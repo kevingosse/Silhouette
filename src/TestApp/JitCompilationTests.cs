@@ -13,6 +13,14 @@ internal class JitCompilationTests
         Logs.AssertContains(logs, "JITCompilationStarted - TestApp.JitCompilationTests.PrivateMethod");
         Logs.AssertContains(logs, "JITCompilationFinished - TestApp.JitCompilationTests.PrivateMethod");
         Logs.AssertContains(logs, "JITInlining - TestApp.JitCompilationTests.InnerMethod -> TestApp.JitCompilationTests.PrivateMethod");
+
+        for (int i = 1; i <= 2; i++)
+        {
+            Logs.Clear();
+            PInvokes.EnumJittedFunctions(i);
+
+            Logs.AssertContains([.. Logs.Fetch()], "Jitted function: TestApp.JitCompilationTests.PrivateMethod");
+        }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]

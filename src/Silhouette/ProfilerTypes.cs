@@ -212,6 +212,12 @@ public readonly struct COR_PRF_ELT_INFO
     public readonly nint Value;
 }
 
+public readonly struct COR_PRF_FUNCTION
+{
+    public readonly FunctionId FunctionId;
+    public readonly ReJITId ReJitId;
+}
+
 public readonly struct COR_PRF_FUNCTION_ARGUMENT_INFO
 {
     public readonly uint NumRanges;                // number of chunks of arguments

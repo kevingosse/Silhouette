@@ -79,10 +79,10 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         }
     }
 
-    public HResult<nint> EnumJITedFunctions2()
+    public HResult<INativeEnumerator<COR_PRF_FUNCTION>> EnumJITedFunctions2()
     {
         var result = _impl.EnumJITedFunctions2(out var pEnum);
-        return new(result, pEnum);
+        return new(result, new(pEnum));
     }
 
     public HResult<nint> GetObjectSize2(ObjectId objectId)

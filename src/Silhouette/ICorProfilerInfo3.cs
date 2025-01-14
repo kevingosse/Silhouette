@@ -9,10 +9,10 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2
         _impl = new(ptr);
     }
 
-    public unsafe HResult<nint> EnumJITedFunctions()
+    public unsafe HResult<INativeEnumerator<COR_PRF_FUNCTION>> EnumJITedFunctions()
     {
         var result = _impl.EnumJITedFunctions(out var pEnum);
-        return new(result, (nint)pEnum);
+        return new(result, new(pEnum));
     }
 
     public HResult RequestProfilerDetach(int expectedCompletionMilliseconds)

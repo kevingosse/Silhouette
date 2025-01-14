@@ -46,4 +46,10 @@ internal unsafe class PInvoke
 
         return log.Length;
     }
+
+    [UnmanagedCallersOnly(EntryPoint = "EnumJittedFunctions")]
+    public static bool EnumJittedFunctions(int version)
+    {
+        return Task.Run(() => CorProfiler.Instance.EnumJittedFunctions(version)).Result;
+    }
 }

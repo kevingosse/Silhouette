@@ -30,7 +30,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
         if (!result.IsOK)
         {
-            LogHResult(nameof(ICorProfilerInfo.GetCurrentThreadId), result);
+            Error(result, nameof(ICorProfilerInfo.GetCurrentThreadId));
             return default;
         }
 
@@ -44,7 +44,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
         if (!result.IsOK)
         {
-            LogHResult(nameof(ICorProfilerInfo.GetThreadInfo), result);
+            Error(result, nameof(ICorProfilerInfo.GetThreadInfo));
             return default;
         }
 
@@ -634,9 +634,9 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    private static void LogHResult(string function, HResult hresult)
+    private static void Error(HResult hresult, string function)
     {
-        Log($"Call to {function} failed with code {hresult}");
+        Error($"Call to {function} failed with code {hresult}");
     }
 
     private static void Error(string explanation)
@@ -750,5 +750,33 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         }
 
         return size;
+    }
+
+    internal bool EnumJittedFunctions(int apiVersion)
+    {
+        Func<HResult<INativeEnumerator<COR_PRF_FUNCTION>>> enumJITedFunctions = apiVersion switch
+        {
+            1 => ICorProfilerInfo3.EnumJITedFunctions,
+            2 => ICorProfilerInfo4.EnumJITedFunctions2,
+            _ => throw new InvalidOperationException($"Unknown API version {apiVersion}")
+        };
+
+        var (result, jittedFunctions) = enumJITedFunctions();
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo3.EnumJITedFunctions));
+            return false;
+        }
+
+        using var _ = jittedFunctions;
+
+        foreach (var functionInfo in jittedFunctions.AsEnumerable())
+        {
+            var name = GetFunctionFullName(functionInfo.FunctionId);
+            Log($"Jitted function: {name}");
+        }
+
+        return true;
     }
 }

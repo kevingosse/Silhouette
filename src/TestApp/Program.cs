@@ -22,7 +22,7 @@ var osId = PInvokes.Win32.GetCurrentThreadId();
 
 Logs.Assert(PInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
 Logs.Assert((ulong)threadId == actualThreadId);
-Logs.Assert(osId != actualOsId);
+Logs.Assert(osId == actualOsId);
 
 // Clear the logs before the next tests
 Logs.Clear();

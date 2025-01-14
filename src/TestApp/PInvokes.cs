@@ -21,4 +21,7 @@ internal class PInvokes
 
     [DllImport("ManagedDotnetProfiler.dll")]
     public static extern unsafe int GetModuleNames(char* buffer, int length);
+
+    [DllImport("ManagedDotnetProfiler.dll")]
+    public static extern unsafe bool EnumJittedFunctions(int version);
 }
