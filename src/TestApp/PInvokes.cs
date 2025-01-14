@@ -14,5 +14,11 @@ internal class PInvokes
     public static extern unsafe int FetchLastLog(char* buffer, int bufferSize);
 
     [DllImport("ManagedDotnetProfiler.dll")]
-    public static extern bool GetThreadId(ulong expectedThreadId, int expectedOSId);
+    public static extern bool GetCurrentThreadInfo(out ulong threadId, out uint osId);
+
+    [DllImport("ManagedDotnetProfiler.dll")]
+    public static extern unsafe bool GetThreads(uint* array, int length, int* actualLength);
+
+    [DllImport("ManagedDotnetProfiler.dll")]
+    public static extern unsafe int GetModuleNames(char* buffer, int length);
 }

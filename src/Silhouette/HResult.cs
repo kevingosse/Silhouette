@@ -49,6 +49,14 @@ public readonly struct HResult
     }
 
     public override string ToString() => ToString(Code);
+
+    public void ThrowIfFailed()
+    {
+        if (!IsOK)
+        {
+            throw new Win32Exception(this);
+        }
+    }
 }
 
 public readonly struct HResult<T>

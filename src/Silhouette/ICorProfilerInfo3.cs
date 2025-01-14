@@ -58,10 +58,10 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2
         return new(result, pFrameInfo);
     }
 
-    public unsafe HResult<nint> EnumModules()
+    public unsafe HResult<INativeEnumerator<ModuleId>> EnumModules()
     {
         var result = _impl.EnumModules(out var pEnum);
-        return new(result, (nint)pEnum);
+        return new(result, new(pEnum));
     }
 
     public unsafe HResult<RuntimeInformation> GetRuntimeInformation(Span<char> versionString, out uint versionStringLength)

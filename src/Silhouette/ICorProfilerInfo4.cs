@@ -9,10 +9,10 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
         _impl = new(ptr);
     }
 
-    public HResult<nint> EnumThreads()
+    public HResult<INativeEnumerator<ThreadId>> EnumThreads()
     {
         var result = _impl.EnumThreads(out var pEnum);
-        return new(result, pEnum);
+        return new(result, new(pEnum));
     }
 
     public HResult InitializeCurrentThread()

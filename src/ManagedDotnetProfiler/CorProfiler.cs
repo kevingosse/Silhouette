@@ -24,21 +24,14 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     public static ConcurrentQueue<string> Logs { get; } = new();
 
-    public bool GetThreadId(ulong expectedThreadId, int expectedOsId)
+    public (bool result, ulong threadId, uint osId) GetCurrentThreadInfo()
     {
         var (result, threadId) = ICorProfilerInfo.GetCurrentThreadId();
 
         if (!result.IsOK)
         {
             LogHResult(nameof(ICorProfilerInfo.GetCurrentThreadId), result);
-            return false;
-        }
-
-        Log($"GetThreadId - expected: {expectedThreadId} - actual: {threadId.Value}");
-
-        if (expectedThreadId != threadId.Value)
-        {
-            return false;
+            return default;
         }
 
         // Can't call GetThreadInfo in the CLR thread
@@ -52,12 +45,10 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         if (!result.IsOK)
         {
             LogHResult(nameof(ICorProfilerInfo.GetThreadInfo), result);
-            return false;
+            return default;
         }
 
-        Log($"GetThreadInfo - expected: {expectedOsId} - actual: {osId}");
-
-        return true;
+        return (true, threadId.Value, osId);
     }
 
     protected override HResult Initialize(int iCorProfilerInfoVersion)
@@ -330,7 +321,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override unsafe HResult COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
     {
-        Log("Error: the profiling API never raises the event COMClassicVTableDestroyed");
+        Error("The profiling API never raises the event COMClassicVTableDestroyed");
         return HResult.S_OK;
     }
 
@@ -384,7 +375,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         // https://github.com/dotnet/runtime/issues/10871
         if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Log($"Error: ExceptionCatcherEnter called without a matching ExceptionUnwindFunctionEnter");
+            Error($"ExceptionCatcherEnter called without a matching ExceptionUnwindFunctionEnter");
             return HResult.E_FAIL;
         }
 
@@ -398,7 +389,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedCatchBlocks.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Log($"Error: ExceptionCatcherLeave called without a matching ExceptionCatcherEnter");
+            Error($"ExceptionCatcherLeave called without a matching ExceptionCatcherEnter");
             return HResult.E_FAIL;
         }
 
@@ -414,25 +405,25 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult ExceptionCLRCatcherExecute()
     {
-        Log("Error: the profiling API never raises the event ExceptionCLRCatcherExecute");
+        Error("The profiling API never raises the event ExceptionCLRCatcherExecute");
         return HResult.S_OK;
     }
 
     protected override HResult ExceptionCLRCatcherFound()
     {
-        Log("Error: the profiling API never raises the event ExceptionCLRCatcherFound");
+        Error("The profiling API never raises the event ExceptionCLRCatcherFound");
         return HResult.S_OK;
     }
 
     protected override unsafe HResult ExceptionOSHandlerEnter(nint* _)
     {
-        Log("Error: the profiling API never raises the event ExceptionOSHandlerEnter");
+        Error("The profiling API never raises the event ExceptionOSHandlerEnter");
         return HResult.S_OK;
     }
 
     protected override unsafe HResult ExceptionOSHandlerLeave(nint* _)
     {
-        Log("Error: the profiling API never raises the event ExceptionOSHandlerEnter");
+        Error("The profiling API never raises the event ExceptionOSHandlerEnter");
         return HResult.S_OK;
     }
 
@@ -454,7 +445,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionSearchFilter.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Log($"Error: ExceptionSearchFilterLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionSearchFilterLeave called without a matching ExceptionSearchFilterEnter");
             return HResult.E_FAIL;
         }
 
@@ -486,7 +477,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionSearchFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Log($"Error: ExceptionSearchFunctionLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionSearchFunctionLeave called without a matching ExceptionSearchFilterEnter");
             return HResult.E_FAIL;
         }
 
@@ -517,7 +508,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionUnwindFinally.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Log($"Error: ExceptionUnwindFinallyLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionUnwindFinallyLeave called without a matching ExceptionSearchFilterEnter");
             return HResult.E_FAIL;
         }
 
@@ -549,7 +540,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Log($"Error: ExceptionUnwindFunctionLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionUnwindFunctionLeave called without a matching ExceptionSearchFilterEnter");
             return HResult.E_FAIL;
         }
 
@@ -623,7 +614,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
         if (count < 0)
         {
-            Log("Error: GarbageCollectionFinished called without a matching GarbageCollectionStarted");
+            Error("GarbageCollectionFinished called without a matching GarbageCollectionStarted");
         }
 
         Log($"GarbageCollectionFinished - {count}");
@@ -656,7 +647,6 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     private static void Log(string line)
     {
         Logs.Enqueue(line);
-
         // Console.WriteLine($"[Profiler] {line}");
     }
 
@@ -689,5 +679,76 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
         return $"{typeDefProps.TypeName}.{methodProperties.Name}";
+    }
+
+    internal bool GetThreads(uint* array, int length, int* actualLength)
+    {
+        var (result, threads) = ICorProfilerInfo4.EnumThreads();
+
+        if (!result)
+        {
+            Error($"Failed to enumerate threads: {result}");
+            return false;
+        }
+
+        using var _ = threads;
+
+        Span<ThreadId> buffer = stackalloc ThreadId[5];
+        int count = 0;
+
+        foreach (var thread in threads.AsEnumerable(buffer))
+        {
+            if (count >= length)
+            {
+                break;
+            }
+
+            (result, var osId) = ICorProfilerInfo.GetThreadInfo(thread);
+
+            array[count] = osId;
+            count++;
+        }
+
+        *actualLength = count;
+
+        return true;
+    }
+
+    internal int GetModuleNames(char* buffer, int length)
+    {
+        var (result, modules) = ICorProfilerInfo3.EnumModules();
+
+        if (!result)
+        {
+            Error($"Failed to enumerate modules: {result}");
+            return 0;
+        }
+
+        using var _ = modules;
+
+        int size = 0;
+
+        foreach (var module in modules.AsEnumerable())
+        {
+            var moduleInfo = ICorProfilerInfo.GetModuleInfo(module).ThrowIfFailed();
+            var moduleName = moduleInfo.ModuleName;
+
+            if (size + moduleName.Length > length)
+            {
+                Error("The buffer was too small");
+                return -1;
+            }
+
+            fixed (char* moduleNamePtr = moduleName)
+            {
+                // Add 1 to the length to include the null terminator
+                new ReadOnlySpan<char>(moduleNamePtr, moduleName.Length + 1)
+                    .CopyTo(new Span<char>(buffer + size, moduleName.Length + 1));
+            }
+
+            size += moduleName.Length + 1;
+        }
+
+        return size;
     }
 }

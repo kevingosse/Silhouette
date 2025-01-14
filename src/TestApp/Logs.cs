@@ -1,10 +1,15 @@
-﻿namespace TestApp;
+﻿using System.Runtime.CompilerServices;
+
+namespace TestApp;
 
 internal static class Logs
 {
     public static void Clear()
-    {
-        while (FetchNext() != null) ;
+    {        
+        foreach (var log in Fetch())
+        {
+            // Do nothing
+        }
     }
 
     public static IEnumerable<string> Fetch()
@@ -31,21 +36,19 @@ internal static class Logs
     {
         if (!logs.Contains(expected))
         {
-            Console.WriteLine($"Could not find log: '{expected}'");
-
-            Fail(logs);
+            Fail("Could not find log: '{expected}'", logs);
         }
     }
 
-    public static void Assert(bool value)
+    public static void Assert(bool value, [CallerArgumentExpression(nameof(value))] string expression = null)
     {
         if (!value)
         {
-            Fail();
+            Fail(expression, null);
         }
     }
 
-    private static void Fail(IEnumerable<string>? logs = null)
+    private static void Fail(string message, IEnumerable<string>? logs)
     {
         Console.WriteLine("********* Assertion failed, dumping logs *********");
 
@@ -56,7 +59,7 @@ internal static class Logs
             Console.WriteLine(log);
         }
 
-        throw new Exception("Assertion failed");
+        throw new Exception($"Assertion failed: {message}");
     }
 
     private static unsafe string? FetchNext()

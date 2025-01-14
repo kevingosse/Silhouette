@@ -17,6 +17,67 @@ internal class ThreadTests
         Logs.AssertContains(logs, $"ThreadAssignedToOSThread - {threadId}");
         Logs.AssertContains(logs, "ThreadNameChanged - Test");
 
+        ChildThreadsTest();
+    }
+
+    private static unsafe void ChildThreadsTest()
+    {
+        const int nbThreads = 8;
+
+        var threads = new Thread[nbThreads];
+        var expectedOsIds = new uint[nbThreads];
+        using var barrier = new Barrier(nbThreads + 1);
+
+        for (int i = 0; i < nbThreads; i++)
+        {
+            int index = i;
+            threads[index] = new Thread(() =>
+            {
+                expectedOsIds[index] = PInvokes.Win32.GetCurrentThreadId();
+                barrier.SignalAndWait();
+                barrier.SignalAndWait();
+            });
+
+            threads[index].Start();
+        }
+
+        barrier.SignalAndWait();
+
+        Span<uint> actualOsIds = stackalloc uint[50];
+        int actualLength = 0;
+
+        fixed (uint* pActualOsIds = actualOsIds)
+        {
+            PInvokes.GetThreads(pActualOsIds, actualOsIds.Length, &actualLength);            
+        }
+
+        if (actualLength >= actualOsIds.Length)
+        {
+            throw new InvalidOperationException("The buffer was too small");
+        }
+
+        Console.WriteLine($"Found {actualLength} threads");
+
+        for (int i = 0; i < actualLength; i++)
+        {
+            Console.WriteLine($"Found thread {actualOsIds[i]}");
+        }
+
+        for (int i = 0; i < nbThreads; i++)
+        {
+            if (!actualOsIds.Contains(expectedOsIds[i]))
+            {
+                throw new InvalidOperationException($"Thread {expectedOsIds[i]} was not found");
+            }
+
+            Console.WriteLine($"Thread {expectedOsIds[i]} was found");
+        }
+
+        Console.WriteLine("All threads were found");
+
+        barrier.SignalAndWait();
+
+        Logs.Clear();
     }
 
     private static uint CreateAndDestroyThread()

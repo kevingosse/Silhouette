@@ -16,14 +16,13 @@ Logs.AssertContains(logs, $"AppDomainCreationStarted - DefaultDomain - Process I
 Logs.AssertContains(logs, "AppDomainCreationFinished - System.Private.CoreLib.dll - HResult S_OK");
 Logs.AssertContains(logs, "AppDomainCreationFinished - DefaultDomain - HResult S_OK");
 
-
 var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
     .GetValue(Thread.CurrentThread);
-
 var osId = PInvokes.Win32.GetCurrentThreadId();
 
-Logs.Assert(PInvokes.GetThreadId((ulong)threadId, (int)osId));
-
+Logs.Assert(PInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
+Logs.Assert((ulong)threadId == actualThreadId);
+Logs.Assert(osId != actualOsId);
 
 // Clear the logs before the next tests
 Logs.Clear();
@@ -40,6 +39,7 @@ GarbageCollectionTests.Run();
 JitCompilationTests.Run();
 PInvokeTests.Run();
 ThreadTests.Run();
+ModuleTests.Run();
 
 // Dump last logs before exiting
 foreach (var log in Logs.Fetch())

@@ -12,7 +12,7 @@ internal unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
      * COR_PRF_FUNCTION::reJitId field.  If you require valid COR_PRF_FUNCTION::reJitId values, use
      * ICorProfilerInfo4::EnumJITedFunctions2.
      */
-    HResult EnumJITedFunctions(out void* ppEnum);
+    HResult EnumJITedFunctions(out IntPtr pEnum);
 
     HResult RequestProfilerDetach(int dwExpectedCompletionMilliseconds);
 
@@ -95,7 +95,7 @@ internal unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
                 COR_PRF_ELT_INFO eltInfo,
                 out COR_PRF_FRAME_INFO pFrameInfo);
 
-    HResult EnumModules(out void* ppEnum);
+    HResult EnumModules(out IntPtr pEnum);
 
     /*
      * The profiler can call GetRuntimeInformation to query CLR version information.
