@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using Silhouette;
+using System.Linq;
 
 namespace ManagedDotnetProfiler;
 
@@ -778,5 +779,38 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         }
 
         return true;
+    }
+
+    internal int CountFrozenObjects()
+    {
+        int count = 0;
+
+        var (result, modules) = ICorProfilerInfo3.EnumModules();
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo3.EnumModules));
+            return -1;
+        }
+
+        using var _ = modules;
+
+        foreach (var module in modules.AsEnumerable())
+        {
+            (result, var frozenObjects) = ICorProfilerInfo2.EnumModuleFrozenObjects(module);
+
+            if (!result)
+            {
+                // EnumModuleFrozenObjects should never fail
+                Error(result, nameof(ICorProfilerInfo3.EnumModuleFrozenObjects));
+                return -1;
+            }
+
+            using var __ = frozenObjects;
+
+            count += frozenObjects.AsEnumerable().Count();
+        }
+
+        return count;
     }
 }

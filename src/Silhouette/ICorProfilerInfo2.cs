@@ -74,10 +74,10 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
         }
     }
 
-    public unsafe HResult<nint> EnumModuleFrozenObjects(ModuleId moduleID)
+    public unsafe HResult<INativeEnumerator<ObjectId>> EnumModuleFrozenObjects(ModuleId moduleID)
     {
         var result = _impl.EnumModuleFrozenObjects(moduleID, out var pEnum);
-        return new(result, (nint)pEnum);
+        return new(result, new(pEnum));
     }
 
     public unsafe HResult<nint> GetArrayObjectInfo(ObjectId objectId, Span<uint> dimensionSizes, Span<int> dimensionLowerBounds)

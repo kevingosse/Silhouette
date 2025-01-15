@@ -200,7 +200,7 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
      */
     HResult EnumModuleFrozenObjects(
                 ModuleId moduleID,
-                out void* ppEnum);
+                out IntPtr pEnum);
 
 
 

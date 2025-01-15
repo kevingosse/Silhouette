@@ -52,4 +52,10 @@ internal unsafe class PInvoke
     {
         return Task.Run(() => CorProfiler.Instance.EnumJittedFunctions(version)).Result;
     }
+
+    [UnmanagedCallersOnly(EntryPoint = "CountFrozenObjects")]
+    public static int CountFrozenObjects()
+    {
+        return Task.Run(CorProfiler.Instance.CountFrozenObjects).Result;
+    }
 }

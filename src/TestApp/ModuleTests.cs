@@ -50,6 +50,10 @@ internal class ModuleTests
                               select name;
 
         Logs.Assert(expectedModules.SequenceEqual(moduleNames.Order()));
+
+        var frozenObjects = PInvokes.CountFrozenObjects();
+        Logs.Assert(frozenObjects == 0);
+
         Logs.Clear();
     }
 }
