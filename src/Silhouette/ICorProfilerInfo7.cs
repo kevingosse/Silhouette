@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo7 : ICorProfilerInfo6
+public class ICorProfilerInfo7 : ICorProfilerInfo6, ICorProfilerInfoFactory<ICorProfilerInfo7>
 {
     private NativeObjects.ICorProfilerInfo7Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo7 : ICorProfilerInfo6
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo7 ICorProfilerInfoFactory<ICorProfilerInfo7>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo7>.Guid => Interfaces.ICorProfilerInfo7.Guid;
 
     public HResult ApplyMetaData(ModuleId moduleId)
     {

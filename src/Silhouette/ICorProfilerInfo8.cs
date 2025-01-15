@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo8 : ICorProfilerInfo7
+public class ICorProfilerInfo8 : ICorProfilerInfo7, ICorProfilerInfoFactory<ICorProfilerInfo8>
 {
     private NativeObjects.ICorProfilerInfo8Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo8 ICorProfilerInfoFactory<ICorProfilerInfo8>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo8>.Guid => Interfaces.ICorProfilerInfo8.Guid;
 
     public HResult<bool> IsFunctionDynamic(FunctionId functionId)
     {

@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo11 : ICorProfilerInfo10
+public class ICorProfilerInfo11 : ICorProfilerInfo10, ICorProfilerInfoFactory<ICorProfilerInfo11>
 {
     private NativeObjects.ICorProfilerInfo11Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo11 : ICorProfilerInfo10
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo11 ICorProfilerInfoFactory<ICorProfilerInfo11>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo11>.Guid => Interfaces.ICorProfilerInfo11.Guid;
 
     public unsafe HResult GetEnvironmentVariable(string name, ReadOnlySpan<char> value, out uint valueLength)
     {

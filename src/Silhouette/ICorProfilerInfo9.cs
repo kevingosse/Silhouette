@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo9 : ICorProfilerInfo8
+public class ICorProfilerInfo9 : ICorProfilerInfo8, ICorProfilerInfoFactory<ICorProfilerInfo9>
 {
     private NativeObjects.ICorProfilerInfo9Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo9 : ICorProfilerInfo8
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo9 ICorProfilerInfoFactory<ICorProfilerInfo9>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo9>.Guid => Interfaces.ICorProfilerInfo9.Guid;
 
     public unsafe HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, Span<uint> codeStartAddresses, out uint nbCodeStartAddresses)
     {

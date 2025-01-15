@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo4 : ICorProfilerInfo3
+public class ICorProfilerInfo4 : ICorProfilerInfo3, ICorProfilerInfoFactory<ICorProfilerInfo4>
 {
     private NativeObjects.ICorProfilerInfo4Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo4 ICorProfilerInfoFactory<ICorProfilerInfo4>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo4>.Guid => Interfaces.ICorProfilerInfo4.Guid;
 
     public HResult<INativeEnumerator<ThreadId>> EnumThreads()
     {

@@ -2,7 +2,7 @@
 
 namespace Silhouette
 {
-    public class ICorProfilerInfo : IUnknown
+    public class ICorProfilerInfo : IUnknown, ICorProfilerInfoFactory<ICorProfilerInfo>
     {
         private NativeObjects.ICorProfilerInfoInvoker _impl;
 
@@ -10,6 +10,9 @@ namespace Silhouette
         {
             _impl = new(ptr);
         }
+
+        static ICorProfilerInfo ICorProfilerInfoFactory<ICorProfilerInfo>.Create(nint ptr) => new(ptr);
+        static Guid ICorProfilerInfoFactory<ICorProfilerInfo>.Guid => Interfaces.ICorProfilerInfo.Guid;
 
         public HResult QueryInterface(in Guid guid, out nint ptr)
         {

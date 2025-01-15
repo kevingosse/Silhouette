@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo5 : ICorProfilerInfo4
+public class ICorProfilerInfo5 : ICorProfilerInfo4, ICorProfilerInfoFactory<ICorProfilerInfo5>
 {
     private NativeObjects.ICorProfilerInfo5Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo5 : ICorProfilerInfo4
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo5 ICorProfilerInfoFactory<ICorProfilerInfo5>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo5>.Guid => Interfaces.ICorProfilerInfo5.Guid;
 
     public HResult<EventMask2> GetEventMask2()
     {

@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public unsafe class ICorProfilerInfo12 : ICorProfilerInfo11
+public unsafe class ICorProfilerInfo12 : ICorProfilerInfo11, ICorProfilerInfoFactory<ICorProfilerInfo12>
 {
     private NativeObjects.ICorProfilerInfo12Invoker _impl;
 
@@ -8,6 +8,9 @@ public unsafe class ICorProfilerInfo12 : ICorProfilerInfo11
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo12 ICorProfilerInfoFactory<ICorProfilerInfo12>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo12>.Guid => Interfaces.ICorProfilerInfo12.Guid;
 
     public HResult<EVENTPIPE_SESSION> EventPipeStartSession(Span<COR_PRF_EVENTPIPE_PROVIDER_CONFIG> providerConfigs, bool requestRundown)
     {

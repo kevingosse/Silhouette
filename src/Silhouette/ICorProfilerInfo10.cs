@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo10 : ICorProfilerInfo9
+public class ICorProfilerInfo10 : ICorProfilerInfo9, ICorProfilerInfoFactory<ICorProfilerInfo10>
 {
     private NativeObjects.ICorProfilerInfo10Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo10 : ICorProfilerInfo9
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo10 ICorProfilerInfoFactory<ICorProfilerInfo10>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo10>.Guid => Interfaces.ICorProfilerInfo10.Guid;
 
     public unsafe HResult EnumerateObjectReferences(ObjectId objectId, delegate* unmanaged<ObjectId, ObjectId*, void*, int> callback, void* clientData)
     {

@@ -23,6 +23,8 @@ namespace Silhouette
         public ICorProfilerInfo9 ICorProfilerInfo9;
         public ICorProfilerInfo10 ICorProfilerInfo10;
         public ICorProfilerInfo11 ICorProfilerInfo11;
+        public ICorProfilerInfo12 ICorProfilerInfo12;
+        public ICorProfilerInfo13 ICorProfilerInfo13;
 
         protected override HResult QueryInterface(in Guid guid, out nint ptr)
         {
@@ -38,135 +40,90 @@ namespace Silhouette
 
         protected abstract HResult Initialize(int iCorProfilerInfoVersion);
 
+        private static bool TryInitialize<T>(NativeObjects.IUnknownInvoker iUnknown, ref T destination, ref int counter)
+            where T : ICorProfilerInfoFactory<T>
+        {
+            var result = iUnknown.QueryInterface(T.Guid, out var ptr);
+
+            if (!result.IsOK)
+            {
+                return false;
+            }
+
+            destination = T.Create(ptr);
+            counter++;
+            return true;
+        }
+
         private int GetICorProfilerInfo(nint pICorProfilerInfoUnk)
         {
             int supportedInterface = 0;
-
             var impl = new NativeObjects.IUnknownInvoker(pICorProfilerInfoUnk);
 
-            HResult result;
-            nint ptr;
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo = new ICorProfilerInfo(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo2.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo2, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo2 = new ICorProfilerInfo2(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo3.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo3, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo3 = new ICorProfilerInfo3(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo4.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo4, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo4 = new ICorProfilerInfo4(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo5.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo5, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo5 = new ICorProfilerInfo5(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo6.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo6, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo6 = new ICorProfilerInfo6(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo7.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo7, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo7 = new ICorProfilerInfo7(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo8.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo8, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo8 = new ICorProfilerInfo8(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo9.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo9, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo9 = new ICorProfilerInfo9(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo10.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo10, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
-
-            ICorProfilerInfo10 = new ICorProfilerInfo10(ptr);
-
-            result = impl.QueryInterface(Interfaces.ICorProfilerInfo11.Guid, out ptr);
-
-            if (!result.IsOK)
+            if (!TryInitialize(impl, ref ICorProfilerInfo11, ref supportedInterface))
             {
                 return supportedInterface;
             }
 
-            supportedInterface++;
+            if (!TryInitialize(impl, ref ICorProfilerInfo12, ref supportedInterface))
+            {
+                return supportedInterface;
+            }
 
-            ICorProfilerInfo11 = new ICorProfilerInfo11(ptr);
+            if (!TryInitialize(impl, ref ICorProfilerInfo13, ref supportedInterface))
+            {
+                return supportedInterface;
+            }
 
             return supportedInterface;
         }

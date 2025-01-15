@@ -1,6 +1,6 @@
 ﻿namespace Silhouette;
 
-public class ICorProfilerInfo2 : ICorProfilerInfo
+public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorProfilerInfo2>
 {
     private NativeObjects.ICorProfilerInfo2Invoker _impl;
 
@@ -8,6 +8,9 @@ public class ICorProfilerInfo2 : ICorProfilerInfo
     {
         _impl = new(ptr);
     }
+
+    static ICorProfilerInfo2 ICorProfilerInfoFactory<ICorProfilerInfo2>.Create(nint ptr) => new(ptr);
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo2>.Guid => Interfaces.ICorProfilerInfo2.Guid;
 
     public unsafe HResult DoStackSnapshot(ThreadId thread, delegate* unmanaged[Stdcall]<FunctionId, nint, COR_PRF_FRAME_INFO, uint, byte*, void*, HResult> callback, COR_PRF_SNAPSHOT_INFO infoFlags, void* clientData, byte* context, uint contextSize)
     {
