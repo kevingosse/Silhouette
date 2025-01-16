@@ -61,93 +61,91 @@ public readonly struct ContextId
     public readonly nint Value;
 }
 
-public readonly struct MdToken
+public readonly struct MdToken(int value)
 {
-    public readonly int Value;
+    public readonly int Value = value;
+
+    public static implicit operator int(MdToken token) => token.Value;
+    public static implicit operator MdToken(int value) => new(value);
 }
 
-public readonly struct MdModule
+public readonly struct MdModule(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdTypeDef
+public readonly struct MdTypeDef(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
-public readonly struct MdMethodDef
+public readonly struct MdMethodDef(MdToken token)
 {
-    public MdMethodDef(MdToken token)
-    {
-        Value = token.Value;
-    }
-
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdFieldDef
+public readonly struct MdFieldDef(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdInterfaceImpl
+public readonly struct MdInterfaceImpl(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdTypeRef
+public readonly struct MdTypeRef(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdParamDef
+public readonly struct MdParamDef(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdMemberRef
+public readonly struct MdMemberRef(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdPermission
+public readonly struct MdPermission(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdProperty
+public readonly struct MdProperty(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdEvent
+public readonly struct MdEvent(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdSignature
+public readonly struct MdSignature(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdModuleRef
+public readonly struct MdModuleRef(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdTypeSpec
+public readonly struct MdTypeSpec(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdString
+public readonly struct MdString(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
-public readonly struct MdCustomAttribute
+public readonly struct MdCustomAttribute(MdToken token)
 {
-    public readonly int Value;
+    public readonly int Value = token.Value;
 }
 
 public readonly struct CorElementType
@@ -178,6 +176,15 @@ public readonly struct CorDebugIlToNativeMap
     public readonly uint IlOffset;
     public readonly uint NativeStartOffset;
     public readonly uint NativeEndOffset;
+}
+
+/// <summary>
+/// Represents a IL methods uniquely by combining the module ID and method token.
+/// </summary>
+public readonly struct COR_PRF_METHOD
+{
+    public readonly ModuleId ModuleId;
+    public readonly MdMethodDef MethodId;
 }
 
 public readonly struct COR_PRF_FRAME_INFO
@@ -995,7 +1002,7 @@ public readonly record struct FunctionLeave3Info(COR_PRF_FRAME_INFO FrameInfo, C
 public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_RUNTIME_TYPE RuntimeType, ushort MajorVersion, ushort MinorVersion, ushort BuildNumber, ushort QFEVersion);
 public readonly record struct FunctionFromIP(FunctionId FunctionId, ReJITId ReJitId);
 public readonly record struct EventMask2(COR_PRF_MONITOR EventsLow, COR_PRF_HIGH_MONITOR EventsHigh);
-public readonly record struct NgenModuleMethodsInliningThisMethod(nint Enumerator, bool IncompleteData);
+public readonly record struct NgenModuleMethodsInliningThisMethod(INativeEnumerator<COR_PRF_METHOD> Enumerator, bool IncompleteData);
 public readonly record struct ScopeProps(string Name, Guid Mvid);
 public readonly record struct InterfaceImplProps(MdTypeDef Class, MdToken Interface);
 public readonly record struct TypeRefProps(string TypeName, MdToken ResolutionScope);

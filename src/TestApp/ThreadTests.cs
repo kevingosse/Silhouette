@@ -1,8 +1,10 @@
-﻿namespace TestApp;
+﻿using System.Reflection;
 
-internal class ThreadTests
+namespace TestApp;
+
+internal class ThreadTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         var threadId = CreateAndDestroyThread();
 
@@ -18,6 +20,15 @@ internal class ThreadTests
         Logs.AssertContains(logs, "ThreadNameChanged - Test");
 
         ChildThreadsTest();
+
+        var currentThreadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(Thread.CurrentThread);
+
+        var osId = PInvokes.Win32.GetCurrentThreadId();
+
+        Logs.Assert(PInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
+        Logs.Assert((ulong)currentThreadId == actualThreadId);
+        Logs.Assert(osId == actualOsId);
     }
 
     private static unsafe void ChildThreadsTest()
@@ -56,27 +67,15 @@ internal class ThreadTests
             throw new InvalidOperationException("The buffer was too small");
         }
 
-        Console.WriteLine($"Found {actualLength} threads");
-
-        for (int i = 0; i < actualLength; i++)
-        {
-            Console.WriteLine($"Found thread {actualOsIds[i]}");
-        }
-
         for (int i = 0; i < nbThreads; i++)
         {
             if (!actualOsIds.Contains(expectedOsIds[i]))
             {
                 throw new InvalidOperationException($"Thread {expectedOsIds[i]} was not found");
             }
-
-            Console.WriteLine($"Thread {expectedOsIds[i]} was found");
         }
 
-        Console.WriteLine("All threads were found");
-
         barrier.SignalAndWait();
-
         Logs.Clear();
     }
 

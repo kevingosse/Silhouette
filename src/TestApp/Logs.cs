@@ -1,9 +1,14 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 
 namespace TestApp;
 
 internal static class Logs
 {
+    private static ConcurrentQueue<string> _allLogs = new();
+
+    public static IEnumerable<string> All => _allLogs;
+
     public static void Clear()
     {        
         foreach (var log in Fetch())
@@ -22,6 +27,8 @@ internal static class Logs
             {
                 yield break;
             }
+
+            _allLogs.Enqueue(log);
 
             if (log.StartsWith("Error:"))
             {
@@ -70,8 +77,7 @@ internal static class Logs
         fixed (char* c = buffer)
         {
             int length = PInvokes.FetchLastLog(c, buffer.Length);
-
-            return length >= 0 ? new string(buffer.Slice(0, length)) : null;
+            return length >= 0 ? new string(buffer[..length]) : null;
         }
     }
 }

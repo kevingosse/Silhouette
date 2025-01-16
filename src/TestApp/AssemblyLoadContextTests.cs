@@ -4,9 +4,9 @@ using System.Runtime.Loader;
 
 namespace TestApp;
 
-internal class AssemblyLoadContextTests
+internal class AssemblyLoadContextTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         CreateAndUnloadAlc();
 

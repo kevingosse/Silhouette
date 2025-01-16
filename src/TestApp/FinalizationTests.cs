@@ -2,9 +2,9 @@
 
 namespace TestApp;
 
-internal class FinalizationTests
+internal class FinalizationTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         InnerScope();
 

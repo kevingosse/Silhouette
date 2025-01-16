@@ -2,9 +2,9 @@
 
 namespace TestApp;
 
-internal class JitCompilationTests
+internal class JitCompilationTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         _ = PrivateMethod();
 

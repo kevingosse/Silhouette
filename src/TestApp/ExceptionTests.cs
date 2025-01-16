@@ -1,9 +1,14 @@
-﻿namespace TestApp;
+﻿using System.Reflection;
 
-internal static class ExceptionTests
+namespace TestApp;
+
+internal class ExceptionTests : ITest
 {
-    public static void Run(nint threadId)
+    public void Run()
     {
+        var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(Thread.CurrentThread);
+
         try
         {
             throw new InvalidOperationException("Expected");

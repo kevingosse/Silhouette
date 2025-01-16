@@ -2,9 +2,9 @@
 
 namespace TestApp;
 
-internal class ClassLoadTests
+internal class ClassLoadTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         CreateAndUnloadType();
 

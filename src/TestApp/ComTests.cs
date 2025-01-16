@@ -2,9 +2,9 @@
 
 namespace TestApp;
 
-internal class ComTests
+internal class ComTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         _ = Marshal.GetIUnknownForObject(new object());
 

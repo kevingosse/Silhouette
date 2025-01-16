@@ -1,8 +1,8 @@
 ﻿namespace TestApp;
 
-internal class GarbageCollectionTests
+internal class GarbageCollectionTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         var threadId = PInvokes.Win32.GetCurrentThreadId();
 

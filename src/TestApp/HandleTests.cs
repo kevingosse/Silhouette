@@ -2,9 +2,9 @@
 
 namespace TestApp;
 
-internal class HandleTests
+internal class HandleTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         var obj = new object();
 

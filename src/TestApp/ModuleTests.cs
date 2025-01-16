@@ -1,8 +1,8 @@
 ﻿namespace TestApp;
 
-internal class ModuleTests
+internal class ModuleTests : ITest
 {
-    public static unsafe void Run()
+    public unsafe void Run()
     {
         var currentAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 

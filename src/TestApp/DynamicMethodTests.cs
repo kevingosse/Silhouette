@@ -3,9 +3,9 @@ using System.Reflection.Emit;
 
 namespace TestApp;
 
-internal class DynamicMethodTests
+internal class DynamicMethodTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         var handle = InnerScope();
 

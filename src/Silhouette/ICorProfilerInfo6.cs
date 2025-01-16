@@ -15,6 +15,6 @@ public class ICorProfilerInfo6 : ICorProfilerInfo5, ICorProfilerInfoFactory<ICor
     public HResult<NgenModuleMethodsInliningThisMethod> EnumNgenModuleMethodsInliningThisMethod(ModuleId inlinersModuleId, ModuleId inlineeModuleId, MdMethodDef inlineeMethodId)
     {
         var result = _impl.EnumNgenModuleMethodsInliningThisMethod(inlinersModuleId, inlineeModuleId, inlineeMethodId, out var incompleteData, out var pEnum);
-        return new(result, new(pEnum, incompleteData != 0));
+        return new(result, new(new(pEnum), incompleteData != 0));
     }
 }

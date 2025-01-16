@@ -2,9 +2,9 @@
 
 namespace TestApp;
 
-internal class ConditionalWeakTableTests
+internal class ConditionalWeakTableTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         _ = new ConditionalWeakTable<string, string> { { "hello", "world" } };
         GC.Collect(2, GCCollectionMode.Forced, true);

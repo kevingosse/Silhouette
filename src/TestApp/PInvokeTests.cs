@@ -1,8 +1,8 @@
 ﻿namespace TestApp;
 
-internal class PInvokeTests
+internal class PInvokeTests : ITest
 {
-    public static void Run()
+    public void Run()
     {
         _ = PInvokes.Win32.GetCurrentThreadId();
 

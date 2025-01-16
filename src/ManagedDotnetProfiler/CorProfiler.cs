@@ -54,20 +54,32 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult Initialize(int iCorProfilerInfoVersion)
     {
-        if (iCorProfilerInfoVersion < 11)
+        if (iCorProfilerInfoVersion < 13)
         {
+            Console.WriteLine($"This profiler requires ICorProfilerInfo13 ({iCorProfilerInfoVersion})");
             return HResult.E_FAIL;
         }
+
+        Console.WriteLine("[Profiler] *** Profiler initialized ***");
 
         Instance = this;
 
         var eventMask = COR_PRF_MONITOR.COR_PRF_MONITOR_ALL;
+
+        if (Environment.GetEnvironmentVariable("MONITOR_NGEN") == "1")
+        {
+            // JITCachedFunctionSearch events are not raised when those are enabled
+            eventMask = eventMask
+                & ~COR_PRF_MONITOR.COR_PRF_MONITOR_CODE_TRANSITIONS
+                & ~COR_PRF_MONITOR.COR_PRF_MONITOR_ENTERLEAVE;
+        }
+
         var highEventMask = COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS;
 
         Log($"Setting event mask to {eventMask}");
         Log($"Setting high event mask to {highEventMask}");
 
-        return ICorProfilerInfo11.SetEventMask2(eventMask, COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS);
+        return ICorProfilerInfo5.SetEventMask2(eventMask, COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS);
     }
 
     protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
@@ -86,6 +98,58 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     {
         Environment.FailFast("Never called by the CLR");
         return HResult.E_NOTIMPL;
+    }
+
+    protected override HResult JITCachedFunctionSearchStarted(FunctionId functionId, out bool pbUseCachedFunction)
+    {
+        Log($"JITCachedFunctionSearchStarted - {GetFunctionFullName(functionId)}");
+        pbUseCachedFunction = true;
+        return HResult.S_OK;
+    }
+
+    protected override HResult JITCachedFunctionSearchFinished(FunctionId functionId, COR_PRF_JIT_CACHE searchResult)
+    {
+        if (searchResult == COR_PRF_JIT_CACHE.COR_PRF_CACHED_FUNCTION_FOUND)
+        {
+            Log($"JITCachedFunctionSearchFinished - {GetFunctionFullName(functionId)} - Found");
+
+            var (result, functionInfo) = ICorProfilerInfo2.GetFunctionInfo(functionId);
+
+            if (!result)
+            {
+                Error(result, nameof(ICorProfilerInfo2.GetFunctionInfo));
+                return HResult.E_FAIL;
+            }
+
+            (result, var (methods, _)) = ICorProfilerInfo6.EnumNgenModuleMethodsInliningThisMethod(
+                functionInfo.ModuleId, functionInfo.ModuleId, new(functionInfo.Token));
+
+            if (!result)
+            {
+                Error(result, nameof(ICorProfilerInfo6.EnumNgenModuleMethodsInliningThisMethod));
+                return HResult.E_FAIL;
+            }
+
+            using var _ = methods;
+
+            foreach (var method in methods.AsEnumerable())
+            {
+                (result, var inliningFunctionId) = ICorProfilerInfo.GetFunctionFromToken(method.ModuleId, method.MethodId.Value);
+
+                if (!result)
+                {
+                    return HResult.E_FAIL;
+                }
+
+                Log($"JITCachedFunctionSearchFinished - {GetFunctionFullName(inliningFunctionId)} inlined {GetFunctionFullName(functionId)}");
+            }
+        }
+        else
+        {
+            Log($"JITCachedFunctionSearchFinished - {GetFunctionFullName(functionId)} - Not found");
+        }
+
+        return HResult.S_OK;
     }
 
     protected override HResult ManagedToUnmanagedTransition(FunctionId functionId, COR_PRF_TRANSITION_REASON reason)
@@ -625,11 +689,18 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override HResult Shutdown()
     {
-        Console.WriteLine("[Profiler] *** Shutting down, dumping remaining logs ***");
-
-        while (Logs.TryDequeue(out var log))
+        if (Environment.GetEnvironmentVariable("SHUTDOWN_LOGS") == "1")
         {
-            Console.WriteLine($"[Profiler] {log}");
+            Console.WriteLine("[Profiler] *** Shutting down, dumping remaining logs ***");
+
+            while (Logs.TryDequeue(out var log))
+            {
+                Console.WriteLine($"[Profiler] {log}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("[Profiler] *** Shutting down ***");
         }
 
         return HResult.S_OK;
@@ -668,18 +739,19 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     private string GetFunctionFullName(FunctionId functionId)
     {
-        var (result, functionInfo) = ICorProfilerInfo2.GetFunctionInfo(functionId);
-
-        if (!result)
+        try
         {
-            return $"Failed ({result})";
+            var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
+            var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
+
+            return $"{typeDefProps.TypeName}.{methodProperties.Name}";
         }
-
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
-        var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
-        var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
-
-        return $"{typeDefProps.TypeName}.{methodProperties.Name}";
+        catch (Win32Exception ex)
+        {
+            return $"Failed ({ex.NativeErrorCode})";
+        }
     }
 
     internal bool GetThreads(uint* array, int length, int* actualLength)
