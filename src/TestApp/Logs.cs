@@ -43,7 +43,7 @@ internal static class Logs
     {
         if (!logs.Contains(expected))
         {
-            Fail("Could not find log: '{expected}'", logs);
+            Fail($"Could not find log: '{expected}'", logs);
         }
     }
 
