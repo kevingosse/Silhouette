@@ -4,10 +4,10 @@ internal class PInvokeTests : ITest
 {
     public void Run()
     {
-        _ = PInvokes.Win32.GetCurrentThreadId();
+        _ = PInvokes.CurrentOS.GetCurrentThreadId();
 
         var logs = Logs.Fetch().ToList();
-        Logs.AssertContains(logs, "ManagedToUnmanagedTransition - Win32.GetCurrentThreadId - COR_PRF_TRANSITION_CALL");
-        Logs.AssertContains(logs, "UnmanagedToManagedTransition - Win32.GetCurrentThreadId - COR_PRF_TRANSITION_RETURN");
+        Logs.AssertContains(logs, $"ManagedToUnmanagedTransition - CurrentOS.{PInvokes.CurrentOS.GetNativeMethodName()} - COR_PRF_TRANSITION_CALL");
+        Logs.AssertContains(logs, $"UnmanagedToManagedTransition - CurrentOS.{PInvokes.CurrentOS.GetNativeMethodName()} - COR_PRF_TRANSITION_RETURN");
     }
 }
