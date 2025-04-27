@@ -16,7 +16,7 @@ internal class PInvokes
         [DllImport("kernel32.dll")]
         public static extern uint GetCurrentThreadId();
 
-        public static string GetNativeName() => nameof(GetCurrentThreadId);
+        public static string GetNativeMethodName() => nameof(GetCurrentThreadId);
 #else
         [DllImport("libc")]
         public static extern uint gettid();

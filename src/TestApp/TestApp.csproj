@@ -8,6 +8,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants Condition=" '$(OS)' == 'Windows_NT' ">WINDOWS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Update="launch.cmd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

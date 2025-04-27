@@ -43,7 +43,7 @@ var tests = new List<ITest>
     new ClassLoadTests(),
 #if(WINDOWS)
     // not supported on linux
-    new ComTests()
+    new ComTests(),
 #endif
     new ConditionalWeakTableTests(),
     new DynamicMethodTests(),
