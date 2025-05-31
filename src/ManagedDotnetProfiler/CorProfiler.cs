@@ -390,22 +390,38 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
+    protected override HResult ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
     {
-        // check number of objects,
-        // otherwise we attempt to access invalid memory address,
-        // not sure about windows
-        if (cRootRefs == 2)
+        // Extract pairs of strings from the ConditionalWeakTable elements.
+
+        var (stringLengthOffset, bufferOffset) = ICorProfilerInfo5.GetStringLayout2().ThrowIfFailed();
+       
+        for (int i = 0; i < cRootRefs; i++)
         {
-            var (stringLengthOffset, bufferOffset) = ICorProfilerInfo5.GetStringLayout2().ThrowIfFailed();
+            // Validate that they're strings
+            var keyClassId = ICorProfilerInfo4.GetClassFromObject(keyRefIds[0]).ThrowIfFailed();            
+            var keyType = GetTypeNameFromClassId(keyClassId);
+            
+            if (keyType != "System.String")
+            {
+                continue;
+            }
+            
+            var valueClassId = ICorProfilerInfo4.GetClassFromObject(valueRefIds[i]).ThrowIfFailed();
+            var valueType = GetTypeNameFromClassId(valueClassId);
+            
+            if (valueType != "System.String")
+            {
+                continue;
+            }
 
-            var stringPtr1 = (byte*)(*keyRefIds).Value;
+            var stringPtr1 = (byte*)keyRefIds[i].Value;
             var length1 = Unsafe.Read<int>(stringPtr1 + stringLengthOffset);
-            ReadOnlySpan<char> str1 = new ReadOnlySpan<char>(stringPtr1 + bufferOffset, length1);
+            var str1 = new ReadOnlySpan<char>(stringPtr1 + bufferOffset, length1);
 
-            var stringPtr2 = (byte*)(*valueRefIds).Value;
+            var stringPtr2 = (byte*)valueRefIds[i].Value;
             var length2 = Unsafe.Read<int>(stringPtr2 + stringLengthOffset);
-            ReadOnlySpan<char> str2 = new ReadOnlySpan<char>(stringPtr2 + bufferOffset, length2);
+            var str2 = new ReadOnlySpan<char>(stringPtr2 + bufferOffset, length2);
 
             Log($"ConditionalWeakTableElementReferences - {str1} -> {str2}");
         }
