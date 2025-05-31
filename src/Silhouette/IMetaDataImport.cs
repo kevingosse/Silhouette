@@ -132,7 +132,8 @@ namespace Silhouette
         {
             fixed (char* szTypeDef = typeName)
             {
-                return _impl.GetTypeDefProps(typeDef, szTypeDef, (uint)typeName.Length, out typeNameLength, out var typeDefFlags, out var extends);
+                var result = _impl.GetTypeDefProps(typeDef, szTypeDef, (uint)typeName.Length, out typeNameLength, out var typeDefFlags, out var extends);                
+                return new(result, new(typeDefFlags, extends));
             }
         }
 

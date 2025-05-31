@@ -22,9 +22,18 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         return _impl.SetEnterLeaveFunctionHooks2(pFuncEnter, pFuncLeave, pFuncTailcall);
     }
 
-    public unsafe HResult GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, out ClassId pClassId, out ModuleId pModuleId, out MdToken pToken, uint cTypeArgs, out uint pcTypeArgs, out ClassId* typeArgs)
+    public unsafe HResult<FunctionInfo> GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, ReadOnlySpan<ClassId> typeArgs, out uint nbTypeArgs)
     {
-        return _impl.GetFunctionInfo2(funcId, frameInfo, out pClassId, out pModuleId, out pToken, cTypeArgs, out pcTypeArgs, out typeArgs);
+        fixed (ClassId* pTypeArgs = typeArgs)
+        {
+            var result = _impl.GetFunctionInfo2(funcId, frameInfo, out var classId, out var moduleId, out var token, (uint)typeArgs.Length, out nbTypeArgs, pTypeArgs);
+            return new(result, new(classId, moduleId, token));
+        }
+    }
+
+    public unsafe HResult GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, out ClassId pClassId, out ModuleId pModuleId, out MdToken pToken, uint cTypeArgs, out uint pcTypeArgs, ClassId* typeArgs)
+    {
+        return _impl.GetFunctionInfo2(funcId, frameInfo, out pClassId, out pModuleId, out pToken, cTypeArgs, out pcTypeArgs, typeArgs);
     }
 
     public HResult<StringLayout> GetStringLayout()
@@ -42,7 +51,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         }
     }
 
-    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, Span<ClassId> typeArgs, out uint numTypeArgs)
+    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, ReadOnlySpan<ClassId> typeArgs, out uint numTypeArgs)
     {
         fixed (ClassId* pTypeArgs = typeArgs)
         {

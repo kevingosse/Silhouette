@@ -76,7 +76,7 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
                 out MdToken pToken,
                 uint cTypeArgs,
                 out uint pcTypeArgs,
-                out ClassId* typeArgs);
+                ClassId* typeArgs);
 
     /*
      * GetStringLayout returns detailed information about how string objects are stored.
