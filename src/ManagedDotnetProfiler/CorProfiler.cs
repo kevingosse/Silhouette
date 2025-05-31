@@ -392,15 +392,23 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
 
     protected override unsafe HResult ConditionalWeakTableElementReferences(uint cRootRefs, ObjectId* keyRefIds, ObjectId* valueRefIds, GCHandleId* rootIds)
     {
-        var (_, stringLengthOffset, bufferOffset) = ICorProfilerInfo2.GetStringLayout().ThrowIfFailed();
+        // check number of objects,
+        // otherwise we attempt to access invalid memory address,
+        // not sure about windows
+        if (cRootRefs == 2)
+        {
+            var (stringLengthOffset, bufferOffset) = ICorProfilerInfo5.GetStringLayout2().ThrowIfFailed();
 
-        var stringPtr1 = (byte*)(*keyRefIds).Value;
-        var str1 = new ReadOnlySpan<char>(stringPtr1 + bufferOffset, Unsafe.Read<int>(stringPtr1 + stringLengthOffset));
+            var stringPtr1 = (byte*)(*keyRefIds).Value;
+            var length1 = Unsafe.Read<int>(stringPtr1 + stringLengthOffset);
+            ReadOnlySpan<char> str1 = new ReadOnlySpan<char>(stringPtr1 + bufferOffset, length1);
 
-        var stringPtr2 = (byte*)(*valueRefIds).Value;
-        var str2 = new ReadOnlySpan<char>(stringPtr2 + bufferOffset, Unsafe.Read<int>(stringPtr2 + stringLengthOffset));
+            var stringPtr2 = (byte*)(*valueRefIds).Value;
+            var length2 = Unsafe.Read<int>(stringPtr2 + stringLengthOffset);
+            ReadOnlySpan<char> str2 = new ReadOnlySpan<char>(stringPtr2 + bufferOffset, length2);
 
-        Log($"ConditionalWeakTableElementReferences - {str1} -> {str2}");
+            Log($"ConditionalWeakTableElementReferences - {str1} -> {str2}");
+        }
 
         return HResult.S_OK;
     }

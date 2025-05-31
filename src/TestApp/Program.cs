@@ -1,5 +1,20 @@
 ﻿using System.Reflection;
+using System.Runtime.InteropServices;
 using TestApp;
+
+#if(!WINDOWS && !DEBUG)
+// on linux runtime does not check that ManagedDotnetProfiler is already loaded
+// could not find better option to get handle returned from dlopen so using this trick
+
+// runtime does not load the same library twice so it returns handle of the loaded library:
+var handle = NativeLibrary.Load("ManagedDotnetProfiler.so");
+
+NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), (string libraryName, Assembly assembly, DllImportSearchPath? searchPath) =>
+{
+    return handle;
+});
+#endif
+
 
 bool ngenEnabled = Environment.GetEnvironmentVariable("MONITOR_NGEN") == "1";
 
@@ -8,10 +23,10 @@ Console.WriteLine($"NGEN: {ngenEnabled}");
 
 var logs = Logs.Fetch().ToList();
 
-//foreach (var log in logs)
-//{
-//    Console.WriteLine(log);
-//}
+// foreach (var log in logs)
+// {
+//     Console.WriteLine(log);
+// }
 
 Logs.AssertContains(logs, $"AssemblyLoadFinished - TestApp - AppDomain clrhost - Module {typeof(Program).Assembly.Location}");
 Logs.AssertContains(logs, $"AppDomainCreationStarted - System.Private.CoreLib.dll - Process Id {Environment.ProcessId}");
@@ -26,7 +41,10 @@ var tests = new List<ITest>
 {
     new AssemblyLoadContextTests(),
     new ClassLoadTests(),
+#if(WINDOWS)
+    // not supported on linux
     new ComTests(),
+#endif
     new ConditionalWeakTableTests(),
     new DynamicMethodTests(),
     new ExceptionTests(),

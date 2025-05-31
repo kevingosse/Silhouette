@@ -4,27 +4,47 @@ namespace TestApp;
 
 internal class PInvokes
 {
-    public class Win32
+#if WINDOWS
+    private const string DLL_NAME = "ManagedDotnetProfiler.dll";
+#else
+    private const string DLL_NAME = "ManagedDotnetProfiler";
+#endif
+
+    public class CurrentOS
     {
+#if WINDOWS
         [DllImport("kernel32.dll")]
         public static extern uint GetCurrentThreadId();
+
+        public static string GetNativeMethodName() => nameof(GetCurrentThreadId);
+#else
+        [DllImport("libc")]
+        public static extern uint gettid();
+
+        public static uint GetCurrentThreadId()
+        {
+            return gettid();
+        }
+
+        public static string GetNativeMethodName() => nameof(gettid);
+#endif
     }
 
-    [DllImport("ManagedDotnetProfiler.dll")]
+    [DllImport(DLL_NAME)]
     public static extern unsafe int FetchLastLog(char* buffer, int bufferSize);
 
-    [DllImport("ManagedDotnetProfiler.dll")]
+    [DllImport(DLL_NAME)]
     public static extern bool GetCurrentThreadInfo(out ulong threadId, out uint osId);
 
-    [DllImport("ManagedDotnetProfiler.dll")]
+    [DllImport(DLL_NAME)]
     public static extern unsafe bool GetThreads(uint* array, int length, int* actualLength);
 
-    [DllImport("ManagedDotnetProfiler.dll")]
+    [DllImport(DLL_NAME)]
     public static extern unsafe int GetModuleNames(char* buffer, int length);
 
-    [DllImport("ManagedDotnetProfiler.dll")]
+    [DllImport(DLL_NAME)]
     public static extern unsafe int CountFrozenObjects();
 
-    [DllImport("ManagedDotnetProfiler.dll")]
+    [DllImport(DLL_NAME)]
     public static extern unsafe bool EnumJittedFunctions(int version);
 }

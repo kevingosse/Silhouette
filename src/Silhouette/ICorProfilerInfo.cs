@@ -158,9 +158,10 @@ namespace Silhouette
             }
         }
 
-        public HResult<IMetaDataImport> GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
+        public unsafe HResult<IMetaDataImport> GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
         {
-            var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, riid, out var ptr);
+            var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, &riid, out var ptr);
+
             return new(result, new(ptr));
         }
 

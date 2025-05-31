@@ -24,7 +24,7 @@ internal class ThreadTests : ITest
         var currentThreadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
             .GetValue(Thread.CurrentThread);
 
-        var osId = PInvokes.Win32.GetCurrentThreadId();
+        var osId = PInvokes.CurrentOS.GetCurrentThreadId();
 
         Logs.Assert(PInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
         Logs.Assert((ulong)currentThreadId == actualThreadId);
@@ -44,7 +44,7 @@ internal class ThreadTests : ITest
             int index = i;
             threads[index] = new Thread(() =>
             {
-                expectedOsIds[index] = PInvokes.Win32.GetCurrentThreadId();
+                expectedOsIds[index] = PInvokes.CurrentOS.GetCurrentThreadId();
                 barrier.SignalAndWait();
                 barrier.SignalAndWait();
             });
@@ -85,7 +85,7 @@ internal class ThreadTests : ITest
 
         var thread = new Thread(() => 
         { 
-            id = PInvokes.Win32.GetCurrentThreadId();
+            id = PInvokes.CurrentOS.GetCurrentThreadId();
             Thread.CurrentThread.Name = "Test";
         });
 
