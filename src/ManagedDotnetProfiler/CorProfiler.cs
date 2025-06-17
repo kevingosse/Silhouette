@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using Silhouette;
 using System.Linq;
+using Silhouette.IL;
 
 namespace ManagedDotnetProfiler;
 
@@ -85,6 +86,18 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
     {
         Log($"JITCompilationStarted - {GetFunctionFullName(functionId)}");
+
+        var functionName = GetFunctionFullName(functionId);
+
+        if (functionName.Contains("RejitTest"))
+        {
+            var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
+            var functionBody = ICorProfilerInfo.GetILFunctionBody(functionInfo.ModuleId, new(functionInfo.Token)).ThrowIfFailed();
+
+            var rewriter = new IlRewriter(ICorProfilerInfo2);
+            rewriter.Import(functionBody.MethodHeader, functionInfo.ModuleId, new MdMethodDef(functionInfo.Token));
+        }
+
         return HResult.S_OK;
     }
 
