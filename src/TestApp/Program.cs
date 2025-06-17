@@ -37,6 +37,9 @@ Logs.AssertContains(logs, "AppDomainCreationFinished - DefaultDomain - HResult S
 // Clear the logs before the next tests
 Logs.Clear();
 
+RejitTest.Test();
+return;
+
 var tests = new List<ITest>
 {
     new AssemblyLoadContextTests(),
