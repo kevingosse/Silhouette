@@ -22,9 +22,6 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
-    - name: Restore NuGet
-      run: dotnet restore
-
     - name: Build & Test
       shell: bash
       run: |
