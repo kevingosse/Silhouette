@@ -55,7 +55,7 @@ internal static class Logs
         }
     }
 
-    private static void Fail(string message, IEnumerable<string>? logs)
+    private static void Fail(string message, IEnumerable<string> logs)
     {
         Console.WriteLine("********* Assertion failed, dumping logs *********");
 
@@ -69,7 +69,7 @@ internal static class Logs
         throw new Exception($"Assertion failed: {message}");
     }
 
-    private static unsafe string? FetchNext()
+    private static unsafe string FetchNext()
     {
         const int bufferSize = 1024;
         Span<char> buffer = stackalloc char[bufferSize];
