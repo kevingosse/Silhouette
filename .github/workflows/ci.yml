@@ -29,7 +29,8 @@ jobs:
           pwsh ./build.ps1
           pwsh ./test.ps1
         else
-          chmod +x ./build.sh ./test.sh
+          chmod +x ./build.sh
+          chmod +x ./test.sh
           ./build.sh
           ./test.sh
         fi
