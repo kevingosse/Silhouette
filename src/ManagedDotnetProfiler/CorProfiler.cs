@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace ManagedDotnetProfiler;
 
-internal unsafe partial class CorProfiler : CorProfilerCallback10Base
+internal unsafe class CorProfiler : CorProfilerCallback10Base
 {
     private readonly ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();
     private readonly ConcurrentDictionary<ClassId, bool> _classLoads = new();
@@ -253,7 +253,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult ExceptionSearchCatcherFound(FunctionId functionId)
     {
         var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(functionInfo.ModuleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
         var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -395,21 +395,21 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         // Extract pairs of strings from the ConditionalWeakTable elements.
 
         var (stringLengthOffset, bufferOffset) = ICorProfilerInfo5.GetStringLayout2().ThrowIfFailed();
-       
+
         for (int i = 0; i < cRootRefs; i++)
         {
             // Validate that they're strings
-            var keyClassId = ICorProfilerInfo4.GetClassFromObject(keyRefIds[0]).ThrowIfFailed();            
+            var keyClassId = ICorProfilerInfo4.GetClassFromObject(keyRefIds[0]).ThrowIfFailed();
             var keyType = GetTypeNameFromClassId(keyClassId);
-            
+
             if (keyType != "System.String")
             {
                 continue;
             }
-            
+
             var valueClassId = ICorProfilerInfo4.GetClassFromObject(valueRefIds[i]).ThrowIfFailed();
             var valueType = GetTypeNameFromClassId(valueClassId);
-            
+
             if (valueType != "System.String")
             {
                 continue;
@@ -452,7 +452,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         var typeName = GetTypeNameFromObjectId(objectId);
 
         var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
         var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -519,7 +519,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult ExceptionSearchFilterEnter(FunctionId functionId)
     {
         var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
         var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -551,7 +551,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult ExceptionSearchFunctionEnter(FunctionId functionId)
     {
         var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
         var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -582,7 +582,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult ExceptionUnwindFinallyEnter(FunctionId functionId)
     {
         var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
         var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -614,7 +614,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     protected override HResult ExceptionUnwindFunctionEnter(FunctionId functionId)
     {
         var (_, moduleId, mdToken) = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-        var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(mdToken)).ThrowIfFailed();
         var (functionTypeName, _, _) = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -755,7 +755,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
     private string GetTypeNameFromClassId(ClassId classId)
     {
         var (moduleId, typeDef) = ICorProfilerInfo.GetClassIdInfo(classId).ThrowIfFailed();
-        var moduleMetadata = ICorProfilerInfo.GetModuleMetaData(moduleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+        var moduleMetadata = ICorProfilerInfo.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead).ThrowIfFailed();
         var typeDefProps = moduleMetadata.GetTypeDefProps(typeDef).ThrowIfFailed();
 
         return typeDefProps.TypeName;
@@ -766,7 +766,7 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         try
         {
             var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-            var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed();
+            var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(functionInfo.ModuleId, CorOpenFlags.ofRead).ThrowIfFailed();
             var methodProperties = metaDataImport.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
             var typeDefProps = metaDataImport.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
@@ -809,6 +809,74 @@ internal unsafe partial class CorProfiler : CorProfilerCallback10Base
         *actualLength = count;
 
         return true;
+    }
+
+    internal int GetGenericArguments(nint typeHandle, int methodToken, char* buffer, int length)
+    {
+        var resolvedGenericParams = new List<string>();
+
+        var classIdInfo = ICorProfilerInfo.GetClassIdInfo(new(typeHandle)).ThrowIfFailed();
+        using var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport2(classIdInfo.ModuleId, CorOpenFlags.ofRead).ThrowIfFailed().Wrap();
+
+        Span<MdGenericParam> genericParams = stackalloc MdGenericParam[10];
+        HCORENUM genericParamsEnum = default;
+
+        while (metaDataImport.Value.EnumGenericParams(ref genericParamsEnum, new(methodToken), genericParams, out var nbGenericParams)
+            && nbGenericParams > 0)
+        {
+            foreach (var genericParam in genericParams[..(int)nbGenericParams])
+            {
+                var genericParamProps = metaDataImport.Value.GetGenericParamProps(genericParam).ThrowIfFailed();
+                var resolvedGenericParam = genericParamProps.Name;
+
+                var resolvedConstraints = new List<string>();
+
+                Span<MdGenericParamConstraint> constraints = stackalloc MdGenericParamConstraint[10];
+                HCORENUM constraintsEnum = default;
+
+                while (metaDataImport.Value.EnumGenericParamConstraints(ref constraintsEnum, genericParam, constraints, out var nbConstraints)
+                    && nbConstraints > 0)
+                {
+                    foreach (var constraint in constraints[..(int)nbConstraints])
+                    {
+                        var constraintProps = metaDataImport.Value.GetGenericParamConstraintProps(constraint).ThrowIfFailed();
+
+                        if (constraintProps.ConstraintType.IsTypeRef())
+                        {
+                            var constraintTypeDef = metaDataImport.Value.GetTypeRefProps(new(constraintProps.ConstraintType)).ThrowIfFailed();
+                            resolvedConstraints.Add(constraintTypeDef.TypeName);
+                        }
+                        else if (constraintProps.ConstraintType.IsTypeDef())
+                        {
+                            var constraintTypeDef = metaDataImport.Value.GetTypeDefProps(new(constraintProps.ConstraintType)).ThrowIfFailed();
+                            resolvedConstraints.Add(constraintTypeDef.TypeName);
+                        }
+                    }
+                }
+
+                metaDataImport.Value.CloseEnum(constraintsEnum);
+
+                if (resolvedConstraints.Count > 0)
+                {
+                    resolvedGenericParam += $"({string.Join(", ", resolvedConstraints)})";
+                }
+
+                resolvedGenericParams.Add(resolvedGenericParam);
+            }
+        }
+
+        metaDataImport.Value.CloseEnum(genericParamsEnum);
+
+        var result = string.Join(", ", resolvedGenericParams);
+
+        if (result.Length > length)
+        {
+            Error("The buffer was too small");
+            return -1;
+        }
+
+        result.AsSpan().CopyTo(new Span<char>(buffer, length));
+        return result.Length;
     }
 
     internal int GetModuleNames(char* buffer, int length)

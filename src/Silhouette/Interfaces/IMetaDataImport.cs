@@ -3,6 +3,8 @@
 [NativeObject]
 public unsafe interface IMetaDataImport : IUnknown
 {
+    public static readonly Guid Guid = new("7DAC8207-D3AE-4c75-9B67-92801A497D44");
+
     void CloseEnum(HCORENUM hEnum);
     HResult CountEnum(HCORENUM hEnum, out uint pulCount);
     HResult ResetEnum(HCORENUM hEnum, uint ulPos);

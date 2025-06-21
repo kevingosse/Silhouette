@@ -53,11 +53,13 @@ var tests = new List<ITest>
     new GarbageCollectionTests(),
     new JitCompilationTests(),
     new ThreadTests(),
-    new ModuleTests()
+    new ModuleTests(),
+    new GenericArgumentsTests()
 };
 
 if (!ngenEnabled)
 {
+    // p/invoke callbacks are not raised when NGEN callbacks are enabled
     tests.Add(new PInvokeTests());
 }
 else
