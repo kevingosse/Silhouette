@@ -29,7 +29,7 @@ public class ClassFactory : IClassFactory
 
     public HResult QueryInterface(in Guid guid, out nint ptr)
     {
-        if (guid == KnownGuids.ClassFactoryGuid)
+        if (guid == Silhouette.Interfaces.IClassFactory.Guid)
         {
             ptr = IClassFactory;
             return HResult.S_OK;

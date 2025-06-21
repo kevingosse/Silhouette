@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Silhouette
 {
-    public struct IMetaDataImport : Interfaces.IUnknown
+    public class IMetaDataImport : Interfaces.IUnknown
     {
         private IMetaDataImportInvoker _impl;
 

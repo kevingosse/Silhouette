@@ -2,7 +2,7 @@
 
 namespace TestApp;
 
-internal class PInvokes
+internal unsafe class PInvokes
 {
 #if WINDOWS
     private const string DLL_NAME = "ManagedDotnetProfiler.dll";
@@ -31,20 +31,24 @@ internal class PInvokes
     }
 
     [DllImport(DLL_NAME)]
-    public static extern unsafe int FetchLastLog(char* buffer, int bufferSize);
+    public static extern int FetchLastLog(char* buffer, int bufferSize);
 
     [DllImport(DLL_NAME)]
     public static extern bool GetCurrentThreadInfo(out ulong threadId, out uint osId);
 
     [DllImport(DLL_NAME)]
-    public static extern unsafe bool GetThreads(uint* array, int length, int* actualLength);
+    public static extern bool GetThreads(uint* array, int length, int* actualLength);
 
     [DllImport(DLL_NAME)]
-    public static extern unsafe int GetModuleNames(char* buffer, int length);
+    public static extern int GetModuleNames(char* buffer, int length);
 
     [DllImport(DLL_NAME)]
-    public static extern unsafe int CountFrozenObjects();
+    public static extern int CountFrozenObjects();
 
     [DllImport(DLL_NAME)]
-    public static extern unsafe bool EnumJittedFunctions(int version);
+    public static extern bool EnumJittedFunctions(int version);
+
+    [DllImport(DLL_NAME)]
+    public static extern int GetGenericArguments(nint typeHandle, int methodToken, char* buffer, int size);
+
 }

@@ -234,7 +234,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
     HResult GetModuleMetaData(
                 ModuleId ModuleId,
                 CorOpenFlags dwOpenFlags,
-                Guid* riid,
+                in Guid riid,
                 out nint ppOut);
 
     /*
