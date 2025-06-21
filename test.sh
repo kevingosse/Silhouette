@@ -8,5 +8,5 @@ export CORECLR_PROFILER="{0A96F866-D763-4099-8E4E-ED1801BE9FBC}"
 export CORECLR_PROFILER_PATH="$PROFILER_DLL"
 
 echo "Running TestApp with profiler..."
-./src/TestApp/bin/Release/net9.0/TestApp.dll
+./src/TestApp/bin/Release/net9.0/TestApp
 exit $?
