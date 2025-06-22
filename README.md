@@ -71,7 +71,7 @@ Use the `ICorProfilerInfoXx` fields to access the `ICorProfilerInfo` APIs:
         {
             var functionId = ICorProfilerInfo11.GetFunctionFromIP(ip).ThrowIfFailed();
             var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-            using var metaDataImport = ICorProfilerInfo2.GetModuleMetaData(functionInfo.ModuleId, CorOpenFlags.ofRead, KnownGuids.IMetaDataImport).ThrowIfFailed().Wrap();
+            using var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(functionInfo.ModuleId, CorOpenFlags.ofRead).ThrowIfFailed().Wrap();
             var methodProperties = metaDataImport.Value.GetMethodProps(new MdMethodDef(functionInfo.Token)).ThrowIfFailed();
             var typeDefProps = metaDataImport.Value.GetTypeDefProps(methodProperties.Class).ThrowIfFailed();
 
