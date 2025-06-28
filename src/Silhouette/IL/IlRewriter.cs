@@ -24,7 +24,7 @@ public class IlRewriter
         try
         {
             using var metadataImport = CorProfilerInfo
-                .GetModuleMetaData(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite, KnownGuids.IMetaDataImport)
+                .GetModuleMetaDataImport(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
                 .ThrowIfFailed()
                 .Wrap();
 
