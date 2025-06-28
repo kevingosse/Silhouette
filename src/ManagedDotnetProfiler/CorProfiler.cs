@@ -662,9 +662,9 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectID)
+    protected override HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectId)
     {
-        Log($"FinalizeableObjectQueued - {finalizerFlags} - {GetTypeNameFromObjectId(objectID)}");
+        Log($"FinalizeableObjectQueued - {finalizerFlags} - {GetTypeNameFromObjectId(objectId)}");
         return HResult.S_OK;
     }
     protected override HResult HandleCreated(GCHandleId handleId, ObjectId initialObjectId)
@@ -801,7 +801,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
             return false;
         }
 
-        using var _ = threads;
+        using var t = threads;
 
         Span<ThreadId> buffer = stackalloc ThreadId[5];
         int count = 0;
@@ -844,6 +844,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 var resolvedGenericParam = genericParamProps.Name;
 
                 var resolvedConstraints = new List<string>();
+                Span<MdGenericParamConstraint> constraints = stackalloc MdGenericParamConstraint[10];
                 HCORENUM constraintsEnum = default;
 
                 while (metaDataImport.Value.EnumGenericParamConstraints(ref constraintsEnum, genericParam, constraints, out var nbConstraints)
@@ -931,14 +932,14 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
     internal bool EnumJittedFunctions(int apiVersion)
     {
-        Func<HResult<INativeEnumerator<COR_PRF_FUNCTION>>> enumJITedFunctions = apiVersion switch
+        Func<HResult<INativeEnumerator<COR_PRF_FUNCTION>>> enumJittedFunctions = apiVersion switch
         {
             1 => ICorProfilerInfo3.EnumJITedFunctions,
             2 => ICorProfilerInfo4.EnumJITedFunctions2,
             _ => throw new InvalidOperationException($"Unknown API version {apiVersion}")
         };
 
-        var (result, jittedFunctions) = enumJITedFunctions();
+        var (result, jittedFunctions) = enumJittedFunctions();
 
         if (!result)
         {
