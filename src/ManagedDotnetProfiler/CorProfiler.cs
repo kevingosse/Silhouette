@@ -94,7 +94,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
             var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
             var functionBody = ICorProfilerInfo.GetILFunctionBody(functionInfo.ModuleId, new(functionInfo.Token)).ThrowIfFailed();
 
-            var rewriter = new IlRewriter(ICorProfilerInfo2);
+            var rewriter = new IlRewriter(ICorProfilerInfo3);
             rewriter.Import(functionBody.MethodHeader, functionInfo.ModuleId, new MdMethodDef(functionInfo.Token));
         }
 
