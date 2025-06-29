@@ -1,4 +1,6 @@
-﻿namespace Silhouette;
+﻿using System.Runtime.InteropServices;
+
+namespace Silhouette;
 
 public readonly struct ModuleId(nint value)
 {
@@ -1035,6 +1037,21 @@ public enum CorPEKind
     pe32Plus = 0x00000004,
     pe32Unmanaged = 0x00000008,
     pe32BitPreferred = 0x00000010
+}
+
+public enum CorSaveSize
+{
+    cssAccurate = 0x0000,
+    cssQuick = 0x0001,
+    cssDiscardTransientCAs = 0x0002
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct COR_SECATTR
+{
+    public MdMemberRef tkCtor;         // Ref to constructor of security attribute.
+    public IntPtr pCustomAttribute;  // Blob describing ctor args and field/property values.
+    public uint cbCustomAttribute;  // Length of the above blob.
 }
 
 public readonly struct ObjectHandleId
