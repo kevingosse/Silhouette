@@ -1,9 +1,4 @@
 ﻿using dnlib.DotNet.Emit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using dnlib.DotNet;
 using dnlib.DotNet.MD;
 using dnlib.IO;
@@ -12,18 +7,18 @@ using dnlib.DotNet.Writer;
 namespace Silhouette.IL;
 public class IlRewriter
 {
-    private readonly ICorProfilerInfo2 CorProfilerInfo;
+    private readonly ICorProfilerInfo3 _corProfilerInfo;
 
-    public IlRewriter(ICorProfilerInfo2 corProfilerInfo)
+    public IlRewriter(ICorProfilerInfo3 corProfilerInfo)
     {
-        CorProfilerInfo = corProfilerInfo;
+        _corProfilerInfo = corProfilerInfo;
     }
 
     public unsafe bool Import(IntPtr method, ModuleId module, MdMethodDef methodDefToken)
     {
         try
         {
-            using var metadataImport = CorProfilerInfo
+            using var metadataImport = _corProfilerInfo
                 .GetModuleMetaDataImport(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
                 .ThrowIfFailed()
                 .Wrap();
@@ -31,7 +26,7 @@ public class IlRewriter
             var dataStream = DataStreamFactory.Create((byte*)method);
             var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
 
-            var resolver = new InstructionOperandResolver(metadataImport);
+            var resolver = new InstructionOperandResolver(metadataImport, _corProfilerInfo);
 
             var parameters = new List<Parameter>();
 
@@ -51,6 +46,13 @@ public class IlRewriter
             {
                 Console.WriteLine(instruction);
             }
+
+            var writer = new MethodBodyWriter(resolver, body);
+            writer.Write();
+
+            var bodyBytes = writer.Code;
+
+            Console.WriteLine($"Wrote {bodyBytes} bytes");
         }
         catch (Exception ex)
         {
@@ -62,34 +64,15 @@ public class IlRewriter
     }
 }
 
-public class TokenProvider : ITokenProvider
-{
-    public void Error(string message)
-    {
-        Console.WriteLine($"Error({message})");
-        throw new NotImplementedException();
-    }
-
-    public MDToken GetToken(object o)
-    {
-        Console.WriteLine($"GetToken({o})");
-        throw new NotImplementedException();
-    }
-
-    public MDToken GetToken(IList<TypeSig> locals, uint origToken)
-    {
-        Console.WriteLine($"GetToken({locals}, {origToken})");
-        throw new NotImplementedException();
-    }
-}
-
-public class InstructionOperandResolver : IInstructionOperandResolver, IDisposable
+public class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider
 {
     private readonly ComPtr<IMetaDataImport> _metadataImport;
+    private readonly ICorProfilerInfo3 _corProfilerInfo;
 
-    public InstructionOperandResolver(ComPtr<IMetaDataImport> metadataImport)
+    public InstructionOperandResolver(ComPtr<IMetaDataImport> metadataImport, ICorProfilerInfo3 corProfilerInfo)
     {
         _metadataImport = metadataImport.Copy();
+        _corProfilerInfo = corProfilerInfo;
     }
 
     public IMDTokenProvider ResolveToken(uint token, GenericParamContext gpContext)
@@ -123,13 +106,13 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
         //        throw new NotSupportedException($"Token type {MDToken.ToTable(token)} is not supported.");
         //}
 
-        return MDToken.ToTable(token) switch
+        var result = MDToken.ToTable(token) switch
         {
             //Table.Module => ResolveModule(rid),
             //Table.TypeRef => ResolveTypeRef(rid),
             //Table.TypeDef => ResolveTypeDef(rid),
             //Table.Field => ResolveField(rid),
-            //Table.Method => ResolveMethod(rid),
+            Table.Method => ResolveMethod(token),
             //Table.Param => ResolveParam(rid),
             //Table.InterfaceImpl => ResolveInterfaceImpl(rid, gpContext),
             Table.MemberRef => ResolveMemberRef(token, gpContext),
@@ -153,8 +136,36 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
             _ => null,
         };
 
+        if (result == null)
+        {
+            Console.WriteLine($"Unsupported token: {token:x2}");
+        }
 
-        throw new NotImplementedException();
+        return result;
+    }
+
+    private unsafe IMethodDefOrRef ResolveMethod(uint token)
+    {
+        Console.WriteLine($"ResolveMethod({token:x2})");
+        
+        var props = _metadataImport.Value.GetMethodProps(new((int)token)).ThrowIfFailed();
+
+        var dataStream = DataStreamFactory.Create((byte*)props.Signature.Ptr);
+        var dataReader = new DataReader(dataStream, 0, (uint)props.Signature.Length);
+
+        var (result, corLibTypes) = CorLibTypes.Create(_metadataImport, _corProfilerInfo);
+
+        if (!result)
+        {
+            Console.WriteLine($"Failed to create CorLibTypes: {result}");
+            return null;
+        }
+
+        using var _ = corLibTypes;
+
+        var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
+
+        return new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags);
     }
 
     private unsafe MemberRef ResolveMemberRef(uint token, GenericParamContext gpContext)
@@ -183,12 +194,29 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
         var dataStream = DataStreamFactory.Create((byte*)props.Signature.Ptr);
         var dataReader = new DataReader(dataStream, 0, (uint)props.Signature.Length);
 
-        var sig = SignatureReader.ReadSig(new SignatureReaderHelper(), new CorLibTypes(), dataReader);
+        var (result, corLibTypes) = CorLibTypes.Create(_metadataImport, _corProfilerInfo);
+
+        if (!result)
+        {
+            Console.WriteLine($"Failed to create CorLibTypes: {result}");
+            return null;
+        }
+
+        using var _ = corLibTypes;
+
+        var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
 
         return new MyMemberRef(props.Name, MDToken.ToRID(token), sig, parent);
     }
 
-    private IMemberRefParent ResolveTypeRef(uint tokenValue, GenericParamContext gpContext)
+    private TypeDef ResolveTypeDef(uint tokenValue, GenericParamContext gpContext)
+    {
+        Console.WriteLine($"ResolveTypeDef({tokenValue:x2}, {gpContext.Type}, {gpContext.Method})");
+        var typeDefProps = _metadataImport.Value.GetTypeDefProps(new((int)tokenValue)).ThrowIfFailed();
+        return new TypeDefUser(new(typeDefProps.TypeName));
+    }
+
+    private TypeRef ResolveTypeRef(uint tokenValue, GenericParamContext gpContext)
     {
         Console.WriteLine($"ResolveTypeRef({tokenValue:x2}, {gpContext.Type}, {gpContext.Method})");
         var typeRefProps = _metadataImport.Value.GetTypeRefProps(new((int)tokenValue)).ThrowIfFailed();
@@ -239,53 +267,165 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
     {
         _metadataImport.Dispose();
     }
-}
 
-public class SignatureReaderHelper : ISignatureReaderHelper
-{
     public ITypeDefOrRef ResolveTypeDefOrRef(uint codedToken, GenericParamContext gpContext)
     {
-        Console.WriteLine($"ISignatureReaderHelper.ResolveTypeDefOrRef({codedToken:x2}, {gpContext.Type}, {gpContext.Method})");
-        throw new NotImplementedException();
+        var token = CodedToken.TypeDefOrRef.Decode2(codedToken);
+
+        if (token.Table == Table.TypeRef)
+        {
+            return ResolveTypeRef(token.Raw, gpContext);
+        }
+
+        if (token.Table == Table.TypeDef)
+        {
+            return ResolveTypeDef(token.Raw, gpContext);
+        }
+
+        Console.WriteLine($"Unsupported token type: {token.Table}");
+        throw new NotSupportedException($"Unsupported token type: {token.Table}");
     }
 
     public TypeSig ConvertRTInternalAddress(IntPtr address)
     {
         Console.WriteLine($"ISignatureReaderHelper.ConvertRTInternalAddress({address})");
+
+        throw new NotImplementedException();
+    }
+
+    public void Error(string message)
+    {
+        Console.WriteLine($"ITokenProvider.Error({message})");
+        throw new NotImplementedException();
+    }
+
+    public MDToken GetToken(object o)
+    {
+        if (o is string s)
+        {
+            
+        }
+
+        Console.WriteLine($"ITokenProvider.GetToken({o}) - {o.GetType()}");
+        Console.WriteLine(Environment.StackTrace);
+        throw new NotImplementedException();
+    }
+
+    public MDToken GetToken(IList<TypeSig> locals, uint origToken)
+    {
+        Console.WriteLine($"ITokenProvider.GetToken({locals}, {origToken})");
         throw new NotImplementedException();
     }
 }
 
-public class CorLibTypes : ICorLibTypes
+public class CorLibTypes : ICorLibTypes, IDisposable
 {
+    private readonly ComPtr<IMetaDataImport> _metadataImport;
+    private readonly ComPtr<IMetaDataImport> _corLibMetadataImport;
+
+    public static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport> metadataImport, ICorProfilerInfo3 corProfilerInfo)
+    {
+        var (result, corLib) = FindCorLib(corProfilerInfo);
+
+        if (!result)
+        {
+            return result;
+        }
+
+        using var corLibPtr = corLib.Wrap();
+
+        return new CorLibTypes(metadataImport, corLibPtr);
+    }
+
+    private CorLibTypes(ComPtr<IMetaDataImport> metadataImport, ComPtr<IMetaDataImport> corLibMetadataImport)
+    {
+        _metadataImport = metadataImport.Copy();
+        _corLibMetadataImport = corLibMetadataImport.Copy();
+    }
+
+    private static HResult<IMetaDataImport> FindCorLib(ICorProfilerInfo3 corProfilerInfo)
+    {
+        var (result, moduleEnumerator) = corProfilerInfo.EnumModules();
+
+        if (!result)
+        {
+            Console.WriteLine($"Failed to enumerate modules: {result}");
+            return result;
+        }
+
+        using var _ = moduleEnumerator;
+
+        foreach (var module in moduleEnumerator.AsEnumerable())
+        {
+            (result, var props) = corProfilerInfo.GetModuleInfo(module);
+
+            if (!result)
+            {
+                continue;
+            }
+
+            var moduleName = Path.GetFileNameWithoutExtension(props.ModuleName);
+
+            if ("mscorlib".Equals(moduleName, StringComparison.OrdinalIgnoreCase)
+                || "System.Private.CoreLib".Equals(moduleName, StringComparison.OrdinalIgnoreCase))
+            {
+                // TODO: use ofWrite only if needed
+                // TODO: double check if this is the correct module
+                return corProfilerInfo.GetModuleMetaDataImport(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite);
+            }
+        }       
+
+        return new(HResult.E_FAIL, default);
+    }
+
+    public void Dispose()
+    {
+        _metadataImport.Dispose();
+    }
+
     public TypeRef GetTypeRef(string @namespace, string name)
     {
         Console.WriteLine($"GetTypeRef({@namespace}, {name})");
         throw new NotImplementedException();
     }
 
-    public CorLibTypeSig Void { get; }
-    public CorLibTypeSig Boolean { get; }
-    public CorLibTypeSig Char { get; }
-    public CorLibTypeSig SByte { get; }
-    public CorLibTypeSig Byte { get; }
-    public CorLibTypeSig Int16 { get; }
-    public CorLibTypeSig UInt16 { get; }
-    public CorLibTypeSig Int32 { get; }
-    public CorLibTypeSig UInt32 { get; }
-    public CorLibTypeSig Int64 { get; }
-    public CorLibTypeSig UInt64 { get; }
-    public CorLibTypeSig Single { get; }
-    public CorLibTypeSig Double { get; }
-    public CorLibTypeSig String { get
+    public CorLibTypeSig Void => new(new TypeDefUser("void"), ElementType.Void);
+    public CorLibTypeSig Boolean => ResolveTypeSig("System.Boolean", ElementType.Boolean);
+    public CorLibTypeSig Char => ResolveTypeSig("System.Char", ElementType.Char);
+    public CorLibTypeSig SByte => ResolveTypeSig("System.SByte", ElementType.I1);
+    public CorLibTypeSig Byte => ResolveTypeSig("System.Byte", ElementType.U1);
+    public CorLibTypeSig Int16 => ResolveTypeSig("System.Int16", ElementType.I2);
+    public CorLibTypeSig UInt16 => ResolveTypeSig("System.UInt16", ElementType.U2);
+    public CorLibTypeSig Int32 => ResolveTypeSig("System.Int32", ElementType.I4);
+    public CorLibTypeSig UInt32 => ResolveTypeSig("System.UInt32", ElementType.U4);
+    public CorLibTypeSig Int64 => ResolveTypeSig("System.Int64", ElementType.I8);
+    public CorLibTypeSig UInt64 => ResolveTypeSig("System.UInt64", ElementType.U8);
+    public CorLibTypeSig Single => ResolveTypeSig("System.Single", ElementType.R4);
+    public CorLibTypeSig Double => ResolveTypeSig("System.Double", ElementType.R8);
+    public CorLibTypeSig String => ResolveTypeSig("System.String", ElementType.String);
+    public CorLibTypeSig TypedReference => ResolveTypeSig("System.TypedReference", ElementType.TypedByRef);
+    public CorLibTypeSig IntPtr => ResolveTypeSig("System.IntPtr", ElementType.I);
+    public CorLibTypeSig UIntPtr => ResolveTypeSig("System.UIntPtr", ElementType.U);
+    public CorLibTypeSig Object => ResolveTypeSig("System.Object", ElementType.Object);
+    public AssemblyRef AssemblyRef
+    { 
+        get
         {
-            Console.WriteLine("Returning String type signature.");
-            return default;
+            Console.WriteLine("AssemblyRef requested, returning null.");
+            return null;
         }
     }
-    public CorLibTypeSig TypedReference { get; }
-    public CorLibTypeSig IntPtr { get; }
-    public CorLibTypeSig UIntPtr { get; }
-    public CorLibTypeSig Object { get; }
-    public AssemblyRef AssemblyRef { get; }
+
+    private CorLibTypeSig ResolveTypeSig(string name, ElementType elementType)
+    {
+        Console.WriteLine($"ResolveTypeSig({name}, {elementType})");
+        var (result, typeDef) = _corLibMetadataImport.Value.FindTypeDefByName(name, default);
+        if (!result)
+        {
+            Console.WriteLine($"Failed to find type definition for {name}: {result}");
+            return default;
+        }
+        return new(new TypeDefUser(name), elementType);
+    }
+
 }

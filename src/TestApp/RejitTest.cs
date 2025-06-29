@@ -7,5 +7,12 @@ internal class RejitTest
     public static void Test()
     {
         Console.WriteLine("RejitTest");
+        JustAnotherMethod();
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static RejitTest JustAnotherMethod()
+    {
+        return null;
     }
 }
