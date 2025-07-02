@@ -33,7 +33,7 @@ internal class AssemblyLoadContextTests : ITest
             : base(true)
         {
         }
-        protected override Assembly? Load(AssemblyName name)
+        protected override Assembly Load(AssemblyName name)
         {
             return null;
         }

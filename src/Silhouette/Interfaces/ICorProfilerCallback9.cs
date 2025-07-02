@@ -1,7 +1,7 @@
 ﻿namespace Silhouette.Interfaces;
 
 [NativeObject]
-internal unsafe interface ICorProfilerCallback9 : ICorProfilerCallback8
+internal interface ICorProfilerCallback9 : ICorProfilerCallback8
 {
     public new static readonly Guid Guid = Guid.Parse("27583EC3-C8F5-482F-8052-194B8CE4705A");
 

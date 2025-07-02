@@ -156,19 +156,19 @@ public class ICorProfilerInfo : Interfaces.IUnknown, ICorProfilerInfoFactory<ICo
         }
     }
 
-    public unsafe HResult<IntPtr> GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
+    public HResult<IntPtr> GetModuleMetaData(ModuleId moduleId, CorOpenFlags dwOpenFlags, Guid riid)
     {
         var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, riid, out var ptr);
         return new(result, new(ptr));
     }
 
-    public unsafe HResult<IMetaDataImport> GetModuleMetaDataImport(ModuleId moduleId, CorOpenFlags dwOpenFlags)
+    public HResult<IMetaDataImport> GetModuleMetaDataImport(ModuleId moduleId, CorOpenFlags dwOpenFlags)
     {
         var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, Interfaces.IMetaDataImport.Guid, out var ptr);
         return new(result, new(ptr));
     }
 
-    public unsafe HResult<IMetaDataImport2> GetModuleMetaDataImport2(ModuleId moduleId, CorOpenFlags dwOpenFlags)
+    public HResult<IMetaDataImport2> GetModuleMetaDataImport2(ModuleId moduleId, CorOpenFlags dwOpenFlags)
     {
         var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, Interfaces.IMetaDataImport2.Guid, out var ptr);
         return new(result, new(ptr));

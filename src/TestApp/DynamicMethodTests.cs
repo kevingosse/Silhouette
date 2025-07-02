@@ -21,16 +21,18 @@ internal class DynamicMethodTests : ITest
         Logs.AssertContains(logs, $"DynamicMethodUnloaded - {handle:x2}");
     }
 
-    private static string InnerScope()
+    private static nint InnerScope()
     {
         var dynamicMethod = new DynamicMethod("test", null, null);
         var ilGenerator = dynamicMethod.GetILGenerator();
         ilGenerator.Emit(OpCodes.Ret);
 
-        var handle = (RuntimeMethodHandle)typeof(DynamicMethod).GetMethod("GetMethodDescriptor", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(dynamicMethod, null);
+        var handle = (RuntimeMethodHandle)typeof(DynamicMethod)
+            .GetMethod("GetMethodDescriptor", BindingFlags.NonPublic | BindingFlags.Instance)!
+            .Invoke(dynamicMethod, null)!;
 
         dynamicMethod.CreateDelegate<Action>().Invoke();
 
-        return handle.Value.ToString("x2");
+        return handle.Value;
     }
 }

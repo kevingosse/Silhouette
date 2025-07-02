@@ -78,7 +78,7 @@ namespace Silhouette
             return HResult.E_NOTIMPL;
         }
 
-        protected virtual unsafe HResult GarbageCollectionStarted(Span<bool> generationCollected, COR_PRF_GC_REASON reason)
+        protected virtual HResult GarbageCollectionStarted(Span<bool> generationCollected, COR_PRF_GC_REASON reason)
         {
             return HResult.E_NOTIMPL;
         }

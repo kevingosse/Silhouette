@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
-using TestApp;
+﻿using TestApp;
 
 #if(!WINDOWS && !DEBUG)
 // on linux runtime does not check that ManagedDotnetProfiler is already loaded

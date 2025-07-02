@@ -2,77 +2,63 @@
 
 namespace Silhouette;
 
-public readonly struct ModuleId(nint value)
+public readonly record struct ModuleId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ObjectId(nint value)
+public readonly record struct ObjectId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct GCHandleId(nint value)
+public readonly record struct GCHandleId(nint Value)
 {
-    public readonly nint Value = value;
-
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct AppDomainId(nint value)
+public readonly record struct AppDomainId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct AssemblyId(nint value)
+public readonly record struct AssemblyId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ClassId(nint value)
+public readonly record struct ClassId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct FunctionId(nint value)
+public readonly record struct FunctionId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ReJITId(nint value)
+public readonly record struct ReJITId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ThreadId(nuint value)
+public readonly record struct ThreadId(nuint Value)
 {
-    public readonly nuint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ProcessId(nint value)
+public readonly record struct ProcessId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ContextId(nint value)
+public readonly record struct ContextId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdToken(int value)
+public readonly record struct MdToken(int Value)
 {
-    public readonly int Value = value;
-
     public static implicit operator int(MdToken token) => token.Value;
     public static implicit operator MdToken(int value) => new(value);
 
@@ -82,116 +68,116 @@ public readonly struct MdToken(int value)
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdModule(MdToken token)
+public readonly record struct MdModule(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdTypeDef(MdToken token)
+public readonly record struct MdTypeDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
-public readonly struct MdMethodDef(MdToken token)
+public readonly record struct MdMethodDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
-    public override string ToString() => Value.ToString("x2");
-}
-
-public readonly struct MdFieldDef(MdToken token)
-{
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdInterfaceImpl(MdToken token)
+public readonly record struct MdFieldDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdTypeRef(MdToken token)
+public readonly record struct MdInterfaceImpl(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdParamDef(MdToken token)
+public readonly record struct MdTypeRef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdMemberRef(MdToken token)
+public readonly record struct MdParamDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public  int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdPermission(MdToken token)
+public readonly record struct MdMemberRef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdProperty(MdToken token)
+public readonly record struct MdPermission(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdEvent(MdToken token)
+public readonly record struct MdProperty(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdSignature(MdToken token)
+public readonly record struct MdEvent(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdModuleRef(MdToken token)
+public readonly record struct MdSignature(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdTypeSpec(MdToken token)
+public readonly record struct MdModuleRef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdString(MdToken token)
+public readonly record struct MdTypeSpec(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdCustomAttribute(MdToken token)
+public readonly record struct MdString(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdGenericParam(MdToken token)
+public readonly record struct MdCustomAttribute(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdMethodSpec(MdToken token)
+public readonly record struct MdGenericParam(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdGenericParamConstraint(MdToken token)
+public readonly record struct MdMethodSpec(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+public readonly struct MdGenericParamConstraint(MdToken Token)
+{
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
@@ -1054,10 +1040,7 @@ public struct COR_SECATTR
     public uint cbCustomAttribute;  // Length of the above blob.
 }
 
-public readonly struct ObjectHandleId
-{
-    public readonly nint Value;
-}
+public readonly record struct ObjectHandleId(nint Value);
 
 public readonly record struct ClassIdInfo(ModuleId ModuleId, MdTypeDef TypeDef);
 public readonly record struct ClassIdInfo2(ModuleId ModuleId, MdTypeDef TypeDef, ClassId ParentClassId);

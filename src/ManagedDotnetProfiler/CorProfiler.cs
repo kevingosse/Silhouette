@@ -378,13 +378,13 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
+    protected override HResult COMClassicVTableCreated(ClassId wrappedClassId, in Guid implementedIID, void* pVTable, uint cSlots)
     {
         Log($"COMClassicVTableCreated - {GetTypeNameFromClassId(wrappedClassId)} - {implementedIID} - {cSlots}");
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
+    protected override HResult COMClassicVTableDestroyed(ClassId wrappedClassId, in Guid implementedIID, void* pVTable)
     {
         Error("The profiling API never raises the event COMClassicVTableDestroyed");
         return HResult.S_OK;
@@ -429,7 +429,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
+    protected override HResult DynamicMethodJITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock, byte* pILHeader, uint cbILHeader)
     {
         Log($"DynamicMethodJITCompilationStarted - {functionId.Value:x2}");
         return HResult.S_OK;
@@ -504,13 +504,13 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult ExceptionOSHandlerEnter(nint* _)
+    protected override HResult ExceptionOSHandlerEnter(nint* _)
     {
         Error("The profiling API never raises the event ExceptionOSHandlerEnter");
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult ExceptionOSHandlerLeave(nint* _)
+    protected override HResult ExceptionOSHandlerLeave(nint* _)
     {
         Error("The profiling API never raises the event ExceptionOSHandlerLeave");
         return HResult.S_OK;
@@ -678,7 +678,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override unsafe HResult GarbageCollectionStarted(Span<bool> generationCollected, COR_PRF_GC_REASON reason)
+    protected override HResult GarbageCollectionStarted(Span<bool> generationCollected, COR_PRF_GC_REASON reason)
     {
         var generations = new List<int>();
 
@@ -800,7 +800,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 break;
             }
 
-            (result, var osId) = ICorProfilerInfo.GetThreadInfo(thread);
+            var (_, osId) = ICorProfilerInfo.GetThreadInfo(thread);
 
             array[count] = osId;
             count++;
@@ -819,6 +819,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         using var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport2(classIdInfo.ModuleId, CorOpenFlags.ofRead).ThrowIfFailed().Wrap();
 
         Span<MdGenericParam> genericParams = stackalloc MdGenericParam[10];
+        Span<MdGenericParamConstraint> constraints = stackalloc MdGenericParamConstraint[10];
         HCORENUM genericParamsEnum = default;
 
         while (metaDataImport.Value.EnumGenericParams(ref genericParamsEnum, new(methodToken), genericParams, out var nbGenericParams)
@@ -830,8 +831,6 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 var resolvedGenericParam = genericParamProps.Name;
 
                 var resolvedConstraints = new List<string>();
-
-                Span<MdGenericParamConstraint> constraints = stackalloc MdGenericParamConstraint[10];
                 HCORENUM constraintsEnum = default;
 
                 while (metaDataImport.Value.EnumGenericParamConstraints(ref constraintsEnum, genericParam, constraints, out var nbConstraints)

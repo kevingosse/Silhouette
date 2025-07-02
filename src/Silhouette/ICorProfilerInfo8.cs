@@ -18,7 +18,7 @@ public class ICorProfilerInfo8 : ICorProfilerInfo7, ICorProfilerInfoFactory<ICor
         return new(result, isDynamic != 0);
     }
 
-    public unsafe HResult<FunctionFromIP> GetFunctionFromIP3(nint ip)
+    public HResult<FunctionFromIP> GetFunctionFromIP3(nint ip)
     {
         var result = _impl.GetFunctionFromIP3(ip, out var functionId, out var reJitId);
         return new(result, new(functionId, reJitId));

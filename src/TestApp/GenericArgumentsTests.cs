@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TestApp;
 internal unsafe class GenericArgumentsTests : ITest
@@ -31,6 +32,7 @@ internal unsafe class GenericArgumentsTests : ITest
 
     private class Test
     {
+        [SuppressMessage("ReSharper", "UnusedTypeParameter")]
         public void Function<T1, T2>()
             where T1: Test, IEnumerable, IEqualityComparer
             where T2: struct, IComparable

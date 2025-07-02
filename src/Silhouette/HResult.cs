@@ -2,7 +2,7 @@
 
 namespace Silhouette;
 
-public readonly struct HResult
+public readonly struct HResult : IEquatable<HResult>
 {
     public const int S_OK = 0;
     public const int S_FALSE = 1;
@@ -45,7 +45,6 @@ public readonly struct HResult
             CORPROF_E_UNSUPPORTED_CALL_SEQUENCE => "CORPROF_E_UNSUPPORTED_CALL_SEQUENCE",
             _ => $"{code:x8}",
         };
-
     }
 
     public override string ToString() => ToString(Code);
@@ -57,9 +56,24 @@ public readonly struct HResult
             throw new Win32Exception(this);
         }
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is HResult other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return Code;
+    }
+
+    public bool Equals(HResult other)
+    {
+        return Code == other.Code;
+    }
 }
 
-public readonly struct HResult<T>
+public readonly struct HResult<T> : IEquatable<HResult<T>>
 {
     public HResult(HResult error, T result)
     {
@@ -94,5 +108,20 @@ public readonly struct HResult<T>
     {
         error = Error;
         result = Result;
+    }
+
+    public bool Equals(HResult<T> other)
+    {
+        return Error.Equals(other.Error) && EqualityComparer<T>.Default.Equals(Result, other.Result);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is HResult<T> other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Error, Result);
     }
 }

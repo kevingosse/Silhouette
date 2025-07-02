@@ -86,7 +86,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         }
     }
 
-    public unsafe HResult<INativeEnumerator<ObjectId>> EnumModuleFrozenObjects(ModuleId moduleID)
+    public HResult<INativeEnumerator<ObjectId>> EnumModuleFrozenObjects(ModuleId moduleID)
     {
         var result = _impl.EnumModuleFrozenObjects(moduleID, out var pEnum);
         return new(result, new(pEnum));

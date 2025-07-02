@@ -39,7 +39,7 @@ public readonly ref struct BufferedNativeEnumerable<T>
 
         public void Dispose() { }
 
-        public unsafe bool MoveNext()
+        public bool MoveNext()
         {
             _index++;
 

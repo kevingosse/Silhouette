@@ -1,4 +1,5 @@
-﻿using Silhouette.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Silhouette.Interfaces;
 
 namespace Silhouette
 {
@@ -55,6 +56,7 @@ namespace Silhouette
             return true;
         }
 
+        [SuppressMessage("ReSharper", "DuplicatedStatements")]
         private int GetICorProfilerInfo(nint pICorProfilerInfoUnk)
         {
             int supportedInterface = 0;

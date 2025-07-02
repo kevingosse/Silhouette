@@ -32,7 +32,7 @@ namespace Silhouette
             _impl.CloseEnum(hEnum);
         }
 
-        public unsafe HResult<uint> CountEnum(HCORENUM hEnum)
+        public HResult<uint> CountEnum(HCORENUM hEnum)
         {
             var result = _impl.CountEnum(hEnum, out var pulCount);
             return new(result, pulCount);
@@ -168,7 +168,7 @@ namespace Silhouette
             }
         }
 
-        public unsafe HResult<ResolvedTypeRef> ResolveTypeRef(MdTypeRef typeRef, in Guid riid)
+        public HResult<ResolvedTypeRef> ResolveTypeRef(MdTypeRef typeRef, in Guid riid)
         {
             var result = _impl.ResolveTypeRef(typeRef, in riid, out var iScope, out var typeDef);
             return new(result, new(iScope, typeDef));
@@ -401,25 +401,25 @@ namespace Silhouette
             }
         }
 
-        public unsafe HResult<NativePointer<byte>> GetFieldMarshal(MdToken token)
+        public HResult<NativePointer<byte>> GetFieldMarshal(MdToken token)
         {
             var result = _impl.GetFieldMarshal(token, out var signature, out var length);
             return new(result, new(signature, (int)length));
         }
 
-        public unsafe HResult<MetadataRva> GetRVA(MdToken token)
+        public HResult<MetadataRva> GetRVA(MdToken token)
         {
             var result = _impl.GetRVA(token, out var rva, out var flags);
             return new(result, new(rva, (CorMethodImpl)flags));
         }
 
-        public unsafe HResult<PermissionSetProps> GetPermissionSetProps(MdPermission permissionToken)
+        public HResult<PermissionSetProps> GetPermissionSetProps(MdPermission permissionToken)
         {
             var result = _impl.GetPermissionSetProps(permissionToken, out var action, out var permission, out var length);
             return new(result, new(action, new(permission, (int)length)));
         }
 
-        public unsafe HResult<NativePointer<byte>> GetSigFromToken(MdSignature signatureToken)
+        public HResult<NativePointer<byte>> GetSigFromToken(MdSignature signatureToken)
         {
             var result = _impl.GetSigFromToken(signatureToken, out var signature, out var length);
             return new(result, new(signature, (int)length));
@@ -462,13 +462,13 @@ namespace Silhouette
             }
         }
 
-        public unsafe HResult<NativePointer<byte>> GetTypeSpecFromToken(MdTypeSpec typespec)
+        public HResult<NativePointer<byte>> GetTypeSpecFromToken(MdTypeSpec typespec)
         {
             var result = _impl.GetTypeSpecFromToken(typespec, out var signature, out var length);
             return new(result, new(signature, (int)length));
         }
 
-        public unsafe HResult<nint> GetNameFromToken(MdToken token)
+        public HResult<nint> GetNameFromToken(MdToken token)
         {
             var result = _impl.GetNameFromToken(token, out var ptr);
             return new(result, ptr);
@@ -572,7 +572,7 @@ namespace Silhouette
             }
         }
 
-        public unsafe HResult<CustomAttributeProps> GetCustomAttributeProps(MdCustomAttribute token)
+        public HResult<CustomAttributeProps> GetCustomAttributeProps(MdCustomAttribute token)
         {
             var result = _impl.GetCustomAttributeProps(token, out var obj, out var type, out var ptr, out var length);
             return new(result, new(obj, type, new(ptr, (int)length)));
@@ -635,12 +635,12 @@ namespace Silhouette
             return new(result, new(buffer.WithoutNullTerminator(), fieldProps.Class, fieldProps.Attributes, fieldProps.Signature, fieldProps.CPlusTypeFlag, fieldProps.Value));
         }
 
-        public unsafe HResult<PropertyProps> GetPropertyProps(MdProperty prop, Span<char> name, Span<MdMethodDef> otherMethods, out uint nbOtherMethods)
+        public unsafe HResult<PropertyProps> GetPropertyProps(MdProperty prop, Span<char> name, Span<MdMethodDef> otherMethods, out uint nameLength, out uint nbOtherMethods)
         {
             fixed (char* c = name)
             fixed (MdMethodDef* rOtherMethods = otherMethods)
             {
-                var result = _impl.GetPropertyProps(prop, out var pClass, c, (uint)name.Length, out var nameLength, out var attributes, out var signature, out var signatureLength, out var cPlusTypeFlag, out var value, out var valueLength, out var setter, out var getter, rOtherMethods, (uint)otherMethods.Length, out nbOtherMethods);
+                var result = _impl.GetPropertyProps(prop, out var pClass, c, (uint)name.Length, out nameLength, out var attributes, out var signature, out var signatureLength, out var cPlusTypeFlag, out var value, out var valueLength, out var setter, out var getter, rOtherMethods, (uint)otherMethods.Length, out nbOtherMethods);
                 return new(result, new(pClass, attributes, new(signature, (int)signatureLength), (CorElementTypes)cPlusTypeFlag, new(value, (int)valueLength), setter, getter));
             }
         }
