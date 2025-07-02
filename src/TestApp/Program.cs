@@ -1,6 +1,9 @@
 ﻿using TestApp;
 
 #if(!WINDOWS && !DEBUG)
+
+using System.Reflection;
+using System.Runtime.InteropServices;
 // on linux runtime does not check that ManagedDotnetProfiler is already loaded
 // could not find better option to get handle returned from dlopen so using this trick
 
