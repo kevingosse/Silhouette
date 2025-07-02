@@ -2,7 +2,7 @@
 
 namespace TestApp;
 
-internal unsafe class PInvokes
+internal static unsafe class PInvokes
 {
 #if WINDOWS
     private const string DLL_NAME = "ManagedDotnetProfiler.dll";
@@ -10,7 +10,7 @@ internal unsafe class PInvokes
     private const string DLL_NAME = "ManagedDotnetProfiler";
 #endif
 
-    public class CurrentOS
+    public static class CurrentOS
     {
 #if WINDOWS
         [DllImport("kernel32.dll")]

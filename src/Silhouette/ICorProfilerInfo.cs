@@ -2,7 +2,7 @@
 
 public class ICorProfilerInfo : Interfaces.IUnknown, ICorProfilerInfoFactory<ICorProfilerInfo>
 {
-    private NativeObjects.ICorProfilerInfoInvoker _impl;
+    private readonly NativeObjects.ICorProfilerInfoInvoker _impl;
 
     public ICorProfilerInfo(nint ptr)
     {

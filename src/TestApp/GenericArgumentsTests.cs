@@ -6,7 +6,7 @@ internal unsafe class GenericArgumentsTests : ITest
 {
     public void Run()
     {
-        var method = typeof(Test).GetMethod(nameof(Test.Function));
+        var method = typeof(Test).GetMethod(nameof(Test.Function))!;
 
         Span<char> buffer = stackalloc char[1024];
         int length;

@@ -6,8 +6,8 @@ internal class ExceptionTests : ITest
 {
     public void Run()
     {
-        var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(Thread.CurrentThread);
+        var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(Thread.CurrentThread)!;
 
         try
         {

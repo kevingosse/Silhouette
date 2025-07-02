@@ -24,7 +24,7 @@ internal class JitCompilationTests : ITest
     }
 
     [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.AggressiveOptimization)]
-    public static int PrivateMethod()
+    private static int PrivateMethod()
     {
         if (InnerMethod() == 1)
         {

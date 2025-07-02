@@ -1,39 +1,38 @@
 ﻿using Silhouette.Interfaces;
 
-namespace Silhouette
+namespace Silhouette;
+
+public abstract class CorProfilerCallback9Base : CorProfilerCallback8Base, ICorProfilerCallback9
 {
-    public abstract class CorProfilerCallback9Base : CorProfilerCallback8Base, ICorProfilerCallback9
+    private readonly NativeObjects.ICorProfilerCallback9 _corProfilerCallback9;
+
+    protected CorProfilerCallback9Base()
     {
-        private readonly NativeObjects.ICorProfilerCallback9 _corProfilerCallback9;
+        _corProfilerCallback9 = NativeObjects.ICorProfilerCallback9.Wrap(this);
+    }
 
-        protected CorProfilerCallback9Base()
+    protected override HResult QueryInterface(in Guid guid, out nint ptr)
+    {
+        if (guid == ICorProfilerCallback9.Guid)
         {
-            _corProfilerCallback9 = NativeObjects.ICorProfilerCallback9.Wrap(this);
+            ptr = _corProfilerCallback9;
+            return HResult.S_OK;
         }
 
-        protected override HResult QueryInterface(in Guid guid, out nint ptr)
-        {
-            if (guid == ICorProfilerCallback9.Guid)
-            {
-                ptr = _corProfilerCallback9;
-                return HResult.S_OK;
-            }
+        return base.QueryInterface(guid, out ptr);
+    }
 
-            return base.QueryInterface(guid, out ptr);
-        }
+    #region ICorProfilerCallback9
 
-        #region ICorProfilerCallback9
+    HResult ICorProfilerCallback9.DynamicMethodUnloaded(FunctionId functionId)
+    {
+        return DynamicMethodUnloaded(functionId);
+    }
 
-        HResult ICorProfilerCallback9.DynamicMethodUnloaded(FunctionId functionId)
-        {
-            return DynamicMethodUnloaded(functionId);
-        }
+    #endregion
 
-        #endregion
-
-        protected virtual HResult DynamicMethodUnloaded(FunctionId functionId)
-        {
-            return HResult.E_NOTIMPL;
-        }
+    protected virtual HResult DynamicMethodUnloaded(FunctionId functionId)
+    {
+        return HResult.E_NOTIMPL;
     }
 }

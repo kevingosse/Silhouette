@@ -5,7 +5,7 @@ namespace Silhouette;
 
 public unsafe class IMetaDataImport2 : IMetaDataImport
 {
-    private IMetaDataImport2Invoker _impl;
+    private readonly IMetaDataImport2Invoker _impl;
 
     public IMetaDataImport2(nint ptr)
         : base(ptr)

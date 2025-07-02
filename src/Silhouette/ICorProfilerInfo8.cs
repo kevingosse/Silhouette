@@ -2,7 +2,7 @@
 
 public class ICorProfilerInfo8 : ICorProfilerInfo7, ICorProfilerInfoFactory<ICorProfilerInfo8>
 {
-    private NativeObjects.ICorProfilerInfo8Invoker _impl;
+    private readonly NativeObjects.ICorProfilerInfo8Invoker _impl;
 
     public ICorProfilerInfo8(nint ptr) : base(ptr)
     {

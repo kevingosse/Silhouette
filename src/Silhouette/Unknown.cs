@@ -1,34 +1,33 @@
 ﻿using Silhouette.Interfaces;
 
-namespace Silhouette
+namespace Silhouette;
+
+public abstract class Unknown : IUnknown
 {
-    public abstract class Unknown : IUnknown
+    private int _referenceCount;
+
+    protected abstract HResult QueryInterface(in Guid guid, out nint ptr);
+
+    HResult IUnknown.QueryInterface(in Guid guid, out nint ptr) => QueryInterface(guid, out ptr);
+
+    int IUnknown.AddRef()
     {
-        private int _referenceCount;
+        return Interlocked.Increment(ref _referenceCount);
+    }
 
-        protected abstract HResult QueryInterface(in Guid guid, out nint ptr);
+    int IUnknown.Release()
+    {
+        var value = Interlocked.Decrement(ref _referenceCount);
 
-        HResult IUnknown.QueryInterface(in Guid guid, out nint ptr) => QueryInterface(guid, out ptr);
-
-        int IUnknown.AddRef()
+        if (value == 0)
         {
-            return Interlocked.Increment(ref _referenceCount);
+            Dispose();
         }
 
-        int IUnknown.Release()
-        {
-            var value = Interlocked.Decrement(ref _referenceCount);
+        return value;
+    }
 
-            if (value == 0)
-            {
-                Dispose();
-            }
-
-            return value;
-        }
-
-        public virtual void Dispose()
-        {
-        }
+    public virtual void Dispose()
+    {
     }
 }

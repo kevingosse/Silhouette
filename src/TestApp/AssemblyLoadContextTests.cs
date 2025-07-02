@@ -20,7 +20,7 @@ internal class AssemblyLoadContextTests : ITest
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    static void CreateAndUnloadAlc()
+    private static void CreateAndUnloadAlc()
     {
         var alc = new TestAssemblyLoadContext();
         _ = alc.LoadFromAssemblyPath(typeof(Program).Assembly.Location);

@@ -30,7 +30,5 @@ internal class FinalizationTests : ITest
         }
     }
 
-    private class CriticalFinalizableType : CriticalFinalizerObject
-    {
-    }
+    private class CriticalFinalizableType : CriticalFinalizerObject;
 }

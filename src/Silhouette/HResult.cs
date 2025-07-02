@@ -43,7 +43,7 @@ public readonly struct HResult : IEquatable<HResult>
             E_NOTIMPL => "E_NOTIMPL",
             E_NOINTERFACE => "E_NOINTERFACE",
             CORPROF_E_UNSUPPORTED_CALL_SEQUENCE => "CORPROF_E_UNSUPPORTED_CALL_SEQUENCE",
-            _ => $"{code:x8}",
+            _ => $"{code:x8}"
         };
     }
 

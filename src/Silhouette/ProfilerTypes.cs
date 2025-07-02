@@ -543,7 +543,7 @@ public enum COR_PRF_HIGH_MONITOR : uint
     // MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
     // Trying to change any of these flags elsewhere will result in a
     // failed HRESULT.
-    COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION,
+    COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION
 }
 
 public enum COR_PRF_FINALIZER_FLAGS
@@ -574,7 +574,7 @@ public enum COR_PRF_SUSPEND_REASON
     COR_PRF_SUSPEND_FOR_INPROC_DEBUGGER = 6,
     COR_PRF_SUSPEND_FOR_GC_PREP = 7,
     COR_PRF_SUSPEND_FOR_REJIT = 8,
-    COR_PRF_SUSPEND_FOR_PROFILER = 9,
+    COR_PRF_SUSPEND_FOR_PROFILER = 9
 }
 
 [Flags]
@@ -609,7 +609,7 @@ public enum CorILMethodFlags
     CorILMethod_TinyFormat = 0x0002,         // use this code if the code size is even
     CorILMethod_SmallFormat = 0x0000,
     CorILMethod_FatFormat = 0x0003,
-    CorILMethod_TinyFormat1 = 0x0006,         // use this code if the code size is odd
+    CorILMethod_TinyFormat1 = 0x0006         // use this code if the code size is odd
 }
 
 public enum COR_PRF_STATIC_TYPE
@@ -635,13 +635,13 @@ public enum COR_PRF_CLAUSE_TYPE
     COR_PRF_CLAUSE_NONE = 0,
     COR_PRF_CLAUSE_FILTER = 1,
     COR_PRF_CLAUSE_CATCH = 2,
-    COR_PRF_CLAUSE_FINALLY = 3,
+    COR_PRF_CLAUSE_FINALLY = 3
 }
 
 public enum COR_PRF_RUNTIME_TYPE
 {
     COR_PRF_DESKTOP_CLR = 0x1,
-    COR_PRF_CORE_CLR = 0x2,
+    COR_PRF_CORE_CLR = 0x2
 }
 
 /// <summary>
@@ -674,7 +674,7 @@ public enum COR_PRF_GC_ROOT_FLAGS
     COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
     COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
     COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
-    COR_PRF_GC_ROOT_REFCOUNTED = 0x8, // Whether it prevents collection depends on a refcount - if not,
+    COR_PRF_GC_ROOT_REFCOUNTED = 0x8 // Whether it prevents collection depends on a refcount - if not,
                                       // COR_PRF_GC_ROOT_WEAKREF will be set also
 }
 
@@ -690,7 +690,7 @@ public enum COR_PRF_SNAPSHOT_INFO : uint
 
     // Use a quicker stack walk algorithm based on the EBP frame chain. This is available
     // on x86 only.
-    COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2,
+    COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2
 }
 
 public struct COR_DEBUG_IL_TO_NATIVE_MAP
@@ -746,7 +746,7 @@ public enum COR_PRF_HANDLE_TYPE
 {
     COR_PRF_HANDLE_TYPE_WEAK = 0x1,
     COR_PRF_HANDLE_TYPE_STRONG = 0x2,
-    COR_PRF_HANDLE_TYPE_PINNED = 0x3,
+    COR_PRF_HANDLE_TYPE_PINNED = 0x3
 }
 
 /// <summary>
@@ -927,7 +927,7 @@ public enum CorPinvokeMap : uint
     pmCallConvThiscall = 0x0400,   // In M9, pinvoke will raise exception.
     pmCallConvFastcall = 0x0500,
 
-    pmMaxValue = 0xFFFF,
+    pmMaxValue = 0xFFFF
 }
 
 public enum CorElementTypes : uint
@@ -998,7 +998,7 @@ public enum CorParamAttr
     pdHasDefault = 0x1000,     // Param has default value.
     pdHasFieldMarshal = 0x2000,     // Param has FieldMarshal.
 
-    pdUnused = 0xcfe0,
+    pdUnused = 0xcfe0
 }
 
 public enum CorGenericParamAttr

@@ -464,7 +464,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         // https://github.com/dotnet/runtime/issues/10871
         if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionCatcherEnter called without a matching ExceptionUnwindFunctionEnter");
+            Error("ExceptionCatcherEnter called without a matching ExceptionUnwindFunctionEnter");
             return HResult.E_FAIL;
         }
 
@@ -478,7 +478,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedCatchBlocks.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionCatcherLeave called without a matching ExceptionCatcherEnter");
+            Error("ExceptionCatcherLeave called without a matching ExceptionCatcherEnter");
             return HResult.E_FAIL;
         }
 
@@ -534,7 +534,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionSearchFilter.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionSearchFilterLeave called without a matching ExceptionSearchFilterEnter");
+            Error("ExceptionSearchFilterLeave called without a matching ExceptionSearchFilterEnter");
             return HResult.E_FAIL;
         }
 
@@ -566,7 +566,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionSearchFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionSearchFunctionLeave called without a matching ExceptionSearchFunctionEnter");
+            Error("ExceptionSearchFunctionLeave called without a matching ExceptionSearchFunctionEnter");
             return HResult.E_FAIL;
         }
 
@@ -597,7 +597,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionUnwindFinally.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionUnwindFinallyLeave called without a matching ExceptionUnwindFinallyEnter");
+            Error("ExceptionUnwindFinallyLeave called without a matching ExceptionUnwindFinallyEnter");
             return HResult.E_FAIL;
         }
 
@@ -629,7 +629,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionUnwindFunctionLeave called without a matching ExceptionUnwindFunctionEnter");
+            Error("ExceptionUnwindFunctionLeave called without a matching ExceptionUnwindFunctionEnter");
             return HResult.E_FAIL;
         }
 

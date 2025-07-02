@@ -4,7 +4,7 @@ using Silhouette;
 
 namespace ManagedDotnetProfiler;
 
-public class DllMain
+public static class DllMain
 {
     private static ClassFactory Instance;
 
