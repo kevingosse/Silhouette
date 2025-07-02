@@ -36,7 +36,7 @@ public class ClassFactory : IClassFactory
         }
 
         ptr = nint.Zero;
-        return HResult.E_NOTIMPL;
+        return HResult.E_NOINTERFACE;
     }
 
     public int AddRef()

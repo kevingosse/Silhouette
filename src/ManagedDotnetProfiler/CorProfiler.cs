@@ -512,7 +512,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
     protected override unsafe HResult ExceptionOSHandlerLeave(nint* _)
     {
-        Error("The profiling API never raises the event ExceptionOSHandlerEnter");
+        Error("The profiling API never raises the event ExceptionOSHandlerLeave");
         return HResult.S_OK;
     }
 
@@ -566,7 +566,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionSearchFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionSearchFunctionLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionSearchFunctionLeave called without a matching ExceptionSearchFunctionEnter");
             return HResult.E_FAIL;
         }
 
@@ -597,7 +597,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionUnwindFinally.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionUnwindFinallyLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionUnwindFinallyLeave called without a matching ExceptionUnwindFinallyEnter");
             return HResult.E_FAIL;
         }
 
@@ -629,7 +629,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         if (!_nestedExceptionUnwindFunction.TryGetValue(Environment.CurrentManagedThreadId, out var count) || count <= 0)
         {
-            Error($"ExceptionUnwindFunctionLeave called without a matching ExceptionSearchFilterEnter");
+            Error($"ExceptionUnwindFunctionLeave called without a matching ExceptionUnwindFunctionEnter");
             return HResult.E_FAIL;
         }
 
