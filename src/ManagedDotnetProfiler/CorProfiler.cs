@@ -74,7 +74,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 & ~COR_PRF_MONITOR.COR_PRF_MONITOR_ENTERLEAVE;
         }
 
-        var highEventMask = COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS;
+        const COR_PRF_HIGH_MONITOR highEventMask = COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS;
 
         Log($"Setting event mask to {eventMask}");
         Log($"Setting high event mask to {highEventMask}");

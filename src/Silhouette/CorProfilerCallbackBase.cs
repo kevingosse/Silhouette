@@ -56,7 +56,7 @@ public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
         return true;
     }
 
-    [SuppressMessage("ReSharper", "DuplicatedStatements")]
+    // ReSharper disable once DuplicatedStatements
     private int GetICorProfilerInfo(nint pICorProfilerInfoUnk)
     {
         int supportedInterface = 0;

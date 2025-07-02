@@ -1078,7 +1078,7 @@ public readonly record struct ClassLayout(uint PackSize, uint ClassSize);
 public readonly record struct DynamicFunctionInfo(ModuleId ModuleId, NativePointer<byte> Signature);
 public readonly record struct DynamicFunctionInfoWithName(ModuleId ModuleId, NativePointer<byte> Signature, string Name);
 public readonly record struct MethodProps(MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint RVA, uint ImplementationFlags);
-public readonly record struct MethodPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> signature, uint Rva, uint ImplementationFlags);
+public readonly record struct MethodPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint Rva, uint ImplementationFlags);
 public readonly record struct MemberRefProps(MdToken Token, NativePointer<byte> Signature);
 public readonly record struct MemberRefPropsWithName(string Name, MdToken Token, NativePointer<byte> Signature);
 public readonly record struct MetadataRva(uint Rva, CorMethodImpl Flags);

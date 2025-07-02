@@ -31,6 +31,10 @@ public readonly struct HResult : IEquatable<HResult>
     /// </summary>
     public static implicit operator bool(HResult hr) => hr.Code >= 0;
 
+    public static bool operator ==(HResult left, HResult right) => left.Equals(right);
+
+    public static bool operator !=(HResult left, HResult right) => !left.Equals(right);
+
     public static string ToString(int code)
     {
         return code switch
@@ -88,6 +92,10 @@ public readonly struct HResult<T> : IEquatable<HResult<T>>
     public static implicit operator HResult<T>(T t) => new(HResult.S_OK, t);
 
     public static implicit operator HResult<T>(HResult error) => new(error, default);
+
+    public static bool operator ==(HResult<T> left, HResult<T> right) => left.Equals(right);
+
+    public static bool operator !=(HResult<T> left, HResult<T> right)=> !left.Equals(right);
 
     public T ThrowIfFailed()
     {

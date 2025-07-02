@@ -36,5 +36,6 @@ public class ComPtr<T> : IDisposable
     public void Dispose()
     {
         Value?.Release();
+        GC.SuppressFinalize(this);
     }
 }

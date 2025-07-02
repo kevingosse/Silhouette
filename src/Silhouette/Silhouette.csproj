@@ -8,6 +8,7 @@
     <PublishAot>true</PublishAot>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsAotCompatible>true</IsAotCompatible>
+    <NoWarn>IDE0290;IDE0079</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
