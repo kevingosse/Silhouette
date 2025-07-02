@@ -52,7 +52,7 @@ public readonly struct HResult
 
     public void ThrowIfFailed()
     {
-        if (!IsOK)
+        if (Code < 0)
         {
             throw new Win32Exception(this);
         }
@@ -77,7 +77,7 @@ public readonly struct HResult<T>
 
     public T ThrowIfFailed()
     {
-        if (!Error.IsOK)
+        if (Error.Code < 0)
         {
             throw new Win32Exception(Error);
         }
