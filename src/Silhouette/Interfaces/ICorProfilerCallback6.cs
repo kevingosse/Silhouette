@@ -1,6 +1,4 @@
-﻿using Silhouette;
-
-namespace Silhouette.Interfaces;
+﻿namespace Silhouette.Interfaces;
 
 [NativeObject]
 internal unsafe interface ICorProfilerCallback6 : ICorProfilerCallback5

@@ -2,7 +2,7 @@
 
 public class ICorProfilerInfo3 : ICorProfilerInfo2, ICorProfilerInfoFactory<ICorProfilerInfo3>
 {
-    private NativeObjects.ICorProfilerInfo3Invoker _impl;
+    private readonly NativeObjects.ICorProfilerInfo3Invoker _impl;
 
     public ICorProfilerInfo3(nint ptr) : base(ptr)
     {
@@ -12,7 +12,7 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2, ICorProfilerInfoFactory<ICor
     static ICorProfilerInfo3 ICorProfilerInfoFactory<ICorProfilerInfo3>.Create(nint ptr) => new(ptr);
     static Guid ICorProfilerInfoFactory<ICorProfilerInfo3>.Guid => Interfaces.ICorProfilerInfo3.Guid;
 
-    public unsafe HResult<INativeEnumerator<COR_PRF_FUNCTION>> EnumJITedFunctions()
+    public HResult<INativeEnumerator<COR_PRF_FUNCTION>> EnumJITedFunctions()
     {
         var result = _impl.EnumJITedFunctions(out var pEnum);
         return new(result, new(pEnum));
@@ -61,7 +61,7 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2, ICorProfilerInfoFactory<ICor
         return new(result, pFrameInfo);
     }
 
-    public unsafe HResult<INativeEnumerator<ModuleId>> EnumModules()
+    public HResult<INativeEnumerator<ModuleId>> EnumModules()
     {
         var result = _impl.EnumModules(out var pEnum);
         return new(result, new(pEnum));

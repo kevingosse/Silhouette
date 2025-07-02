@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace ManagedDotnetProfiler;
 
-internal unsafe class PInvoke
+internal static unsafe class PInvoke
 {
     [UnmanagedCallersOnly(EntryPoint = nameof(GetCurrentThreadInfo))]
     public static bool GetCurrentThreadInfo(ulong* pThreadId, uint* pOsId)

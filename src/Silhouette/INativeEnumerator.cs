@@ -61,12 +61,12 @@ public readonly struct INativeEnumerator<T> : IDisposable
         }
     }
 
-    public readonly BufferedNativeEnumerable<T> AsEnumerable(Span<T> buffer)
+    public BufferedNativeEnumerable<T> AsEnumerable(Span<T> buffer)
     {
         return new BufferedNativeEnumerable<T>(this, buffer);
     }
 
-    private unsafe HResult GetNextItem(ref T buffer)
+    private HResult GetNextItem(ref T buffer)
     {
         return Next(MemoryMarshal.CreateSpan(ref buffer, 1)).Error;
     }

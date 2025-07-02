@@ -1,9 +1,11 @@
 ﻿using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace TestApp;
 
 internal class ComTests : ITest
 {
+    [SupportedOSPlatform("windows")]
     public void Run()
     {
         _ = Marshal.GetIUnknownForObject(new object());

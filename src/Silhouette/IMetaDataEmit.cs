@@ -4,7 +4,7 @@ namespace Silhouette;
 
 public unsafe class IMetaDataEmit : Interfaces.IUnknown
 {
-    private IMetaDataEmitInvoker _impl;
+    private readonly IMetaDataEmitInvoker _impl;
 
     public IMetaDataEmit(nint ptr)
     {

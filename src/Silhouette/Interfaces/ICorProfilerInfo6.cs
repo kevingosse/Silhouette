@@ -1,7 +1,7 @@
 ﻿namespace Silhouette.Interfaces;
 
 [NativeObject]
-internal unsafe interface ICorProfilerInfo6 : ICorProfilerInfo5
+internal interface ICorProfilerInfo6 : ICorProfilerInfo5
 {
     public new static readonly Guid Guid = new("F30A070D-BFFB-46A7-B1D8-8781EF7B698A");
 

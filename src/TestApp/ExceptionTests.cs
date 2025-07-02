@@ -6,8 +6,8 @@ internal class ExceptionTests : ITest
 {
     public void Run()
     {
-        var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(Thread.CurrentThread);
+        var threadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .GetValue(Thread.CurrentThread)!;
 
         try
         {
@@ -30,6 +30,7 @@ internal class ExceptionTests : ITest
         }
         catch
         {
+            // Expected
         }
 
         var logs = Logs.Fetch().ToList();
@@ -75,9 +76,6 @@ internal class ExceptionTests : ITest
         catch (Exception) when (ExceptionFilter2())
         {
         }
-        finally
-        {
-        }
 
         return true;
     }
@@ -101,6 +99,7 @@ internal class ExceptionTests : ITest
             }
             catch
             {
+                // Expected
             }
         }
     }

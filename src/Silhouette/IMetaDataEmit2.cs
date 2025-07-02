@@ -4,7 +4,7 @@ namespace Silhouette;
 
 public unsafe class IMetaDataEmit2 : IMetaDataEmit
 {
-    private IMetaDataEmit2Invoker _impl;
+    private readonly IMetaDataEmit2Invoker _impl;
 
     public IMetaDataEmit2(nint ptr)
         : base(ptr)

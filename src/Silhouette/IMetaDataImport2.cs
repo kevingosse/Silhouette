@@ -5,7 +5,7 @@ namespace Silhouette;
 
 public unsafe class IMetaDataImport2 : IMetaDataImport
 {
-    private IMetaDataImport2Invoker _impl;
+    private readonly IMetaDataImport2Invoker _impl;
 
     public IMetaDataImport2(nint ptr)
         : base(ptr)
@@ -54,7 +54,7 @@ public unsafe class IMetaDataImport2 : IMetaDataImport
             return result;
         }
 
-        return new(result, new(props.ParamSeq, (CorGenericParamAttr)props.ParamFlags, props.Owner, props.Reserved, buffer.WithoutNullTerminator()));
+        return new(result, new(props.ParamSeq, props.ParamFlags, props.Owner, props.Reserved, buffer.WithoutNullTerminator()));
     }
 
     public HResult<MethodSpecProps> GetMethodSpecProps(MdMethodSpec mi)

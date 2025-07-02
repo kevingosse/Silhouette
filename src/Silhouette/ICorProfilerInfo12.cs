@@ -2,7 +2,7 @@
 
 public unsafe class ICorProfilerInfo12 : ICorProfilerInfo11, ICorProfilerInfoFactory<ICorProfilerInfo12>
 {
-    private NativeObjects.ICorProfilerInfo12Invoker _impl;
+    private readonly NativeObjects.ICorProfilerInfo12Invoker _impl;
 
     public ICorProfilerInfo12(nint ptr) : base(ptr)
     {

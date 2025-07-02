@@ -2,7 +2,7 @@
 
 namespace Silhouette;
 
-public readonly struct HResult
+public readonly struct HResult : IEquatable<HResult>
 {
     public const int S_OK = 0;
     public const int S_FALSE = 1;
@@ -31,6 +31,10 @@ public readonly struct HResult
     /// </summary>
     public static implicit operator bool(HResult hr) => hr.Code >= 0;
 
+    public static bool operator ==(HResult left, HResult right) => left.Equals(right);
+
+    public static bool operator !=(HResult left, HResult right) => !left.Equals(right);
+
     public static string ToString(int code)
     {
         return code switch
@@ -43,9 +47,8 @@ public readonly struct HResult
             E_NOTIMPL => "E_NOTIMPL",
             E_NOINTERFACE => "E_NOINTERFACE",
             CORPROF_E_UNSUPPORTED_CALL_SEQUENCE => "CORPROF_E_UNSUPPORTED_CALL_SEQUENCE",
-            _ => $"{code:x8}",
+            _ => $"{code:x8}"
         };
-
     }
 
     public override string ToString() => ToString(Code);
@@ -57,9 +60,24 @@ public readonly struct HResult
             throw new Win32Exception(this);
         }
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is HResult other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return Code;
+    }
+
+    public bool Equals(HResult other)
+    {
+        return Code == other.Code;
+    }
 }
 
-public readonly struct HResult<T>
+public readonly struct HResult<T> : IEquatable<HResult<T>>
 {
     public HResult(HResult error, T result)
     {
@@ -74,6 +92,10 @@ public readonly struct HResult<T>
     public static implicit operator HResult<T>(T t) => new(HResult.S_OK, t);
 
     public static implicit operator HResult<T>(HResult error) => new(error, default);
+
+    public static bool operator ==(HResult<T> left, HResult<T> right) => left.Equals(right);
+
+    public static bool operator !=(HResult<T> left, HResult<T> right)=> !left.Equals(right);
 
     public T ThrowIfFailed()
     {
@@ -94,5 +116,20 @@ public readonly struct HResult<T>
     {
         error = Error;
         result = Result;
+    }
+
+    public bool Equals(HResult<T> other)
+    {
+        return Error.Equals(other.Error) && EqualityComparer<T>.Default.Equals(Result, other.Result);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is HResult<T> other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Error, Result);
     }
 }

@@ -5,13 +5,13 @@ namespace TestApp;
 
 internal static class Logs
 {
-    private static ConcurrentQueue<string> _allLogs = new();
+    private static readonly ConcurrentQueue<string> AllLogs = new();
 
-    public static IEnumerable<string> All => _allLogs;
+    public static IEnumerable<string> All => AllLogs;
 
     public static void Clear()
     {        
-        foreach (var log in Fetch())
+        foreach (var _ in Fetch())
         {
             // Do nothing
         }
@@ -28,7 +28,7 @@ internal static class Logs
                 yield break;
             }
 
-            _allLogs.Enqueue(log);
+            AllLogs.Enqueue(log);
 
             if (log.StartsWith("Error:"))
             {

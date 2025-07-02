@@ -46,7 +46,7 @@ internal class ModuleTests : ITest
         var expectedModules = from assembly in currentAssemblies
                               from module in assembly.Modules
                               let name = assembly.IsDynamic ? module.ScopeName : module.FullyQualifiedName
-                              orderby name ascending
+                              orderby name
                               select name;
 
         Logs.Assert(expectedModules.SequenceEqual(moduleNames.Order()));

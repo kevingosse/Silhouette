@@ -2,7 +2,7 @@
 
 public class ICorProfilerInfo4 : ICorProfilerInfo3, ICorProfilerInfoFactory<ICorProfilerInfo4>
 {
-    private NativeObjects.ICorProfilerInfo4Invoker _impl;
+    private readonly NativeObjects.ICorProfilerInfo4Invoker _impl;
 
     public ICorProfilerInfo4(nint ptr) : base(ptr)
     {
@@ -60,7 +60,7 @@ public class ICorProfilerInfo4 : ICorProfilerInfo3, ICorProfilerInfoFactory<ICor
         }
     }
 
-    public unsafe HResult<FunctionFromIP> GetFunctionFromIP2(nint ip)
+    public HResult<FunctionFromIP> GetFunctionFromIP2(nint ip)
     {
         var result = _impl.GetFunctionFromIP2(ip, out var functionId, out var reJitId);
         return new(result, new(functionId, reJitId));

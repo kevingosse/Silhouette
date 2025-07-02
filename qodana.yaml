@@ -1,6 +1,13 @@
-version: "1.0"
-linter: jetbrains/qodana-dotnet:2025.1
+version: '1.0'
+linter: 'jetbrains/qodana-dotnet:2025.1'
 profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
+exclude:
+  - name: ArrangeObjectCreationWhenTypeNotEvident
+  - name: SuggestVarOrType_BuiltInTypes
+  - name: ConvertToPrimaryConstructor
+  - name: SYSLIB1054
+  - name: ConvertIfStatementToReturnStatement
+  - name: InvertIf

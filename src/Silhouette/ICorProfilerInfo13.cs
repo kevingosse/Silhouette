@@ -1,8 +1,8 @@
 ﻿namespace Silhouette;
 
-public unsafe class ICorProfilerInfo13 : ICorProfilerInfo12, ICorProfilerInfoFactory<ICorProfilerInfo13>
+public class ICorProfilerInfo13 : ICorProfilerInfo12, ICorProfilerInfoFactory<ICorProfilerInfo13>
 {
-    private NativeObjects.ICorProfilerInfo13Invoker _impl;
+    private readonly NativeObjects.ICorProfilerInfo13Invoker _impl;
 
     public ICorProfilerInfo13(nint ptr) : base(ptr)
     {

@@ -2,19 +2,15 @@
 using System.Runtime.InteropServices;
 using TestApp;
 
-#if(!WINDOWS && !DEBUG)
-// on linux runtime does not check that ManagedDotnetProfiler is already loaded
-// could not find better option to get handle returned from dlopen so using this trick
-
-// runtime does not load the same library twice so it returns handle of the loaded library:
-var handle = NativeLibrary.Load("ManagedDotnetProfiler.so");
-
-NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), (string libraryName, Assembly assembly, DllImportSearchPath? searchPath) =>
+if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    return handle;
-});
-#endif
+    // on linux runtime does not check that ManagedDotnetProfiler is already loaded
+    // could not find better option to get handle returned from dlopen so using this trick
 
+    // runtime does not load the same library twice so it returns handle of the loaded library:
+    var handle = NativeLibrary.Load("ManagedDotnetProfiler.so");
+    NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), (_, _, _) => handle);
+}
 
 bool ngenEnabled = Environment.GetEnvironmentVariable("MONITOR_NGEN") == "1";
 
@@ -41,10 +37,6 @@ var tests = new List<ITest>
 {
     new AssemblyLoadContextTests(),
     new ClassLoadTests(),
-#if(WINDOWS)
-    // not supported on linux
-    new ComTests(),
-#endif
     new ConditionalWeakTableTests(),
     new DynamicMethodTests(),
     new ExceptionTests(),
@@ -56,6 +48,11 @@ var tests = new List<ITest>
     new ModuleTests(),
     new GenericArgumentsTests()
 };
+
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    tests.Add(new ComTests());
+}
 
 if (!ngenEnabled)
 {

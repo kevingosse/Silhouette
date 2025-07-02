@@ -1,78 +1,68 @@
 ﻿using System.Runtime.InteropServices;
 
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnassignedReadonlyField
+#pragma warning disable CA1069
+
 namespace Silhouette;
 
-public readonly struct ModuleId(nint value)
+public readonly record struct ModuleId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ObjectId(nint value)
+public readonly record struct ObjectId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct GCHandleId(nint value)
+public readonly record struct GCHandleId(nint Value)
 {
-    public readonly nint Value = value;
-
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct AppDomainId(nint value)
+public readonly record struct AppDomainId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct AssemblyId(nint value)
+public readonly record struct AssemblyId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ClassId(nint value)
+public readonly record struct ClassId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct FunctionId(nint value)
+public readonly record struct FunctionId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ReJITId(nint value)
+public readonly record struct ReJITId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ThreadId(nuint value)
+public readonly record struct ThreadId(nuint Value)
 {
-    public readonly nuint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ProcessId(nint value)
+public readonly record struct ProcessId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct ContextId(nint value)
+public readonly record struct ContextId(nint Value)
 {
-    public readonly nint Value = value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdToken(int value)
+public readonly record struct MdToken(int Value)
 {
-    public readonly int Value = value;
-
     public static implicit operator int(MdToken token) => token.Value;
     public static implicit operator MdToken(int value) => new(value);
 
@@ -82,116 +72,116 @@ public readonly struct MdToken(int value)
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdModule(MdToken token)
+public readonly record struct MdModule(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdTypeDef(MdToken token)
+public readonly record struct MdTypeDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
-public readonly struct MdMethodDef(MdToken token)
+public readonly record struct MdMethodDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
-    public override string ToString() => Value.ToString("x2");
-}
-
-public readonly struct MdFieldDef(MdToken token)
-{
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdInterfaceImpl(MdToken token)
+public readonly record struct MdFieldDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdTypeRef(MdToken token)
+public readonly record struct MdInterfaceImpl(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdParamDef(MdToken token)
+public readonly record struct MdTypeRef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdMemberRef(MdToken token)
+public readonly record struct MdParamDef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public  int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdPermission(MdToken token)
+public readonly record struct MdMemberRef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdProperty(MdToken token)
+public readonly record struct MdPermission(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdEvent(MdToken token)
+public readonly record struct MdProperty(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdSignature(MdToken token)
+public readonly record struct MdEvent(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdModuleRef(MdToken token)
+public readonly record struct MdSignature(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdTypeSpec(MdToken token)
+public readonly record struct MdModuleRef(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdString(MdToken token)
+public readonly record struct MdTypeSpec(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdCustomAttribute(MdToken token)
+public readonly record struct MdString(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdGenericParam(MdToken token)
+public readonly record struct MdCustomAttribute(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdMethodSpec(MdToken token)
+public readonly record struct MdGenericParam(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
-public readonly struct MdGenericParamConstraint(MdToken token)
+public readonly record struct MdMethodSpec(MdToken Token)
 {
-    public readonly int Value = token.Value;
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+public readonly struct MdGenericParamConstraint(MdToken Token)
+{
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
@@ -557,7 +547,7 @@ public enum COR_PRF_HIGH_MONITOR : uint
     // MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
     // Trying to change any of these flags elsewhere will result in a
     // failed HRESULT.
-    COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION,
+    COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION
 }
 
 public enum COR_PRF_FINALIZER_FLAGS
@@ -588,7 +578,7 @@ public enum COR_PRF_SUSPEND_REASON
     COR_PRF_SUSPEND_FOR_INPROC_DEBUGGER = 6,
     COR_PRF_SUSPEND_FOR_GC_PREP = 7,
     COR_PRF_SUSPEND_FOR_REJIT = 8,
-    COR_PRF_SUSPEND_FOR_PROFILER = 9,
+    COR_PRF_SUSPEND_FOR_PROFILER = 9
 }
 
 [Flags]
@@ -623,7 +613,7 @@ public enum CorILMethodFlags
     CorILMethod_TinyFormat = 0x0002,         // use this code if the code size is even
     CorILMethod_SmallFormat = 0x0000,
     CorILMethod_FatFormat = 0x0003,
-    CorILMethod_TinyFormat1 = 0x0006,         // use this code if the code size is odd
+    CorILMethod_TinyFormat1 = 0x0006         // use this code if the code size is odd
 }
 
 public enum COR_PRF_STATIC_TYPE
@@ -649,13 +639,13 @@ public enum COR_PRF_CLAUSE_TYPE
     COR_PRF_CLAUSE_NONE = 0,
     COR_PRF_CLAUSE_FILTER = 1,
     COR_PRF_CLAUSE_CATCH = 2,
-    COR_PRF_CLAUSE_FINALLY = 3,
+    COR_PRF_CLAUSE_FINALLY = 3
 }
 
 public enum COR_PRF_RUNTIME_TYPE
 {
     COR_PRF_DESKTOP_CLR = 0x1,
-    COR_PRF_CORE_CLR = 0x2,
+    COR_PRF_CORE_CLR = 0x2
 }
 
 /// <summary>
@@ -688,7 +678,7 @@ public enum COR_PRF_GC_ROOT_FLAGS
     COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
     COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
     COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
-    COR_PRF_GC_ROOT_REFCOUNTED = 0x8, // Whether it prevents collection depends on a refcount - if not,
+    COR_PRF_GC_ROOT_REFCOUNTED = 0x8 // Whether it prevents collection depends on a refcount - if not,
                                       // COR_PRF_GC_ROOT_WEAKREF will be set also
 }
 
@@ -704,26 +694,26 @@ public enum COR_PRF_SNAPSHOT_INFO : uint
 
     // Use a quicker stack walk algorithm based on the EBP frame chain. This is available
     // on x86 only.
-    COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2,
+    COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2
 }
 
 public struct COR_DEBUG_IL_TO_NATIVE_MAP
 {
-    public uint ilOffset;
-    public uint nativeStartOffset;
-    public uint nativeEndOffset;
+    public uint IlOffset;
+    public uint NativeStartOffset;
+    public uint NativeEndOffset;
 }
 
 public unsafe struct COR_PRF_EVENTPIPE_PROVIDER_CONFIG
 {
-    public char* providerName;
-    public ulong keywords;
-    public uint loggingLevel;
+    public char* ProviderName;
+    public ulong Keywords;
+    public uint LoggingLevel;
     // filterData expects a semicolon delimited string that defines key value pairs
     // such as "key1=value1;key2=value2;". Quotes can be used to escape the '=' and ';'
     // characters. These key value pairs will be passed in the enable callback to event
     // providers
-    public char* filterData;
+    public char* FilterData;
 }
 
 public readonly struct EVENTPIPE_SESSION
@@ -743,24 +733,24 @@ public readonly struct EVENTPIPE_EVENT
 
 public unsafe struct COR_PRF_EVENTPIPE_PARAM_DESC
 {
-    public uint type;
+    public uint Type;
     // Used if type == ArrayType
-    public uint elementType;
-    public char* name;
+    public uint ElementType;
+    public char* Name;
 }
 
 public struct COR_PRF_EVENT_DATA
 {
-    public ulong ptr;
-    public uint size;
-    public uint reserved;
+    public ulong Ptr;
+    public uint Size;
+    public uint Reserved;
 }
 
 public enum COR_PRF_HANDLE_TYPE
 {
     COR_PRF_HANDLE_TYPE_WEAK = 0x1,
     COR_PRF_HANDLE_TYPE_STRONG = 0x2,
-    COR_PRF_HANDLE_TYPE_PINNED = 0x3,
+    COR_PRF_HANDLE_TYPE_PINNED = 0x3
 }
 
 /// <summary>
@@ -941,7 +931,7 @@ public enum CorPinvokeMap : uint
     pmCallConvThiscall = 0x0400,   // In M9, pinvoke will raise exception.
     pmCallConvFastcall = 0x0500,
 
-    pmMaxValue = 0xFFFF,
+    pmMaxValue = 0xFFFF
 }
 
 public enum CorElementTypes : uint
@@ -1012,7 +1002,7 @@ public enum CorParamAttr
     pdHasDefault = 0x1000,     // Param has default value.
     pdHasFieldMarshal = 0x2000,     // Param has FieldMarshal.
 
-    pdUnused = 0xcfe0,
+    pdUnused = 0xcfe0
 }
 
 public enum CorGenericParamAttr
@@ -1054,10 +1044,7 @@ public struct COR_SECATTR
     public uint cbCustomAttribute;  // Length of the above blob.
 }
 
-public readonly struct ObjectHandleId
-{
-    public readonly nint Value;
-}
+public readonly record struct ObjectHandleId(nint Value);
 
 public readonly record struct ClassIdInfo(ModuleId ModuleId, MdTypeDef TypeDef);
 public readonly record struct ClassIdInfo2(ModuleId ModuleId, MdTypeDef TypeDef, ClassId ParentClassId);
@@ -1091,7 +1078,7 @@ public readonly record struct ClassLayout(uint PackSize, uint ClassSize);
 public readonly record struct DynamicFunctionInfo(ModuleId ModuleId, NativePointer<byte> Signature);
 public readonly record struct DynamicFunctionInfoWithName(ModuleId ModuleId, NativePointer<byte> Signature, string Name);
 public readonly record struct MethodProps(MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint RVA, uint ImplementationFlags);
-public readonly record struct MethodPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> signature, uint Rva, uint ImplementationFlags);
+public readonly record struct MethodPropsWithName(string Name, MdTypeDef Class, uint Attributes, NativePointer<byte> Signature, uint Rva, uint ImplementationFlags);
 public readonly record struct MemberRefProps(MdToken Token, NativePointer<byte> Signature);
 public readonly record struct MemberRefPropsWithName(string Name, MdToken Token, NativePointer<byte> Signature);
 public readonly record struct MetadataRva(uint Rva, CorMethodImpl Flags);

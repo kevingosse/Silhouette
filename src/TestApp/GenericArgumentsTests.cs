@@ -5,7 +5,7 @@ internal unsafe class GenericArgumentsTests : ITest
 {
     public void Run()
     {
-        var method = typeof(Test).GetMethod(nameof(Test.Function));
+        var method = typeof(Test).GetMethod(nameof(Test.Function))!;
 
         Span<char> buffer = stackalloc char[1024];
         int length;
@@ -31,7 +31,10 @@ internal unsafe class GenericArgumentsTests : ITest
 
     private class Test
     {
+#pragma warning disable CA1822
+        // ReSharper disable twice UnusedTypeParameter
         public void Function<T1, T2>()
+#pragma warning restore CA1822
             where T1: Test, IEnumerable, IEqualityComparer
             where T2: struct, IComparable
         {
