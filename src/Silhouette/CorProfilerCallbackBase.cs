@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Silhouette.Interfaces;
+﻿using Silhouette.Interfaces;
 
 namespace Silhouette;
 

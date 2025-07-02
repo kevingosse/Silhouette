@@ -10,3 +10,4 @@ exclude:
   - name: ConvertToPrimaryConstructor
   - name: SYSLIB1054
   - name: ConvertIfStatementToReturnStatement
+  - name: InvertIf

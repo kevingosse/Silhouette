@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 
 namespace TestApp;
 internal unsafe class GenericArgumentsTests : ITest
