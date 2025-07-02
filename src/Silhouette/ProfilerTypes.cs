@@ -1,5 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnassignedReadonlyField
+#pragma warning disable CA1069
+
 namespace Silhouette;
 
 public readonly record struct ModuleId(nint Value)
@@ -695,21 +699,21 @@ public enum COR_PRF_SNAPSHOT_INFO : uint
 
 public struct COR_DEBUG_IL_TO_NATIVE_MAP
 {
-    public uint ilOffset;
-    public uint nativeStartOffset;
-    public uint nativeEndOffset;
+    public uint IlOffset;
+    public uint NativeStartOffset;
+    public uint NativeEndOffset;
 }
 
 public unsafe struct COR_PRF_EVENTPIPE_PROVIDER_CONFIG
 {
-    public char* providerName;
-    public ulong keywords;
-    public uint loggingLevel;
+    public char* ProviderName;
+    public ulong Keywords;
+    public uint LoggingLevel;
     // filterData expects a semicolon delimited string that defines key value pairs
     // such as "key1=value1;key2=value2;". Quotes can be used to escape the '=' and ';'
     // characters. These key value pairs will be passed in the enable callback to event
     // providers
-    public char* filterData;
+    public char* FilterData;
 }
 
 public readonly struct EVENTPIPE_SESSION
@@ -729,17 +733,17 @@ public readonly struct EVENTPIPE_EVENT
 
 public unsafe struct COR_PRF_EVENTPIPE_PARAM_DESC
 {
-    public uint type;
+    public uint Type;
     // Used if type == ArrayType
-    public uint elementType;
-    public char* name;
+    public uint ElementType;
+    public char* Name;
 }
 
 public struct COR_PRF_EVENT_DATA
 {
-    public ulong ptr;
-    public uint size;
-    public uint reserved;
+    public ulong Ptr;
+    public uint Size;
+    public uint Reserved;
 }
 
 public enum COR_PRF_HANDLE_TYPE

@@ -5,12 +5,12 @@ namespace TestApp;
 internal static unsafe class PInvokes
 {
 #if WINDOWS
-    private const string DLL_NAME = "ManagedDotnetProfiler.dll";
+    private const string DllName = "ManagedDotnetProfiler.dll";
 #else
-    private const string DLL_NAME = "ManagedDotnetProfiler";
+    private const string DllName = "ManagedDotnetProfiler";
 #endif
 
-    public static class CurrentOS
+    public static class CurrentOs
     {
 #if WINDOWS
         [DllImport("kernel32.dll")]
@@ -30,25 +30,24 @@ internal static unsafe class PInvokes
 #endif
     }
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern int FetchLastLog(char* buffer, int bufferSize);
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern bool GetCurrentThreadInfo(out ulong threadId, out uint osId);
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern bool GetThreads(uint* array, int length, int* actualLength);
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern int GetModuleNames(char* buffer, int length);
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern int CountFrozenObjects();
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern bool EnumJittedFunctions(int version);
 
-    [DllImport(DLL_NAME)]
+    [DllImport(DllName)]
     public static extern int GetGenericArguments(nint typeHandle, int methodToken, char* buffer, int size);
-
 }

@@ -24,7 +24,7 @@ internal class ThreadTests : ITest
         var currentThreadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)!
             .GetValue(Thread.CurrentThread)!;
 
-        var osId = PInvokes.CurrentOS.GetCurrentThreadId();
+        var osId = PInvokes.CurrentOs.GetCurrentThreadId();
 
         Logs.Assert(PInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
         Logs.Assert((ulong)currentThreadId == actualThreadId);
@@ -44,7 +44,7 @@ internal class ThreadTests : ITest
             int index = i;
             threads[index] = new Thread(() =>
             {
-                expectedOsIds[index] = PInvokes.CurrentOS.GetCurrentThreadId();
+                expectedOsIds[index] = PInvokes.CurrentOs.GetCurrentThreadId();
                 // ReSharper disable twice AccessToDisposedClosure
                 barrier.SignalAndWait();
                 barrier.SignalAndWait();
@@ -86,7 +86,7 @@ internal class ThreadTests : ITest
 
         var thread = new Thread(() => 
         { 
-            id = PInvokes.CurrentOS.GetCurrentThreadId();
+            id = PInvokes.CurrentOs.GetCurrentThreadId();
             Thread.CurrentThread.Name = "Test";
         });
 
