@@ -192,10 +192,10 @@ public class ICorProfilerInfo : Interfaces.IUnknown, ICorProfilerInfoFactory<ICo
         return new(result, new((nint)pMethodHeader, methodSize));
     }
 
-    public unsafe HResult<nint> GetILFunctionBodyAllocator(ModuleId moduleId)
+    public HResult<IMethodMalloc> GetILFunctionBodyAllocator(ModuleId moduleId)
     {
         var result = _impl.GetILFunctionBodyAllocator(moduleId, out var malloc);
-        return new(result, (nint)malloc);
+        return new(result, new(malloc));
     }
 
     public HResult SetILFunctionBody(ModuleId moduleId, MdMethodDef methodid, nint pbNewILMethodHeader)
