@@ -5,80 +5,111 @@ using dnlib.IO;
 using dnlib.DotNet.Writer;
 
 namespace Silhouette.IL;
-public class IlRewriter
+public class IlRewriter : IDisposable
 {
     private readonly ICorProfilerInfo3 _corProfilerInfo;
+    private ModuleId _moduleId;
+    private MdMethodDef _methodDefToken;
+    private InstructionOperandResolver _instructionOperandResolver;
 
     public IlRewriter(ICorProfilerInfo3 corProfilerInfo)
     {
         _corProfilerInfo = corProfilerInfo;
     }
 
-    public unsafe bool Import(IntPtr method, ModuleId module, MdMethodDef methodDefToken)
+    public CilBody Body { get; private set; }
+
+    public unsafe void Import(FunctionId functionId)
     {
-        try
+        var functionInfo = _corProfilerInfo.GetFunctionInfo(functionId).ThrowIfFailed();
+        var functionBody = _corProfilerInfo.GetILFunctionBody(functionInfo.ModuleId, new(functionInfo.Token)).ThrowIfFailed();
+
+        _moduleId = functionInfo.ModuleId;
+        _methodDefToken = new MdMethodDef(functionInfo.Token);
+
+        var dataStream = DataStreamFactory.Create((byte*)functionBody.MethodHeader);
+        var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
+        
+        _instructionOperandResolver = new InstructionOperandResolver(functionInfo.ModuleId, _corProfilerInfo);
+
+        var parameters = new List<Parameter>();
+
+        var bodyReader = new MethodBodyReader(_instructionOperandResolver, dataReader, parameters);
+
+        if (!bodyReader.Read())
         {
-            using var metadataImport = _corProfilerInfo
-                .GetModuleMetaDataImport(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
-                .ThrowIfFailed()
-                .Wrap();
-
-            var dataStream = DataStreamFactory.Create((byte*)method);
-            var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
-
-            var resolver = new InstructionOperandResolver(metadataImport, _corProfilerInfo);
-
-            var parameters = new List<Parameter>();
-
-            // IInstructionOperandResolver
-            var bodyReader = new MethodBodyReader(resolver, dataReader, parameters);
-
-            if (!bodyReader.Read())
-            {
-                return false;
-            }
-
-            var body = bodyReader.CreateCilBody();
-
-            Console.WriteLine("Dumping body");
-
-            foreach (var instruction in body.Instructions)
-            {
-                Console.WriteLine(instruction);
-            }
-
-            var writer = new MethodBodyWriter(resolver, body);
-            writer.Write();
-
-            var bodyBytes = writer.Code;
-
-            Console.WriteLine($"Wrote {bodyBytes} bytes");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error importing method: {ex.Message}");
-            return false;
+            throw new InvalidOperationException("Failed to read method body.");
         }
 
-        return true;
+        Body = bodyReader.CreateCilBody();
+    }
+
+    public unsafe void Export()
+    {
+        var writer = new MethodBodyWriter(_instructionOperandResolver, Body);
+        writer.Write();
+
+        var bodyBytes = writer.Code;
+
+        var malloc = _corProfilerInfo.GetILFunctionBodyAllocator(_moduleId).ThrowIfFailed();
+
+        var bodyPtr = malloc.Alloc((uint)bodyBytes.Length);
+        bodyBytes.AsSpan().CopyTo(new Span<byte>((void*)bodyPtr, bodyBytes.Length));
+
+        _corProfilerInfo.SetILFunctionBody(_moduleId, _methodDefToken, bodyPtr).ThrowIfFailed();
+    }
+
+    public void Dispose()
+    {
+        _instructionOperandResolver?.Dispose();
     }
 }
 
 public class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider
 {
-    private readonly ComPtr<IMetaDataImport> _metadataImport;
+    private ComPtr<IMetaDataImport> _metaDataImport;
+    private ComPtr<IMetaDataEmit> _metaDataEmit;
     private readonly ICorProfilerInfo3 _corProfilerInfo;
+    private readonly ModuleId _moduleId;
 
-    public InstructionOperandResolver(ComPtr<IMetaDataImport> metadataImport, ICorProfilerInfo3 corProfilerInfo)
+    public InstructionOperandResolver(ModuleId moduleId, ICorProfilerInfo3 corProfilerInfo)
     {
-        _metadataImport = metadataImport.Copy();
+        _moduleId = moduleId;
         _corProfilerInfo = corProfilerInfo;
+    }
+
+    private ComPtr<IMetaDataImport> MetaDataImport
+    {
+        get
+        {
+            if (_metaDataImport == null)
+            {
+                _metaDataImport = _corProfilerInfo.GetModuleMetaDataImport(_moduleId, CorOpenFlags.ofRead)
+                    .ThrowIfFailed()
+                    .Wrap();
+            }
+
+            return _metaDataImport;
+        }
+    }
+
+    private ComPtr<IMetaDataEmit> MetaDataEmit
+    {
+        get
+        {
+            if (_metaDataEmit == null)
+            {
+                var metadataEmitPtr = _corProfilerInfo.GetModuleMetaData(_moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite, Interfaces.IMetaDataEmit.Guid)
+                    .ThrowIfFailed();
+                _metaDataEmit = new IMetaDataEmit(metadataEmitPtr).Wrap();
+            }
+
+            return _metaDataEmit;
+        }
     }
 
     public IMDTokenProvider ResolveToken(uint token, GenericParamContext gpContext)
     {
-        Console.WriteLine($"ResolveToken({token:x2}, {gpContext.Type}, {gpContext.Method})");
-
         if (token == 0)
         {
             return null;
@@ -146,14 +177,12 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
     private unsafe IMethodDefOrRef ResolveMethod(uint token)
     {
-        Console.WriteLine($"ResolveMethod({token:x2})");
-        
-        var props = _metadataImport.Value.GetMethodProps(new((int)token)).ThrowIfFailed();
+        var props = MetaDataImport.Value.GetMethodProps(new((int)token)).ThrowIfFailed();
 
         var dataStream = DataStreamFactory.Create((byte*)props.Signature.Ptr);
         var dataReader = new DataReader(dataStream, 0, (uint)props.Signature.Length);
 
-        var (result, corLibTypes) = CorLibTypes.Create(_metadataImport, _corProfilerInfo);
+        var (result, corLibTypes) = CorLibTypes.Create(MetaDataImport, _corProfilerInfo);
 
         if (!result)
         {
@@ -165,36 +194,26 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
         var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
 
-        return new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags);
+        var methodDef = new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags);
+        methodDef.Rid = MDToken.ToRID(token);
+        return methodDef;
     }
 
     private unsafe MemberRef ResolveMemberRef(uint token, GenericParamContext gpContext)
     {
-        Console.WriteLine($"ResolveMemberRef({token:x2}, {gpContext.Type}, {gpContext.Method})");
-        var memberRef = _metadataImport.Value.GetMemberRefProps(new((int)token)).ThrowIfFailed();
-
-        var moduleDef = new ModuleDefUser();
-
-        var props = _metadataImport.Value.GetMemberRefProps(new MdMemberRef((int)token)).ThrowIfFailed();
-
-        Console.WriteLine($"Parent: {props.Token.Value.ToString("x2")}");
+        var props = _metaDataImport.Value.GetMemberRefProps(new MdMemberRef((int)token)).ThrowIfFailed();
 
         IMemberRefParent parent = null;
 
         if (MDToken.ToTable(props.Token.Value) == Table.TypeRef)
         {
-            Console.WriteLine("Parent is TypeRef.");
             parent = ResolveTypeRef((uint)props.Token.Value, gpContext);
-        }
-        else
-        {
-            Console.WriteLine(MDToken.ToTable(props.Token.Value));
         }
 
         var dataStream = DataStreamFactory.Create((byte*)props.Signature.Ptr);
         var dataReader = new DataReader(dataStream, 0, (uint)props.Signature.Length);
 
-        var (result, corLibTypes) = CorLibTypes.Create(_metadataImport, _corProfilerInfo);
+        var (result, corLibTypes) = CorLibTypes.Create(MetaDataImport, _corProfilerInfo);
 
         if (!result)
         {
@@ -211,31 +230,17 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
     private TypeDef ResolveTypeDef(uint tokenValue, GenericParamContext gpContext)
     {
-        Console.WriteLine($"ResolveTypeDef({tokenValue:x2}, {gpContext.Type}, {gpContext.Method})");
-        var typeDefProps = _metadataImport.Value.GetTypeDefProps(new((int)tokenValue)).ThrowIfFailed();
+        var typeDefProps = MetaDataImport.Value.GetTypeDefProps(new((int)tokenValue)).ThrowIfFailed();
         return new TypeDefUser(new(typeDefProps.TypeName));
     }
 
     private TypeRef ResolveTypeRef(uint tokenValue, GenericParamContext gpContext)
     {
-        Console.WriteLine($"ResolveTypeRef({tokenValue:x2}, {gpContext.Type}, {gpContext.Method})");
-        var typeRefProps = _metadataImport.Value.GetTypeRefProps(new((int)tokenValue)).ThrowIfFailed();
+        var typeRefProps = MetaDataImport.Value.GetTypeRefProps(new((int)tokenValue)).ThrowIfFailed();
         return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName));
     }
 
-    //private IMemberRefParent ResolveFieldLayout(uint tokenValue, GenericParamContext gpContext)
-    //{
-    //    Console.WriteLine($"ResolveFieldLayout({tokenValue:x2}, {gpContext.Type}, {gpContext.Method})");
-    //    var props = _metadataImport.Value.GetFieldProps(new((int)tokenValue)).ThrowIfFailed();
-
-    //    var @class = props.Class;
-
-    //    var typeProps = _metadataImport.Value.GetTypeDefProps(@class).ThrowIfFailed();
-
-    //    return new TypeDefUser(typeProps.TypeName);
-    //}
-
-    private class MyMemberRef : MemberRef
+    internal class MyMemberRef : MemberRef
     {
         public MyMemberRef(string name, uint rid, CallingConventionSig sig, IMemberRefParent parent)
         {
@@ -256,16 +261,12 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
     public string ReadUserString(uint token)
     {
-        Console.WriteLine($"ReadUserString({token:x2})");
-
-        var str = _metadataImport.Value.GetUserString(new((int)token)).ThrowIfFailed();
-        Console.WriteLine($"Returning {str}");
-        return str;
+        return MetaDataImport.Value.GetUserString(new((int)token)).ThrowIfFailed();
     }
 
     public void Dispose()
     {
-        _metadataImport.Dispose();
+        MetaDataImport.Dispose();
     }
 
     public ITypeDefOrRef ResolveTypeDefOrRef(uint codedToken, GenericParamContext gpContext)
@@ -301,9 +302,47 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
     public MDToken GetToken(object o)
     {
-        if (o is string s)
+        if (o is string str)
         {
-            
+            // Look if the string already exists
+            HCORENUM hEnum = default;
+            Span<MdString> strings = stackalloc MdString[10];
+
+            try
+            {
+                while (MetaDataImport.Value.EnumUserStrings(ref hEnum, strings, out var nbStrings)
+                       && nbStrings > 0)
+                {
+                    foreach (var stringToken in strings)
+                    {
+                        var value = MetaDataImport.Value.GetUserString(stringToken).ThrowIfFailed();
+
+                        if (value == str)
+                        {
+                            return new MDToken(stringToken.Value);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                MetaDataImport.Value.CloseEnum(hEnum);
+            }
+
+            // This is a new string, add it
+            return new(MetaDataEmit.Value.DefineUserString(str).ThrowIfFailed().Value);
+        }
+
+        if (o is MemberRef memberRef)
+        {
+            // TODO: Might need to emit or something
+            return memberRef.MDToken;
+        }
+
+        if (o is MethodDef methodDef)
+        {
+            // TODO: Might need to emit or something
+            return methodDef.MDToken;
         }
 
         Console.WriteLine($"ITokenProvider.GetToken({o}) - {o.GetType()}");
@@ -373,7 +412,7 @@ public class CorLibTypes : ICorLibTypes, IDisposable
                 // TODO: double check if this is the correct module
                 return corProfilerInfo.GetModuleMetaDataImport(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite);
             }
-        }       
+        }
 
         return new(HResult.E_FAIL, default);
     }
@@ -408,7 +447,7 @@ public class CorLibTypes : ICorLibTypes, IDisposable
     public CorLibTypeSig UIntPtr => ResolveTypeSig("System.UIntPtr", ElementType.U);
     public CorLibTypeSig Object => ResolveTypeSig("System.Object", ElementType.Object);
     public AssemblyRef AssemblyRef
-    { 
+    {
         get
         {
             Console.WriteLine("AssemblyRef requested, returning null.");
@@ -418,7 +457,6 @@ public class CorLibTypes : ICorLibTypes, IDisposable
 
     private CorLibTypeSig ResolveTypeSig(string name, ElementType elementType)
     {
-        Console.WriteLine($"ResolveTypeSig({name}, {elementType})");
         var (result, typeDef) = _corLibMetadataImport.Value.FindTypeDefByName(name, default);
         if (!result)
         {

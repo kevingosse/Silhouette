@@ -6,13 +6,8 @@ internal class RejitTest
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void Test()
     {
-        Console.WriteLine("RejitTest");
-        JustAnotherMethod();
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private static RejitTest JustAnotherMethod()
-    {
-        return null;
+        Console.WriteLine("************************");
+        Console.WriteLine("String substitution test");
+        Console.WriteLine("Failure");
     }
 }

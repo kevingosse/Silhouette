@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using Silhouette;
 using System.Linq;
+using dnlib.DotNet.Emit;
 using Silhouette.IL;
 
 namespace ManagedDotnetProfiler;
@@ -89,13 +90,24 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
         var functionName = GetFunctionFullName(functionId);
 
-        if (functionName.Contains("RejitTest"))
+        if (functionName.Contains("RejitTest.Test"))
         {
-            var functionInfo = ICorProfilerInfo2.GetFunctionInfo(functionId).ThrowIfFailed();
-            var functionBody = ICorProfilerInfo.GetILFunctionBody(functionInfo.ModuleId, new(functionInfo.Token)).ThrowIfFailed();
+            using var rewriter = new IlRewriter(ICorProfilerInfo3);
+            rewriter.Import(functionId);
 
-            var rewriter = new IlRewriter(ICorProfilerInfo3);
-            rewriter.Import(functionBody.MethodHeader, functionInfo.ModuleId, new MdMethodDef(functionInfo.Token));
+            Console.WriteLine("Original method body:");
+
+            foreach (var instruction in rewriter.Body.Instructions)
+            {
+                Console.WriteLine(instruction);
+
+                if (instruction.OpCode == OpCodes.Ldstr && instruction.Operand is "Failure")
+                {
+                    instruction.Operand = "Success!";
+                }
+            }
+
+            rewriter.Export();
         }
 
         return HResult.S_OK;
@@ -844,7 +856,6 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 var resolvedGenericParam = genericParamProps.Name;
 
                 var resolvedConstraints = new List<string>();
-                Span<MdGenericParamConstraint> constraints = stackalloc MdGenericParamConstraint[10];
                 HCORENUM constraintsEnum = default;
 
                 while (metaDataImport.Value.EnumGenericParamConstraints(ref constraintsEnum, genericParam, constraints, out var nbConstraints)
