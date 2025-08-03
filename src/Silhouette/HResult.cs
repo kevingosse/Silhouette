@@ -12,6 +12,7 @@ public readonly struct HResult : IEquatable<HResult>
     public const int E_NOTIMPL = unchecked((int)0x80004001);
     public const int E_NOINTERFACE = unchecked((int)0x80004002);
     public const int CORPROF_E_UNSUPPORTED_CALL_SEQUENCE = unchecked((int)0x80131363);
+    public const int CORPROF_E_PROFILER_CANCEL_ACTIVATION = unchecked((int)0x80131375);
 
     public bool IsOK => Code == S_OK;
 
