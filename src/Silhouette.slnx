@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/build/">
+    <File Path="../build.ps1" />
+    <File Path="../build.sh" />
+    <File Path="../test.ps1" />
+    <File Path="../test.sh" />
+  </Folder>
+  <Project Path="ManagedDotnetProfiler/ManagedDotnetProfiler.csproj" />
+  <Project Path="Silhouette/Silhouette.csproj" />
+  <Project Path="TestApp/TestApp.csproj" />
+</Solution>
