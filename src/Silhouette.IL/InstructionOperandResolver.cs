@@ -105,7 +105,7 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
             //Table.GenericParam => ResolveGenericParam(rid),
             //Table.MethodSpec => ResolveMethodSpec(rid, gpContext),
             //Table.GenericParamConstraint => ResolveGenericParamConstraint(rid, gpContext),
-            _ => null,
+            _ => null
         };
 
         if (result == null)
@@ -181,7 +181,7 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
         return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName));
     }
 
-    internal class MyMemberRef : MemberRef
+    private class MyMemberRef : MemberRef
     {
         public MyMemberRef(string name, uint rid, CallingConventionSig sig, IMemberRefParent parent)
         {
