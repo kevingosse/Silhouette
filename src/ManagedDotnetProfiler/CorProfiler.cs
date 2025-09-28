@@ -90,20 +90,20 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
         var functionName = GetFunctionFullName(functionId);
 
-        if (functionName.Contains("RejitTest.Test"))
+        if (functionName.Contains("IlRewriteTest.StringSubstitutionTest"))
         {
-            using var rewriter = new IlRewriter(ICorProfilerInfo3);
+            using var rewriter = IlRewriter.Create(ICorProfilerInfo3);
             rewriter.Import(functionId);
 
-            Console.WriteLine("Original method body:");
+            Log("JITCompilationStarted - Original method body:");
 
             foreach (var instruction in rewriter.Body.Instructions)
             {
-                Console.WriteLine(instruction);
+                Log(instruction.ToString());
 
-                if (instruction.OpCode == OpCodes.Ldstr && instruction.Operand is "Failure")
+                if (instruction.OpCode == OpCodes.Ldstr && instruction.Operand is "failure")
                 {
-                    instruction.Operand = "Success!";
+                    instruction.Operand = "success";
                 }
             }
 
@@ -755,6 +755,35 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
+    protected override HResult GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, ICorProfilerFunctionControl functionControl)
+    {
+        Log($"GetReJITParameters - {moduleId} - {methodId}");
+
+        using var rewriter = IlRewriter.CreateForReJit(ICorProfilerInfo3, functionControl);
+
+        rewriter.Import(moduleId, methodId);
+
+        bool changedMethod = false;
+
+        for (int i = 0; i < rewriter.Body.Instructions.Count; i++)
+        {
+            var instruction = rewriter.Body.Instructions[i];
+
+            if (instruction.IsLdcI4() && instruction.GetLdcI4Value() == 10)
+            {
+                rewriter.Body.Instructions[i] = Instruction.CreateLdcI4(12);
+                changedMethod = true;
+            }
+        }
+
+        if (changedMethod)
+        {
+            rewriter.Export();
+        }
+
+        return HResult.S_OK;
+    }
+
     private static void Error(HResult hresult, string function)
     {
         Error($"Call to {function} failed with code {hresult}");
@@ -1000,5 +1029,38 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         }
 
         return count;
+    }
+
+    internal bool RequestReJit(IntPtr module, int methodDef)
+    {
+        var result = ICorProfilerInfo4.RequestReJIT([new(module)], [new(methodDef)]);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo4.RequestReJIT));
+            return false;
+        }
+
+        return true;
+    }
+
+    internal bool RequestRevert(IntPtr module, int methodDef)
+    {
+        Span<HResult> status = stackalloc HResult[1];
+        var result = ICorProfilerInfo4.RequestRevert([new(module)], [new(methodDef)], status);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo4.RequestRevert));
+            return false;
+        }
+
+        if (!status[0])
+        {
+            Error(status[0], nameof(ICorProfilerInfo4.RequestRevert));
+            return false;
+        }
+
+        return true;
     }
 }

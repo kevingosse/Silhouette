@@ -50,4 +50,10 @@ internal static unsafe class PInvokes
 
     [DllImport(DllName)]
     public static extern int GetGenericArguments(nint typeHandle, int methodToken, char* buffer, int size);
+
+    [DllImport(DllName)]
+    public static extern bool RequestReJit(IntPtr module, int methodDef);
+
+    [DllImport(DllName)]
+    public static extern bool RequestRevert(IntPtr module, int methodDef);
 }

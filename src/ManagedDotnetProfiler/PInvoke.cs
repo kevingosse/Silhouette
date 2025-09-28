@@ -64,4 +64,16 @@ internal static unsafe class PInvoke
     {
         return Task.Run(() => CorProfiler.Instance.GetGenericArguments(typeHandle, methodToken, buffer, size)).Result;
     }
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(RequestReJit))]
+    public static bool RequestReJit(IntPtr module, int methodDef)
+    {
+        return Task.Run(() => CorProfiler.Instance.RequestReJit(module, methodDef)).Result;
+    }
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(RequestRevert))]
+    public static bool RequestRevert(IntPtr module, int methodDef)
+    {
+        return Task.Run(() => CorProfiler.Instance.RequestRevert(module, methodDef)).Result;
+    }
 }

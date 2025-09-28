@@ -2,34 +2,52 @@
 using dnlib.DotNet;
 using dnlib.IO;
 using dnlib.DotNet.Writer;
+using NativeObjects;
 
 namespace Silhouette.IL;
 public class IlRewriter : IDisposable
 {
     private readonly ICorProfilerInfo3 _corProfilerInfo;
+    private readonly ICorProfilerFunctionControl _functionControl;
     private ModuleId _moduleId;
     private MdMethodDef _methodDefToken;
     private InstructionOperandResolver _instructionOperandResolver;
 
-    public IlRewriter(ICorProfilerInfo3 corProfilerInfo)
+    private IlRewriter(ICorProfilerInfo3 corProfilerInfo, ICorProfilerFunctionControl functionControl = null)
     {
         _corProfilerInfo = corProfilerInfo;
+        _functionControl = functionControl;
     }
 
     public CilBody Body { get; private set; }
 
-    public unsafe void Import(FunctionId functionId)
+    public static IlRewriter Create(ICorProfilerInfo3 corProfilerInfo)
+    {
+        return new IlRewriter(corProfilerInfo);
+    }
+
+    public static IlRewriter CreateForReJit(ICorProfilerInfo3 corProfilerInfo3, ICorProfilerFunctionControl functionControl)
+    {
+        return new IlRewriter(corProfilerInfo3, functionControl);
+    }
+
+    public void Import(FunctionId functionId)
     {
         var functionInfo = _corProfilerInfo.GetFunctionInfo(functionId).ThrowIfFailed();
-        var functionBody = _corProfilerInfo.GetILFunctionBody(functionInfo.ModuleId, new(functionInfo.Token)).ThrowIfFailed();
+        Import(functionInfo.ModuleId, new(functionInfo.Token));
+    }
 
-        _moduleId = functionInfo.ModuleId;
-        _methodDefToken = new MdMethodDef(functionInfo.Token);
+    public unsafe void Import(ModuleId moduleId, MdMethodDef methodDef)
+    {
+        var functionBody = _corProfilerInfo.GetILFunctionBody(moduleId, methodDef).ThrowIfFailed();
+
+        _moduleId = moduleId;
+        _methodDefToken = methodDef;
 
         var dataStream = DataStreamFactory.Create((byte*)functionBody.MethodHeader);
         var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
-        
-        _instructionOperandResolver = new InstructionOperandResolver(functionInfo.ModuleId, _corProfilerInfo);
+
+        _instructionOperandResolver = new InstructionOperandResolver(moduleId, _corProfilerInfo);
 
         var parameters = new List<Parameter>();
 
@@ -49,6 +67,12 @@ public class IlRewriter : IDisposable
         writer.Write();
 
         var bodyBytes = writer.Code;
+
+        if (_functionControl != null)
+        {
+            _functionControl.SetILFunctionBody(bodyBytes).ThrowIfFailed();
+            return;
+        }
 
         var malloc = _corProfilerInfo.GetILFunctionBodyAllocator(_moduleId).ThrowIfFailed();
 
