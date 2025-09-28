@@ -102,7 +102,7 @@ public class CorLibTypes : ICorLibTypes, IDisposable
 
     private CorLibTypeSig ResolveTypeSig(string name, ElementType elementType)
     {
-        var (result, typeDef) = _corLibMetadataImport.Value.FindTypeDefByName(name, default);
+        var (result, _) = _corLibMetadataImport.Value.FindTypeDefByName(name, default);
         if (!result)
         {
             Console.WriteLine($"Failed to find type definition for {name}: {result}");

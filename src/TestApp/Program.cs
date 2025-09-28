@@ -47,7 +47,7 @@ var tests = new List<ITest>
     new ThreadTests(),
     new ModuleTests(),
     new GenericArgumentsTests(),
-    new IlRewriteTest(),
+    new IlRewriteTest()
 };
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

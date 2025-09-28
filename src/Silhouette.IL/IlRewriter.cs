@@ -5,7 +5,7 @@ using dnlib.DotNet.Writer;
 
 namespace Silhouette.IL;
 
-public class IlRewriter : IDisposable
+public sealed class IlRewriter : IDisposable
 {
     private readonly ICorProfilerInfo3 _corProfilerInfo;
     private readonly ICorProfilerFunctionControl _functionControl;
