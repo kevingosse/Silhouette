@@ -12,22 +12,19 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Silhouette</PackageId>
+    <PackageId>Silhouette.IL</PackageId>
     <PackageVersion>2.0.0.0</PackageVersion>
-    <Title>Silhouette</Title>
+    <Title>Silhouette IL rewriter</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
     <RepositoryUrl>https://github.com/kevingosse/Silhouette</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>
-      A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
+      IL Rewriter for Silhouette.
     </Description>
     <PackageReleaseNotes>
-      - Added IMetadataImport2 interface
-      Breaking changes:
-      - Removed KnownGuids class. The GUIDs are now available from their respective interfaces.
-      - ICorProfilerInfo.GetModuleMetaData now returns an IntPtr, use GetModuleMetaDataImport and GetModuleMetaDataImport2 to retrieve the strongly typed interface.
+      - Initial release
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
@@ -40,6 +37,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="dnlib" Version="4.5.0" />
     <PackageReference Include="NativeObjects" Version="1.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Silhouette\Silhouette.csproj" />
   </ItemGroup>
 </Project>

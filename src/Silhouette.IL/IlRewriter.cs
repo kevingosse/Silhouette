@@ -2,9 +2,9 @@
 using dnlib.DotNet;
 using dnlib.IO;
 using dnlib.DotNet.Writer;
-using NativeObjects;
 
 namespace Silhouette.IL;
+
 public class IlRewriter : IDisposable
 {
     private readonly ICorProfilerInfo3 _corProfilerInfo;
