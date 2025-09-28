@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette.IL</PackageId>
-    <PackageVersion>2.0.0.0</PackageVersion>
+    <PackageVersion>0.1.0.0</PackageVersion>
     <Title>Silhouette IL rewriter</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
