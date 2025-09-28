@@ -46,7 +46,8 @@ var tests = new List<ITest>
     new JitCompilationTests(),
     new ThreadTests(),
     new ModuleTests(),
-    new GenericArgumentsTests()
+    new GenericArgumentsTests(),
+    new IlRewriteTest()
 };
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

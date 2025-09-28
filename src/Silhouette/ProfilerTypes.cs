@@ -109,7 +109,7 @@ public readonly record struct MdTypeRef(MdToken Token)
 
 public readonly record struct MdParamDef(MdToken Token)
 {
-    public  int Value => Token.Value;
+    public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
@@ -272,9 +272,49 @@ public readonly struct COR_PRF_FUNCTION_ARGUMENT_INFO
 
 public readonly struct COR_PRF_FUNCTION_ARGUMENT_RANGE
 {
-    public readonly nint StartAddress;          // start address of the range
-    public readonly uint Length;                         // contiguous length of the range
+    /// <summary>
+    /// Start address of the range
+    /// </summary>
+    public readonly nint StartAddress;
+
+    /// <summary>
+    /// Contiguous length of the range
+    /// </summary>
+    public readonly uint Length;
 }
+
+public struct COR_IL_MAP
+{
+    /// <summary>
+    /// Old IL offset relative to beginning of function
+    /// </summary>
+    public uint oldOffset;
+
+    /// <summary>
+    /// New IL offset relative to beginning of function
+    /// </summary>
+    public uint newOffset;
+
+    /// <summary>
+    /// Put here for compatibility with the Debugger structure.
+    /// </summary>
+    public int fAccurate;
+}
+
+/// <summary>
+/// COR_PRF_CODEGEN_FLAGS controls various flags and hooks for a specific
+/// method.A combination of COR_PRF_CODEGEN_FLAGS is provided by the
+/// profiler in its call to ICorProfilerFunctionControl::SetCodegenFlags()
+/// when rejitting a method.
+/// </summary>
+[Flags]
+public enum COR_PRF_CODEGEN_FLAGS : uint
+{
+    COR_PRF_CODEGEN_DISABLE_INLINING = 0x0001,
+    COR_PRF_CODEGEN_DISABLE_ALL_OPTIMIZATIONS = 0x0002,
+    COR_PRF_CODEGEN_DEBUG_INFO = 0x0003
+}
+
 
 [Flags]
 public enum COR_PRF_MONITOR : uint
@@ -679,7 +719,7 @@ public enum COR_PRF_GC_ROOT_FLAGS
     COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
     COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
     COR_PRF_GC_ROOT_REFCOUNTED = 0x8 // Whether it prevents collection depends on a refcount - if not,
-                                      // COR_PRF_GC_ROOT_WEAKREF will be set also
+                                     // COR_PRF_GC_ROOT_WEAKREF will be set also
 }
 
 /// <summary>

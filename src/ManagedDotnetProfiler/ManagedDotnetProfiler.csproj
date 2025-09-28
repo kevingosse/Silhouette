@@ -10,5 +10,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Silhouette\Silhouette.csproj" />
+	  <ProjectReference Include="..\Silhouette.IL\Silhouette.IL.csproj" />
 	</ItemGroup>
 </Project>

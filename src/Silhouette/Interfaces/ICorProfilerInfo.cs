@@ -262,7 +262,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      */
     HResult GetILFunctionBodyAllocator(
                 ModuleId ModuleId,
-                out void* ppMalloc);
+                out IntPtr pMalloc);
 
     /*
      * Replaces the method body for a function in a module.  This will replace

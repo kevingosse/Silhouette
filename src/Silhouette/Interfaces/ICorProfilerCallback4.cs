@@ -20,7 +20,7 @@ internal unsafe interface ICorProfilerCallback4 : ICorProfilerCallback3
     HResult GetReJITParameters(
                 ModuleId moduleId,
                 MdMethodDef methodId,
-                nint pFunctionControl);
+                IntPtr functionControl);
 
     /*
      * Similar to JITCompilationFinished, except called when rejitting a method

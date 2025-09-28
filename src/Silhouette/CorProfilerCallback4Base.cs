@@ -24,7 +24,7 @@ public abstract class CorProfilerCallback4Base : CorProfilerCallback3Base, Inter
 
     HResult Interfaces.ICorProfilerCallback4.GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
     {
-        return GetReJITParameters(moduleId, methodId, pFunctionControl);
+        return GetReJITParameters(moduleId, methodId, new(pFunctionControl));
     }
 
     HResult Interfaces.ICorProfilerCallback4.ReJITCompilationFinished(FunctionId functionId, ReJITId rejitId, HResult hrStatus, int fIsSafeToBlock)
@@ -59,7 +59,7 @@ public abstract class CorProfilerCallback4Base : CorProfilerCallback3Base, Inter
         return HResult.E_NOTIMPL;
     }
 
-    protected virtual HResult GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, nint pFunctionControl)
+    protected virtual HResult GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, ICorProfilerFunctionControl functionControl)
     {
         return HResult.E_NOTIMPL;
     }

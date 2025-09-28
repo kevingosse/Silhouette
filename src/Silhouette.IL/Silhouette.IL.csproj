@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <PublishAot>true</PublishAot>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsAotCompatible>true</IsAotCompatible>
+    <NoWarn>IDE0290;IDE0079</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Silhouette.IL</PackageId>
+    <PackageVersion>0.1.0.0</PackageVersion>
+    <Title>Silhouette IL rewriter</Title>
+    <Authors>Kevin Gosse</Authors>
+    <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kevingosse/Silhouette</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>
+      IL Rewriter for Silhouette.
+    </Description>
+    <PackageReleaseNotes>
+      - Initial release
+    </PackageReleaseNotes>
+    <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
+    <PackageTags>profiler profiling diagnostics native interop</PackageTags>
+    <PackageOutputPath>..\..\nugets</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="dnlib" Version="4.5.0" />
+    <PackageReference Include="NativeObjects" Version="1.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Silhouette\Silhouette.csproj" />
+  </ItemGroup>
+</Project>

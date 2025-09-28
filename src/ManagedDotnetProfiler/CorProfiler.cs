@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using Silhouette;
 using System.Linq;
+using dnlib.DotNet.Emit;
+using Silhouette.IL;
 
 namespace ManagedDotnetProfiler;
 
@@ -85,6 +87,29 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
     {
         Log($"JITCompilationStarted - {GetFunctionFullName(functionId)}");
+
+        var functionName = GetFunctionFullName(functionId);
+
+        if (functionName.Contains("IlRewriteTest.StringSubstitutionTest"))
+        {
+            using var rewriter = IlRewriter.Create(ICorProfilerInfo3);
+            rewriter.Import(functionId);
+
+            Log("JITCompilationStarted - Original method body:");
+
+            foreach (var instruction in rewriter.Body.Instructions)
+            {
+                Log(instruction.ToString());
+
+                if (instruction.OpCode == OpCodes.Ldstr && instruction.Operand is "failure")
+                {
+                    instruction.Operand = "success";
+                }
+            }
+
+            rewriter.Export();
+        }
+
         return HResult.S_OK;
     }
 
@@ -649,9 +674,9 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
-    protected override HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectID)
+    protected override HResult FinalizeableObjectQueued(COR_PRF_FINALIZER_FLAGS finalizerFlags, ObjectId objectId)
     {
-        Log($"FinalizeableObjectQueued - {finalizerFlags} - {GetTypeNameFromObjectId(objectID)}");
+        Log($"FinalizeableObjectQueued - {finalizerFlags} - {GetTypeNameFromObjectId(objectId)}");
         return HResult.S_OK;
     }
     protected override HResult HandleCreated(GCHandleId handleId, ObjectId initialObjectId)
@@ -730,6 +755,35 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return HResult.S_OK;
     }
 
+    protected override HResult GetReJITParameters(ModuleId moduleId, MdMethodDef methodId, ICorProfilerFunctionControl functionControl)
+    {
+        Log($"GetReJITParameters - {moduleId} - {methodId}");
+
+        using var rewriter = IlRewriter.CreateForReJit(ICorProfilerInfo3, functionControl);
+
+        rewriter.Import(moduleId, methodId);
+
+        bool changedMethod = false;
+
+        for (int i = 0; i < rewriter.Body.Instructions.Count; i++)
+        {
+            var instruction = rewriter.Body.Instructions[i];
+
+            if (instruction.IsLdcI4() && instruction.GetLdcI4Value() == 10)
+            {
+                rewriter.Body.Instructions[i] = Instruction.CreateLdcI4(12);
+                changedMethod = true;
+            }
+        }
+
+        if (changedMethod)
+        {
+            rewriter.Export();
+        }
+
+        return HResult.S_OK;
+    }
+
     private static void Error(HResult hresult, string function)
     {
         Error($"Call to {function} failed with code {hresult}");
@@ -788,7 +842,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
             return false;
         }
 
-        using var _ = threads;
+        using var t = threads;
 
         Span<ThreadId> buffer = stackalloc ThreadId[5];
         int count = 0;
@@ -918,14 +972,14 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
     internal bool EnumJittedFunctions(int apiVersion)
     {
-        Func<HResult<INativeEnumerator<COR_PRF_FUNCTION>>> enumJITedFunctions = apiVersion switch
+        Func<HResult<INativeEnumerator<COR_PRF_FUNCTION>>> enumJittedFunctions = apiVersion switch
         {
             1 => ICorProfilerInfo3.EnumJITedFunctions,
             2 => ICorProfilerInfo4.EnumJITedFunctions2,
             _ => throw new InvalidOperationException($"Unknown API version {apiVersion}")
         };
 
-        var (result, jittedFunctions) = enumJITedFunctions();
+        var (result, jittedFunctions) = enumJittedFunctions();
 
         if (!result)
         {
@@ -975,5 +1029,38 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         }
 
         return count;
+    }
+
+    internal bool RequestReJit(IntPtr module, int methodDef)
+    {
+        var result = ICorProfilerInfo4.RequestReJIT([new(module)], [new(methodDef)]);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo4.RequestReJIT));
+            return false;
+        }
+
+        return true;
+    }
+
+    internal bool RequestRevert(IntPtr module, int methodDef)
+    {
+        Span<HResult> status = stackalloc HResult[1];
+        var result = ICorProfilerInfo4.RequestRevert([new(module)], [new(methodDef)], status);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo4.RequestRevert));
+            return false;
+        }
+
+        if (!status[0])
+        {
+            Error(status[0], nameof(ICorProfilerInfo4.RequestRevert));
+            return false;
+        }
+
+        return true;
     }
 }
