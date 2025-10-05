@@ -396,7 +396,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         }
 
         using var metaDataEmit = ICorProfilerInfo2.GetModuleMetaDataEmit(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite).ThrowIfFailed().Wrap();
-        var moduleRef = metaDataEmit.Value.DefineModuleRef(Path.GetFileName(profilerPath)).ThrowIfFailed();
+        var moduleRef = metaDataEmit.Value.DefineModuleRef(profilerPath).ThrowIfFailed();
 
         HCORENUM hEnum = default;
         Span<MdMethodDef> methodDefs = stackalloc MdMethodDef[10];

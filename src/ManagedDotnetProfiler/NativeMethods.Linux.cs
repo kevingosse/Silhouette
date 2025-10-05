@@ -9,6 +9,9 @@ internal unsafe partial class NativeMethods
 {
     private static string GetModulePathLinux(nint address)
     {
+        var export = NativeLibrary.GetExport(NativeLibrary.GetMainProgramHandle(), "dladdr");
+        var dladdr = (delegate* unmanaged[Cdecl]<IntPtr, out DlInfo, int>)export;
+
         if (dladdr(address, out var info) == 0 || info.dli_fname == null)
         {
             return null;
@@ -16,9 +19,6 @@ internal unsafe partial class NativeMethods
 
         return Marshal.PtrToStringUTF8((nint)info.dli_fname);
     }
-
-    [LibraryImport("libdl")]
-    private static unsafe partial int dladdr(IntPtr addr, out DlInfo info);
 
 #pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
     private readonly struct DlInfo
