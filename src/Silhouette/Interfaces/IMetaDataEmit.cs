@@ -183,13 +183,13 @@ public unsafe interface IMetaDataEmit : IUnknown
 
     HResult DefinePinvokeMap(            // Return code.
         MdToken tk,                     // [IN] FieldDef or MethodDef.
-        uint dwMappingFlags,         // [IN] Flags used for mapping.
+        CorPinvokeMap dwMappingFlags,         // [IN] Flags used for mapping.
         char* szImportName,           // [IN] Import name.
         MdModuleRef mrImportDLL);      // [IN] ModuleRef token for the target DLL.
 
     HResult SetPinvokeMap(               // Return code.
         MdToken tk,                     // [IN] FieldDef or MethodDef.
-        uint dwMappingFlags,         // [IN] Flags used for mapping.
+        CorPinvokeMap dwMappingFlags,         // [IN] Flags used for mapping.
         char* szImportName,           // [IN] Import name.
         MdModuleRef mrImportDLL);      // [IN] ModuleRef token for the target DLL.
 

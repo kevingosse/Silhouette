@@ -17,7 +17,7 @@ internal class JitCompilationTests : ITest
         for (int i = 1; i <= 2; i++)
         {
             Logs.Clear();
-            PInvokes.EnumJittedFunctions(i);
+            ProfilerPInvokes.EnumJittedFunctions(i);
 
             Logs.AssertContains([.. Logs.Fetch()], "Jitted function: TestApp.JitCompilationTests.PrivateMethod");
         }

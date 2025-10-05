@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,6 +7,15 @@
     <PublishAot>true</PublishAot>
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="NativeMethods.Linux.cs">
+      <DependentUpon>NativeMethods.cs</DependentUpon>
+    </Compile>
+    <Compile Update="NativeMethods.Windows.cs">
+      <DependentUpon>NativeMethods.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Silhouette\Silhouette.csproj" />

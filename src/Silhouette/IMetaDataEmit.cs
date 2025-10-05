@@ -261,7 +261,7 @@ public unsafe class IMetaDataEmit : Interfaces.IUnknown
         }
     }
 
-    public HResult DefinePinvokeMap(MdToken tk, uint mappingFlags, string importName, MdModuleRef importDll)
+    public HResult DefinePinvokeMap(MdToken tk, CorPinvokeMap mappingFlags, string importName, MdModuleRef importDll)
     {
         fixed (char* szImportName = importName)
         {
@@ -269,7 +269,7 @@ public unsafe class IMetaDataEmit : Interfaces.IUnknown
         }
     }
 
-    public HResult SetPinvokeMap(MdToken tk, uint mappingFlags, string importName, MdModuleRef importDll)
+    public HResult SetPinvokeMap(MdToken tk, CorPinvokeMap mappingFlags, string importName, MdModuleRef importDll)
     {
         fixed (char* szImportName = importName)
         {

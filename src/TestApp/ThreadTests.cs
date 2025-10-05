@@ -24,9 +24,9 @@ internal class ThreadTests : ITest
         var currentThreadId = (IntPtr)typeof(Thread).GetField("_DONT_USE_InternalThread", BindingFlags.Instance | BindingFlags.NonPublic)!
             .GetValue(Thread.CurrentThread)!;
 
-        var osId = PInvokes.CurrentOs.GetCurrentThreadId();
+        var osId = NativeMethods.GetCurrentThreadId();
 
-        Logs.Assert(PInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
+        Logs.Assert(ProfilerPInvokes.GetCurrentThreadInfo(out var actualThreadId, out var actualOsId));
         Logs.Assert((ulong)currentThreadId == actualThreadId);
         Logs.Assert(osId == actualOsId);
     }
@@ -44,7 +44,7 @@ internal class ThreadTests : ITest
             int index = i;
             threads[index] = new Thread(() =>
             {
-                expectedOsIds[index] = PInvokes.CurrentOs.GetCurrentThreadId();
+                expectedOsIds[index] = NativeMethods.GetCurrentThreadId();
                 // ReSharper disable twice AccessToDisposedClosure
                 barrier.SignalAndWait();
                 barrier.SignalAndWait();
@@ -60,7 +60,7 @@ internal class ThreadTests : ITest
 
         fixed (uint* pActualOsIds = actualOsIds)
         {
-            PInvokes.GetThreads(pActualOsIds, actualOsIds.Length, &actualLength);            
+            ProfilerPInvokes.GetThreads(pActualOsIds, actualOsIds.Length, &actualLength);            
         }
 
         if (actualLength >= actualOsIds.Length)
@@ -86,7 +86,7 @@ internal class ThreadTests : ITest
 
         var thread = new Thread(() => 
         { 
-            id = PInvokes.CurrentOs.GetCurrentThreadId();
+            id = NativeMethods.GetCurrentThreadId();
             Thread.CurrentThread.Name = "Test";
         });
 

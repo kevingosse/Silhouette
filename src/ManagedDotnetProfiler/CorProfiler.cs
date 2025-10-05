@@ -5,6 +5,7 @@ using System.Threading;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
+using System.IO;
 using Silhouette;
 using System.Linq;
 using dnlib.DotNet.Emit;
@@ -367,6 +368,62 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         Log($"AssemblyUnloadFinished - {assemblyInfo.AssemblyName} - AppDomain {appDomainName} - Module {moduleName}");
 
         return HResult.S_OK;
+    }
+
+    protected override HResult ModuleLoadFinished(ModuleId moduleId, HResult hrStatus)
+    {
+        var moduleInfo = ICorProfilerInfo.GetModuleInfo(moduleId).ThrowIfFailed();
+
+        if (Path.GetFileNameWithoutExtension(moduleInfo.ModuleName) == "TestApp")
+        {
+            RewritePInvokeMaps(moduleId);
+        }
+
+        return HResult.S_OK;
+    }
+
+    private void RewritePInvokeMaps(ModuleId moduleId)
+    {
+        using var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite).ThrowIfFailed().Wrap();
+        var typeDef = metaDataImport.Value.FindTypeDefByName("TestApp.ProfilerPInvokes", default).ThrowIfFailed();
+
+        var profilerPath = NativeMethods.GetCurrentModulePath();
+
+        if (profilerPath == null)
+        {
+            Error("Failed to get current module path");
+            return;
+        }
+
+        using var metaDataEmit = ICorProfilerInfo2.GetModuleMetaDataEmit(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite).ThrowIfFailed().Wrap();
+        var moduleRef = metaDataEmit.Value.DefineModuleRef(Path.GetFileName(profilerPath)).ThrowIfFailed();
+
+        HCORENUM hEnum = default;
+        Span<MdMethodDef> methodDefs = stackalloc MdMethodDef[10];
+
+        try
+        {
+            while (metaDataImport.Value.EnumMethods(ref hEnum, typeDef, methodDefs, out var nbMethods)
+                   && nbMethods > 0)
+            {
+                foreach (var methodDef in methodDefs[..(int)nbMethods])
+                {
+                    var (result, pinvokeMap) = metaDataImport.Value.GetPinvokeMap(new(methodDef.Value));
+
+                    if (!result)
+                    {
+                        continue;
+                    }
+
+                    metaDataEmit.Value.DeletePinvokeMap(new(methodDef.Value)).ThrowIfFailed();
+                    metaDataEmit.Value.DefinePinvokeMap(new(methodDef.Value), pinvokeMap.Flags, pinvokeMap.ImportName, moduleRef).ThrowIfFailed();
+                }
+            }
+        }
+        finally
+        {
+            metaDataImport.Value.CloseEnum(hEnum);
+        }
     }
 
     protected override HResult ClassLoadStarted(ClassId classId)
@@ -1018,7 +1075,6 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
             if (!result)
             {
-                // EnumModuleFrozenObjects should never fail
                 Error(result, nameof(ICorProfilerInfo3.EnumModuleFrozenObjects));
                 return -1;
             }

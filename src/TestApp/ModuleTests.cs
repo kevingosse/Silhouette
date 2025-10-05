@@ -12,7 +12,7 @@ internal class ModuleTests : ITest
 
         fixed (char* p = buffer)
         {
-            length = PInvokes.GetModuleNames(p, buffer.Length);
+            length = ProfilerPInvokes.GetModuleNames(p, buffer.Length);
         }
 
         if (length < 0)
@@ -51,7 +51,7 @@ internal class ModuleTests : ITest
 
         Logs.Assert(expectedModules.SequenceEqual(moduleNames.Order()));
 
-        var frozenObjects = PInvokes.CountFrozenObjects();
+        var frozenObjects = ProfilerPInvokes.CountFrozenObjects();
         Logs.Assert(frozenObjects == 0);
 
         Logs.Clear();

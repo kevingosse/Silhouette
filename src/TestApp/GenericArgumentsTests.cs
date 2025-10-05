@@ -12,7 +12,7 @@ internal unsafe class GenericArgumentsTests : ITest
 
         fixed (char* pBuffer = buffer)
         {
-            length = PInvokes.GetGenericArguments(typeof(Test).TypeHandle.Value, method.MetadataToken, pBuffer, 1024);
+            length = ProfilerPInvokes.GetGenericArguments(typeof(Test).TypeHandle.Value, method.MetadataToken, pBuffer, 1024);
         }
 
         if (length < 0)

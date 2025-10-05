@@ -76,7 +76,7 @@ internal static class Logs
 
         fixed (char* c = buffer)
         {
-            int length = PInvokes.FetchLastLog(c, buffer.Length);
+            int length = ProfilerPInvokes.FetchLastLog(c, buffer.Length);
             return length >= 0 ? new string(buffer[..length]) : null;
         }
     }

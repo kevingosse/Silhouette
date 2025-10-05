@@ -2,33 +2,12 @@
 
 namespace TestApp;
 
-internal static unsafe class PInvokes
+/// <summary>
+/// The p/invokes in this class are automatically rewritten by the profiler.
+/// </summary>
+internal static unsafe class ProfilerPInvokes
 {
-#if WINDOWS
-    private const string DllName = "ManagedDotnetProfiler.dll";
-#else
     private const string DllName = "ManagedDotnetProfiler";
-#endif
-
-    public static class CurrentOs
-    {
-#if WINDOWS
-        [DllImport("kernel32.dll")]
-        public static extern uint GetCurrentThreadId();
-
-        public static string GetNativeMethodName() => nameof(GetCurrentThreadId);
-#else
-        [DllImport("libc")]
-        public static extern uint gettid();
-
-        public static uint GetCurrentThreadId()
-        {
-            return gettid();
-        }
-
-        public static string GetNativeMethodName() => nameof(gettid);
-#endif
-    }
 
     [DllImport(DllName)]
     public static extern int FetchLastLog(char* buffer, int bufferSize);

@@ -1,16 +1,5 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using TestApp;
-
-if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-{
-    // on linux runtime does not check that ManagedDotnetProfiler is already loaded
-    // could not find better option to get handle returned from dlopen so using this trick
-
-    // runtime does not load the same library twice so it returns handle of the loaded library:
-    var handle = NativeLibrary.Load("ManagedDotnetProfiler.so");
-    NativeLibrary.SetDllImportResolver(Assembly.GetExecutingAssembly(), (_, _, _) => handle);
-}
 
 bool ngenEnabled = Environment.GetEnvironmentVariable("MONITOR_NGEN") == "1";
 

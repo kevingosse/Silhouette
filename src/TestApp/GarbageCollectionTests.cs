@@ -4,7 +4,7 @@ internal class GarbageCollectionTests : ITest
 {
     public void Run()
     {
-        var threadId = PInvokes.CurrentOs.GetCurrentThreadId();
+        var threadId = NativeMethods.GetCurrentThreadId();
 
         GC.Collect(2, GCCollectionMode.Default, blocking: true); // reason == COR_PRF_GC_INDUCED
 

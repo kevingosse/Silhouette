@@ -27,9 +27,9 @@ internal class IlRewriteTest : ITest
         var moduleHandle = (IntPtr)module.GetType().GetMethod("GetUnderlyingNativeHandle", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(module, null)!;
 
         Logs.Assert(GetValue() == 10);
-        Logs.Assert(PInvokes.RequestReJit(moduleHandle, methodDef));
+        Logs.Assert(ProfilerPInvokes.RequestReJit(moduleHandle, methodDef));
         Logs.Assert(GetValue() == 12);
-        Logs.Assert(PInvokes.RequestRevert(moduleHandle, methodDef));
+        Logs.Assert(ProfilerPInvokes.RequestRevert(moduleHandle, methodDef));
         Logs.Assert(GetValue() == 10);
     }
 
