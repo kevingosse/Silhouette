@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette</PackageId>
-    <PackageVersion>2.0.0.0</PackageVersion>
+    <PackageVersion>2.1.0.0</PackageVersion>
     <Title>Silhouette</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,10 +24,7 @@
       A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
     </Description>
     <PackageReleaseNotes>
-      - Added IMetadataImport2 interface
-      Breaking changes:
-      - Removed KnownGuids class. The GUIDs are now available from their respective interfaces.
-      - ICorProfilerInfo.GetModuleMetaData now returns an IntPtr, use GetModuleMetaDataImport and GetModuleMetaDataImport2 to retrieve the strongly typed interface.
+      - Added ICorProfilerFunctionControl and IMethodAlloc interfaces
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
