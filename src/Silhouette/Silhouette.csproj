@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette</PackageId>
-    <PackageVersion>2.1.0.0</PackageVersion>
+    <PackageVersion>2.2.0.0</PackageVersion>
     <Title>Silhouette</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,7 +24,7 @@
       A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
     </Description>
     <PackageReleaseNotes>
-      - Added ICorProfilerFunctionControl and IMethodAlloc interfaces
+      - Updated signature of SetEnterLeaveFunctionHooks* APIs
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
