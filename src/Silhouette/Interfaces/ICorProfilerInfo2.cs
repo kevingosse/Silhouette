@@ -50,9 +50,9 @@ internal unsafe interface ICorProfilerInfo2 : ICorProfilerInfo
      * profiler's Initialize() callback.
      */
     HResult SetEnterLeaveFunctionHooks2(
-                void* pFuncEnter,
-                void* pFuncLeave,
-                void* pFuncTailcall);
+                IntPtr pFuncEnter,
+                IntPtr pFuncLeave,
+                IntPtr pFuncTailcall);
 
     /*
      * GetFunctionInfo2 returns the parent class of a function, plus the

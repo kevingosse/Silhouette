@@ -176,16 +176,15 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      * profiler's Initialize() callback.
      */
     HResult SetEnterLeaveFunctionHooks(
-                void* pFuncEnter,
-                void* pFuncLeave,
-                void* pFuncTailcall);
+                IntPtr pFuncEnter,
+                IntPtr pFuncLeave,
+                IntPtr pFuncTailcall);
 
     /*
      * This is used for mapping FunctionIds to alternative values that will be
      * passed to the callbacks
      */
-    HResult SetFunctionIdMapper(
-                void* pFunc);
+    HResult SetFunctionIdMapper(IntPtr pFunc);
 
     /*
      * For a given function, retrieve the token value and an instance of the

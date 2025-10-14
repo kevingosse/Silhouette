@@ -17,9 +17,9 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         return _impl.DoStackSnapshot(thread, callback, (uint)infoFlags, clientData, context, contextSize);
     }
 
-    public unsafe HResult SetEnterLeaveFunctionHooks2(void* pFuncEnter, void* pFuncLeave, void* pFuncTailcall)
+    public HResult SetEnterLeaveFunctionHooks2(IntPtr funcEnter, IntPtr funcLeave, IntPtr funcTailcall)
     {
-        return _impl.SetEnterLeaveFunctionHooks2(pFuncEnter, pFuncLeave, pFuncTailcall);
+        return _impl.SetEnterLeaveFunctionHooks2(funcEnter, funcLeave, funcTailcall);
     }
 
     public unsafe HResult<FunctionInfo> GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, ReadOnlySpan<ClassId> typeArgs, out uint nbTypeArgs)

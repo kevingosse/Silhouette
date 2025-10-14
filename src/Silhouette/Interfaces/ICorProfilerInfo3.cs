@@ -53,15 +53,15 @@ internal unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
      * profiler's Initialize() callback.
      */
     HResult SetEnterLeaveFunctionHooks3(
-                void* pFuncEnter3,
-                void* pFuncLeave3,
-                void* pFuncTailcall3);
+                IntPtr pFuncEnter3,
+                IntPtr pFuncLeave3,
+                IntPtr pFuncTailcall3);
 
 
     HResult SetEnterLeaveFunctionHooks3WithInfo(
-                void* pFuncEnter3WithInfo,
-                void* pFuncLeave3WithInfo,
-                void* pFuncTailcall3WithInfo);
+                IntPtr pFuncEnter3WithInfo,
+                IntPtr pFuncLeave3WithInfo,
+                IntPtr pFuncTailcall3WithInfo);
 
     /*
      * The profiler can call GetFunctionEnter3Info to gather frame info and argument info

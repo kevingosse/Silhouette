@@ -110,14 +110,14 @@ public class ICorProfilerInfo : Interfaces.IUnknown, ICorProfilerInfoFactory<ICo
         return _impl.SetEventMask(dwEvents);
     }
 
-    public unsafe HResult SetEnterLeaveFunctionHooks(void* pFuncEnter, void* pFuncLeave, void* pFuncTailcall)
+    public HResult SetEnterLeaveFunctionHooks(IntPtr funcEnter, IntPtr funcLeave, IntPtr funcTailcall)
     {
-        return _impl.SetEnterLeaveFunctionHooks(pFuncEnter, pFuncLeave, pFuncTailcall);
+        return _impl.SetEnterLeaveFunctionHooks(funcEnter, funcLeave, funcTailcall);
     }
 
-    public unsafe HResult SetFunctionIdMapper(void* pFunc)
+    public HResult SetFunctionIdMapper(IntPtr func)
     {
-        return _impl.SetFunctionIdMapper(pFunc);
+        return _impl.SetFunctionIdMapper(func);
     }
 
     public unsafe HResult<TokenAndMetaData> GetTokenAndMetaDataFromFunction(FunctionId functionId)

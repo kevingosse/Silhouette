@@ -34,14 +34,14 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2, ICorProfilerInfoFactory<ICor
         return new(result, new(stringLengthOffset, bufferOffset));
     }
 
-    public unsafe HResult SetEnterLeaveFunctionHooks3(void* pFuncEnter3, void* pFuncLeave3, void* pFuncTailcall3)
+    public HResult SetEnterLeaveFunctionHooks3(IntPtr funcEnter3, IntPtr funcLeave3, IntPtr funcTailcall3)
     {
-        return _impl.SetEnterLeaveFunctionHooks3(pFuncEnter3, pFuncLeave3, pFuncTailcall3);
+        return _impl.SetEnterLeaveFunctionHooks3(funcEnter3, funcLeave3, funcTailcall3);
     }
 
-    public unsafe HResult SetEnterLeaveFunctionHooks3WithInfo(void* pFuncEnter3WithInfo, void* pFuncLeave3WithInfo, void* pFuncTailcall3WithInfo)
+    public HResult SetEnterLeaveFunctionHooks3WithInfo(IntPtr funcEnter3WithInfo, IntPtr funcLeave3WithInfo, IntPtr funcTailcall3WithInfo)
     {
-        return _impl.SetEnterLeaveFunctionHooks3WithInfo(pFuncEnter3WithInfo, pFuncLeave3WithInfo, pFuncTailcall3WithInfo);
+        return _impl.SetEnterLeaveFunctionHooks3WithInfo(funcEnter3WithInfo, funcLeave3WithInfo, funcTailcall3WithInfo);
     }
 
     public unsafe HResult GetFunctionEnter3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, out COR_PRF_FRAME_INFO pFrameInfo, int* pcbArgumentInfo, COR_PRF_FUNCTION_ARGUMENT_INFO* pArgumentInfo)
