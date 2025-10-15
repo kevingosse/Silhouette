@@ -25,6 +25,8 @@ public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
     public ICorProfilerInfo11 ICorProfilerInfo11;
     public ICorProfilerInfo12 ICorProfilerInfo12;
     public ICorProfilerInfo13 ICorProfilerInfo13;
+    public ICorProfilerInfo14 ICorProfilerInfo14;
+    public ICorProfilerInfo15 ICorProfilerInfo15;
 
     protected override HResult QueryInterface(in Guid guid, out nint ptr)
     {
@@ -122,6 +124,16 @@ public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
         }
 
         if (!TryInitialize(impl, ref ICorProfilerInfo13, ref supportedInterface))
+        {
+            return supportedInterface;
+        }
+
+        if (!TryInitialize(impl, ref ICorProfilerInfo14, ref supportedInterface))
+        {
+            return supportedInterface;
+        }
+
+        if (!TryInitialize(impl, ref ICorProfilerInfo15, ref supportedInterface))
         {
             return supportedInterface;
         }

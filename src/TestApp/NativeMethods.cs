@@ -2,7 +2,7 @@
 
 namespace TestApp;
 
-internal class NativeMethods
+internal static class NativeMethods
 {
     public static uint GetCurrentThreadId()
     {
