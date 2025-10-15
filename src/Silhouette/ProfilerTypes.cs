@@ -786,6 +786,28 @@ public struct COR_PRF_EVENT_DATA
     public uint Reserved;
 }
 
+/// <summary>
+/// COR_PRF_NONGC_GENERATION_RANGE describes a range of memory in the GetNonGCHeapBounds function.
+/// </summary>
+[StructLayout(LayoutKind.Sequential)]
+public struct COR_PRF_NONGC_HEAP_RANGE
+{
+    /// <summary>
+    /// The start of the range
+    /// </summary>
+    public nint RangeStart;
+
+    /// <summary>
+    /// The used length of the range
+    /// </summary>
+    public nint RangeLength;
+
+    /// <summary>
+    /// The amount of memory reserved for the range (including rangeLength)
+    /// </summary>
+    public nint RangeLengthReserved;
+}
+
 public enum COR_PRF_HANDLE_TYPE
 {
     COR_PRF_HANDLE_TYPE_WEAK = 0x1,
