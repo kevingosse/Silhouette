@@ -2,7 +2,7 @@
 
 namespace ManagedDotnetProfiler;
 
-internal unsafe partial class NativeMethods
+internal static unsafe partial class NativeMethods
 {
     internal static string GetCurrentModulePath()
     {

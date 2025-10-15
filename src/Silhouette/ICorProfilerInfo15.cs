@@ -10,7 +10,7 @@ public class ICorProfilerInfo15 : ICorProfilerInfo14, ICorProfilerInfoFactory<IC
     }
 
     static ICorProfilerInfo15 ICorProfilerInfoFactory<ICorProfilerInfo15>.Create(nint ptr) => new(ptr);
-    static Guid ICorProfilerInfoFactory<ICorProfilerInfo15>.Guid => Interfaces.ICorProfilerInfo14.Guid;
+    static Guid ICorProfilerInfoFactory<ICorProfilerInfo15>.Guid => Interfaces.ICorProfilerInfo15.Guid;
 
     /// <summary>
     /// EnumerateGCHeapObjects is a method that iterates over each object in the GC heap.

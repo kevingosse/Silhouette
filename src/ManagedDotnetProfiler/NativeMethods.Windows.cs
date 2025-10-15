@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 
 namespace ManagedDotnetProfiler;
 
-internal unsafe partial class NativeMethods
+internal static unsafe partial class NativeMethods
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static string GetModulePathWindows(nint address)
     {
-        var flags = 0x4 /* GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS */ | 0x2 /* GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT */;
+        const int flags = 0x4 /* GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS */ | 0x2 /* GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT */;
         if (GetModuleHandleExW(flags, address, out var hModule) == 0)
         {
             return null;

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace ManagedDotnetProfiler;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-internal unsafe partial class NativeMethods
+internal static unsafe partial class NativeMethods
 {
     private static string GetModulePathLinux(nint address)
     {
