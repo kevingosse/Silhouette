@@ -179,28 +179,33 @@ public readonly record struct MdMethodSpec(MdToken Token)
     public override string ToString() => Value.ToString("x2");
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct MdGenericParamConstraint(MdToken Token)
 {
     public int Value => Token.Value;
     public override string ToString() => Value.ToString("x2");
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct CorElementType
 {
     public readonly uint Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct HCORENUM
 {
     public readonly nint Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_FIELD_OFFSET
 {
     public readonly MdFieldDef RidOfField;
     public readonly uint UlOffset;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct CorIlMap
 {
     public readonly uint OldOffset;
@@ -208,6 +213,7 @@ public readonly struct CorIlMap
     public readonly bool fAccurate;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct CorDebugIlToNativeMap
 {
     public readonly uint IlOffset;
@@ -218,23 +224,27 @@ public readonly struct CorDebugIlToNativeMap
 /// <summary>
 /// Represents a IL methods uniquely by combining the module ID and method token.
 /// </summary>
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_METHOD
 {
     public readonly ModuleId ModuleId;
     public readonly MdMethodDef MethodId;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_FRAME_INFO
 {
     public readonly nint Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_CODE_INFO
 {
     public readonly nint StartAddress;
     public readonly nint Size;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_GC_GENERATION_RANGE
 {
     public readonly COR_PRF_GC_GENERATION generation;
@@ -243,6 +253,7 @@ public readonly struct COR_PRF_GC_GENERATION_RANGE
     public readonly nint RangeLengthReserved;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_EX_CLAUSE_INFO
 {
     public readonly COR_PRF_CLAUSE_TYPE ClauseType;
@@ -251,17 +262,20 @@ public readonly struct COR_PRF_EX_CLAUSE_INFO
     public readonly nint ShadowStackPointer;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_ELT_INFO
 {
     public readonly nint Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_FUNCTION
 {
     public readonly FunctionId FunctionId;
     public readonly ReJITId ReJitId;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_FUNCTION_ARGUMENT_INFO
 {
     public readonly uint NumRanges;                // number of chunks of arguments
@@ -270,6 +284,7 @@ public readonly struct COR_PRF_FUNCTION_ARGUMENT_INFO
     public readonly COR_PRF_FUNCTION_ARGUMENT_RANGE range2;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_FUNCTION_ARGUMENT_RANGE
 {
     /// <summary>
@@ -283,6 +298,7 @@ public readonly struct COR_PRF_FUNCTION_ARGUMENT_RANGE
     public readonly uint Length;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public struct COR_IL_MAP
 {
     /// <summary>
@@ -737,6 +753,7 @@ public enum COR_PRF_SNAPSHOT_INFO : uint
     COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public struct COR_DEBUG_IL_TO_NATIVE_MAP
 {
     public uint IlOffset;
@@ -744,6 +761,7 @@ public struct COR_DEBUG_IL_TO_NATIVE_MAP
     public uint NativeEndOffset;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public unsafe struct COR_PRF_EVENTPIPE_PROVIDER_CONFIG
 {
     public char* ProviderName;
@@ -756,21 +774,25 @@ public unsafe struct COR_PRF_EVENTPIPE_PROVIDER_CONFIG
     public char* FilterData;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct EVENTPIPE_SESSION
 {
     public readonly ulong Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct EVENTPIPE_PROVIDER
 {
     public readonly nint Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct EVENTPIPE_EVENT
 {
     public readonly nint Value;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public unsafe struct COR_PRF_EVENTPIPE_PARAM_DESC
 {
     public uint Type;
@@ -779,6 +801,7 @@ public unsafe struct COR_PRF_EVENTPIPE_PARAM_DESC
     public char* Name;
 }
 
+[StructLayout(LayoutKind.Sequential)]
 public struct COR_PRF_EVENT_DATA
 {
     public ulong Ptr;
