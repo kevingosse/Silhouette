@@ -6,7 +6,7 @@ using dnlib.IO;
 
 namespace Silhouette.IL;
 
-public class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider
+public sealed class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider
 {
     private ComPtr<IMetaDataImport> _metaDataImport;
     private ComPtr<IMetaDataEmit> _metaDataEmit;
@@ -135,8 +135,11 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
         var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
 
-        var methodDef = new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags);
-        methodDef.Rid = MDToken.ToRID(token);
+        var methodDef = new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags)
+        {
+            Rid = MDToken.ToRID(token)
+        };
+
         return methodDef;
     }
 
@@ -181,6 +184,7 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
         return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName));
     }
 
+#pragma warning disable IDE0003 - Qualifier 'this.' is redundant
     private class MyMemberRef : MemberRef
     {
         public MyMemberRef(string name, uint rid, CallingConventionSig sig, IMemberRefParent parent)
@@ -199,6 +203,7 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
             return "MyMemberRef";
         }
     }
+#pragma warning restore IDE0003
 
     public string ReadUserString(uint token)
     {
@@ -214,18 +219,18 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
     {
         var token = CodedToken.TypeDefOrRef.Decode2(codedToken);
 
-        if (token.Table == Table.TypeRef)
+        switch (token.Table)
         {
-            return ResolveTypeRef(token.Raw, gpContext);
-        }
+            case Table.TypeRef:
+                return ResolveTypeRef(token.Raw, gpContext);
 
-        if (token.Table == Table.TypeDef)
-        {
-            return ResolveTypeDef(token.Raw, gpContext);
-        }
+            case Table.TypeDef:
+                return ResolveTypeDef(token.Raw, gpContext);
 
-        Console.WriteLine($"Unsupported token type: {token.Table}");
-        throw new NotSupportedException($"Unsupported token type: {token.Table}");
+            default:
+                Console.WriteLine($"Unsupported token type: {token.Table}");
+                throw new NotSupportedException($"Unsupported token type: {token.Table}");
+        }
     }
 
     public TypeSig ConvertRTInternalAddress(IntPtr address)
@@ -243,52 +248,50 @@ public class InstructionOperandResolver : IInstructionOperandResolver, IDisposab
 
     public MDToken GetToken(object o)
     {
-        if (o is string str)
+        switch (o)
         {
-            // Look if the string already exists
-            HCORENUM hEnum = default;
-            Span<MdString> strings = stackalloc MdString[10];
-
-            try
+            case string str:
             {
-                while (MetaDataImport.Value.EnumUserStrings(ref hEnum, strings, out var nbStrings)
-                       && nbStrings > 0)
-                {
-                    foreach (var stringToken in strings)
-                    {
-                        var value = MetaDataImport.Value.GetUserString(stringToken).ThrowIfFailed();
+                // Look if the string already exists
+                HCORENUM hEnum = default;
+                Span<MdString> strings = stackalloc MdString[10];
 
-                        if (value == str)
+                try
+                {
+                    while (MetaDataImport.Value.EnumUserStrings(ref hEnum, strings, out var nbStrings)
+                           && nbStrings > 0)
+                    {
+                        foreach (var stringToken in strings)
                         {
-                            return new MDToken(stringToken.Value);
+                            var value = MetaDataImport.Value.GetUserString(stringToken).ThrowIfFailed();
+
+                            if (value == str)
+                            {
+                                return new MDToken(stringToken.Value);
+                            }
                         }
                     }
                 }
+                finally
+                {
+                    MetaDataImport.Value.CloseEnum(hEnum);
+                }
+
+                // This is a new string, add it
+                return new(MetaDataEmit.Value.DefineUserString(str).ThrowIfFailed().Value);
             }
-            finally
-            {
-                MetaDataImport.Value.CloseEnum(hEnum);
-            }
+            case MemberRef memberRef:
+                // TODO: Might need to emit or something
+                return memberRef.MDToken;
+            case MethodDef methodDef:
+                // TODO: Might need to emit or something
+                return methodDef.MDToken;
 
-            // This is a new string, add it
-            return new(MetaDataEmit.Value.DefineUserString(str).ThrowIfFailed().Value);
+            default:
+                Console.WriteLine($"ITokenProvider.GetToken({o}) - {o.GetType()}");
+                Console.WriteLine(Environment.StackTrace);
+                throw new NotImplementedException();
         }
-
-        if (o is MemberRef memberRef)
-        {
-            // TODO: Might need to emit or something
-            return memberRef.MDToken;
-        }
-
-        if (o is MethodDef methodDef)
-        {
-            // TODO: Might need to emit or something
-            return methodDef.MDToken;
-        }
-
-        Console.WriteLine($"ITokenProvider.GetToken({o}) - {o.GetType()}");
-        Console.WriteLine(Environment.StackTrace);
-        throw new NotImplementedException();
     }
 
     public MDToken GetToken(IList<TypeSig> locals, uint origToken)
