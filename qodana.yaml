@@ -11,3 +11,5 @@ exclude:
   - name: SYSLIB1054
   - name: ConvertIfStatementToReturnStatement
   - name: InvertIf
+  - name: PreferConcreteValueOverDefault
+  - name: CA1816
