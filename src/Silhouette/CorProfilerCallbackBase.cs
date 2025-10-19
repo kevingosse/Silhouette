@@ -63,7 +63,7 @@ public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
         int supportedInterface = 0;
         var impl = new NativeObjects.IUnknownInvoker(pICorProfilerInfoUnk);
 
-        // ReSharper disable DuplicatedSequentialIfBodies - Order is important, making it explicit is better
+        // ReSharper disable DuplicatedSequentialIfBodies: Order is important, making it explicit is better
         if (!TryInitialize(impl, ref ICorProfilerInfo, ref supportedInterface))
         {
             return supportedInterface;

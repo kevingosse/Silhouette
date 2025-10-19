@@ -184,7 +184,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName));
     }
 
-#pragma warning disable IDE0003 - Qualifier 'this.' is redundant
+#pragma warning disable IDE0003: Qualifier 'this.' is redundant
     private class MyMemberRef : MemberRef
     {
         public MyMemberRef(string name, uint rid, CallingConventionSig sig, IMemberRefParent parent)
