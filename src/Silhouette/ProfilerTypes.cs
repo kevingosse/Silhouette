@@ -568,7 +568,7 @@ public enum COR_PRF_MONITOR : uint
     COR_PRF_ENABLE_FRAME_INFO = 0X08000000,
 
     /// <summary>
-    /// ENABLE_STACK_SNAPSHOT enables the used of DoStackSnapshot calls.
+    /// ENABLE_STACK_SNAPSHOT enables the use of DoStackSnapshot calls.
     /// </summary>
     COR_PRF_ENABLE_STACK_SNAPSHOT = 0X10000000,
 
@@ -799,13 +799,13 @@ public enum CorILMethodFlags
     CorILMethod_FormatShift = 3,
     CorILMethod_FormatMask = (1 << CorILMethod_FormatShift) - 1,
     /// <summary>
-    /// use this code if the code size is even
+    /// Use this code if the code size is even
     /// </summary>
     CorILMethod_TinyFormat = 0x0002,         
     CorILMethod_SmallFormat = 0x0000,
     CorILMethod_FatFormat = 0x0003,
     /// <summary>
-    /// use this code if the code size is odd
+    /// Use this code if the code size is odd
     /// </summary>
     CorILMethod_TinyFormat1 = 0x0006         
 }
