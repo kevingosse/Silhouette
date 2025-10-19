@@ -263,7 +263,6 @@ public readonly struct COR_PRF_METHOD
 }
 
 [StructLayout(LayoutKind.Sequential)]
-
 public readonly struct COR_PRF_FRAME_INFO
 {
     public readonly nint Value;
@@ -317,7 +316,6 @@ public readonly struct COR_PRF_FUNCTION_ARGUMENT_INFO
 }
 
 [StructLayout(LayoutKind.Sequential)]
-
 public readonly struct COR_PRF_FUNCTION_ARGUMENT_RANGE
 {
     /// <summary>
