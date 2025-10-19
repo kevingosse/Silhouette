@@ -309,8 +309,14 @@ public readonly struct COR_PRF_FUNCTION
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct COR_PRF_FUNCTION_ARGUMENT_INFO
 {
-    public readonly uint NumRanges;                // number of chunks of arguments
-    public readonly uint TotalArgumentSize;    // total size of arguments
+    /// <summary>
+    /// number of chunks of arguments
+    /// </summary>
+    public readonly uint NumRanges;
+    /// <summary>
+    /// total size of arguments
+    /// </summary>
+    public readonly uint TotalArgumentSize;
     public readonly COR_PRF_FUNCTION_ARGUMENT_RANGE range1;
     public readonly COR_PRF_FUNCTION_ARGUMENT_RANGE range2;
 }
@@ -366,165 +372,237 @@ public enum COR_PRF_CODEGEN_FLAGS : uint
 [Flags]
 public enum COR_PRF_MONITOR : uint
 {
-    // These flags represent classes of callback events
+    /// <summary>
+    /// These flags represent classes of callback events
+    /// </summary>
     COR_PRF_MONITOR_NONE = 0x00000000,
 
-    // MONITOR_FUNCTION_UNLOADS controls the
-    // FunctionUnloadStarted callback.
+    /// <summary>
+    /// MONITOR_FUNCTION_UNLOADS controls the
+    /// FunctionUnloadStarted callback.
+    /// </summary>
     COR_PRF_MONITOR_FUNCTION_UNLOADS = 0x00000001,
 
-    // MONITOR_CLASS_LOADS controls the ClassLoad*
-    // and ClassUnload* callbacks.
-    // See the comments on those callbacks for important
-    // behavior changes in V2.
+    /// <summary>
+    /// MONITOR_CLASS_LOADS controls the ClassLoad*
+    /// and ClassUnload* callbacks.
+    /// See the comments on those callbacks for important
+    /// behavior changes in V2.
+    /// </summary>
     COR_PRF_MONITOR_CLASS_LOADS = 0x00000002,
 
-    // MONITOR_MODULE_LOADS controls the
-    // ModuleLoad*, ModuleUnload*, and ModuleAttachedToAssembly
-    // callbacks.
+    /// <summary>
+    /// MONITOR_MODULE_LOADS controls the
+    /// ModuleLoad*, ModuleUnload*, and ModuleAttachedToAssembly
+    /// callbacks.
+    /// </summary>
     COR_PRF_MONITOR_MODULE_LOADS = 0x00000004,
 
-    // MONITOR_ASSEMBLY_LOADS controls the
-    // AssemblyLoad* and AssemblyUnload* callbacks
+    /// <summary>
+    /// MONITOR_ASSEMBLY_LOADS controls the
+    /// AssemblyLoad* and AssemblyUnload* callbacks
+    /// </summary>
     COR_PRF_MONITOR_ASSEMBLY_LOADS = 0x00000008,
 
-    // MONITOR_APPDOMAIN_LOADS controls the
-    // AppDomainCreation* and AppDomainShutdown* callbacks
+    /// <summary>
+    /// MONITOR_APPDOMAIN_LOADS controls the
+    /// AppDomainCreation* and AppDomainShutdown* callbacks
+    /// </summary>
     COR_PRF_MONITOR_APPDOMAIN_LOADS = 0x00000010,
 
-    // MONITOR_JIT_COMPILATION controls the
-    // JITCompilation*, JITFunctionPitched, and JITInlining
-    // callbacks.
+    /// <summary>
+    /// MONITOR_JIT_COMPILATION controls the
+    /// JITCompilation*, JITFunctionPitched, and JITInlining
+    /// callbacks.
+    /// </summary>
     COR_PRF_MONITOR_JIT_COMPILATION = 0x00000020,
 
 
-    // MONITOR_EXCEPTIONS controls the ExceptionThrown,
-    // ExceptionSearch*, ExceptionOSHandler*, ExceptionUnwind*,
-    // and ExceptionCatcher* callbacks.
+    /// <summary>
+    /// MONITOR_EXCEPTIONS controls the ExceptionThrown,
+    /// ExceptionSearch*, ExceptionOSHandler*, ExceptionUnwind*,
+    /// and ExceptionCatcher* callbacks.
+    /// </summary>
     COR_PRF_MONITOR_EXCEPTIONS = 0x00000040,
 
-    // MONITOR_GC controls the GarbageCollectionStarted/Finished,
-    // MovedReferences, SurvivingReferences,
-    // ObjectReferences, ObjectsAllocatedByClass,
-    // RootReferences*, HandleCreated/Destroyed, and FinalizeableObjectQueued
-    // callbacks.
+    /// <summary>
+    /// MONITOR_GC controls the GarbageCollectionStarted/Finished,
+    /// MovedReferences, SurvivingReferences,
+    /// ObjectReferences, ObjectsAllocatedByClass,
+    /// RootReferences*, HandleCreated/Destroyed, and FinalizeableObjectQueued
+    /// callbacks.
+    /// </summary>
     COR_PRF_MONITOR_GC = 0x00000080,
 
-    // MONITOR_OBJECT_ALLOCATED controls the
-    // ObjectAllocated callback.
+    /// <summary>
+    /// MONITOR_OBJECT_ALLOCATED controls the
+    /// ObjectAllocated callback.
+    /// </summary>
     COR_PRF_MONITOR_OBJECT_ALLOCATED = 0x00000100,
 
-    // MONITOR_THREADS controls the ThreadCreated,
-    // ThreadDestroyed, ThreadAssignedToOSThread,
-    // and ThreadNameChanged callbacks.
+    /// <summary>
+    /// MONITOR_THREADS controls the ThreadCreated,
+    /// ThreadDestroyed, ThreadAssignedToOSThread,
+    /// and ThreadNameChanged callbacks.
+    /// </summary>
     COR_PRF_MONITOR_THREADS = 0x00000200,
 
-    // CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
-    // MONITOR_REMOTING controls the Remoting*
-    // callbacks.
+    /// <summary>
+    /// CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
+    /// MONITOR_REMOTING controls the Remoting*
+    /// callbacks.
+    /// </summary>
     COR_PRF_MONITOR_REMOTING = 0x00000400,
 
-    // MONITOR_CODE_TRANSITIONS controls the
-    // UnmanagedToManagedTransition and
-    // ManagedToUnmanagedTransition callbacks.
+    /// <summary>
+    /// MONITOR_CODE_TRANSITIONS controls the
+    /// UnmanagedToManagedTransition and
+    /// ManagedToUnmanagedTransition callbacks.
+    /// </summary>
     COR_PRF_MONITOR_CODE_TRANSITIONS = 0x00000800,
 
-    // MONITOR_ENTERLEAVE controls the
-    // FunctionEnter*/Leave*/Tailcall* callbacks
+    /// <summary>
+    /// MONITOR_ENTERLEAVE controls the
+    /// FunctionEnter*/Leave*/Tailcall* callbacks
+    /// </summary>
     COR_PRF_MONITOR_ENTERLEAVE = 0x00001000,
 
-    // MONITOR_CCW controls the COMClassicVTable*
-    // callbacks.
+    /// <summary>
+    /// MONITOR_CCW controls the COMClassicVTable*
+    /// callbacks.
+    /// </summary>
     COR_PRF_MONITOR_CCW = 0x00002000,
 
-    // CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
-    // MONITOR_REMOTING_COOKIE controls whether
-    // a cookie will be passed to the Remoting* callbacks
+    /// <summary>
+    /// CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
+    /// MONITOR_REMOTING_COOKIE controls whether
+    /// a cookie will be passed to the Remoting* callbacks
+    /// </summary>
     COR_PRF_MONITOR_REMOTING_COOKIE = 0x00004000 | COR_PRF_MONITOR_REMOTING,
 
-    // CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
-    // MONITOR_REMOTING_ASYNC controls whether
-    // the Remoting* callbacks will monitor async events
+    /// <summary>
+    /// CORECLR DEPRECATION WARNING: Remoting no longer exists in coreclr
+    /// MONITOR_REMOTING_ASYNC controls whether
+    /// the Remoting* callbacks will monitor async events
+    /// </summary>
     COR_PRF_MONITOR_REMOTING_ASYNC = 0x00008000 | COR_PRF_MONITOR_REMOTING,
 
-    // MONITOR_SUSPENDS controls the RuntimeSuspend*,
-    // RuntimeResume*, RuntimeThreadSuspended, and
-    // RuntimeThreadResumed callbacks.
+    /// <summary>
+    /// MONITOR_SUSPENDS controls the RuntimeSuspend*,
+    /// RuntimeResume*, RuntimeThreadSuspended, and
+    /// RuntimeThreadResumed callbacks.
+    /// </summary>
     COR_PRF_MONITOR_SUSPENDS = 0x00010000,
 
-    // MONITOR_CACHE_SEARCHES controls the
-    // JITCachedFunctionSearch* callbacks.
-    // See the comments on those callbacks for important
-    // behavior changes in V2.
+    /// <summary>
+    /// MONITOR_CACHE_SEARCHES controls the
+    /// JITCachedFunctionSearch* callbacks.
+    /// See the comments on those callbacks for important
+    /// behavior changes in V2.
+    /// </summary>
     COR_PRF_MONITOR_CACHE_SEARCHES = 0x00020000,
 
-    // NOTE: ReJIT is now supported again.  The profiler must set this flag on
-    // startup in order to use RequestReJIT or RequestRevert.  If the profiler specifies
-    // this flag, then the profiler must also specify COR_PRF_DISABLE_ALL_NGEN_IMAGES
+    /// <summary>
+    /// NOTE: ReJIT is now supported again.  The profiler must set this flag on
+    /// startup in order to use RequestReJIT or RequestRevert.  If the profiler specifies
+    /// this flag, then the profiler must also specify COR_PRF_DISABLE_ALL_NGEN_IMAGES
+    /// </summary>
     COR_PRF_ENABLE_REJIT = 0x00040000,
 
-    // V2 MIGRATION WARNING: DEPRECATED
-    // Inproc debugging is no longer supported. ENABLE_INPROC_DEBUGGING
-    // has no effect.
+    /// <summary>
+    /// V2 MIGRATION WARNING: DEPRECATED
+    /// Inproc debugging is no longer supported. ENABLE_INPROC_DEBUGGING
+    /// has no effect.
+    /// </summary>
     COR_PRF_ENABLE_INPROC_DEBUGGING = 0x00080000,
 
-    // V2 MIGRATION NOTE: DEPRECATED
-    // The runtime now always tracks IL-native maps; this flag is thus always
-    // considered to be set.
+    /// <summary>
+    /// V2 MIGRATION NOTE: DEPRECATED
+    /// The runtime now always tracks IL-native maps; this flag is thus always
+    /// considered to be set.
+    /// </summary>
     COR_PRF_ENABLE_JIT_MAPS = 0x00100000,
 
-    // DISABLE_INLINING tells the runtime to disable all inlining
+    /// <summary>
+    /// DISABLE_INLINING tells the runtime to disable all inlining
+    /// </summary>
     COR_PRF_DISABLE_INLINING = 0x00200000,
 
-    // DISABLE_OPTIMIZATIONS tells the runtime to disable all code optimizations
+    /// <summary>
+    /// DISABLE_OPTIMIZATIONS tells the runtime to disable all code optimizations
+    /// </summary>
     COR_PRF_DISABLE_OPTIMIZATIONS = 0x00400000,
 
-    // ENABLE_OBJECT_ALLOCATED tells the runtime that the profiler may want
-    // object allocation notifications.  This must be set during initialization if the profiler
-    // ever wants object notifications (using COR_PRF_MONITOR_OBJECT_ALLOCATED)
+    /// <summary>
+    /// ENABLE_OBJECT_ALLOCATED tells the runtime that the profiler may want
+    /// object allocation notifications.  This must be set during initialization if the profiler
+    /// ever wants object notifications (using COR_PRF_MONITOR_OBJECT_ALLOCATED)
+    /// </summary>
     COR_PRF_ENABLE_OBJECT_ALLOCATED = 0x00800000,
 
-    // MONITOR_CLR_EXCEPTIONS controls the ExceptionCLRCatcher*
-    // callbacks.
+    /// <summary>
+    /// MONITOR_CLR_EXCEPTIONS controls the ExceptionCLRCatcher*
+    /// callbacks.
+    /// </summary>
     COR_PRF_MONITOR_CLR_EXCEPTIONS = 0x01000000,
 
-    // All callback events are enabled with this flag
+    /// <summary>
+    /// All callback events are enabled with this flag
+    /// </summary>
     COR_PRF_MONITOR_ALL = 0x0107FFFF,
 
-    // ENABLE_FUNCTION_ARGS enables argument tracing through FunctionEnter2.
+    /// <summary>
+    /// ENABLE_FUNCTION_ARGS enables argument tracing through FunctionEnter2.
+    /// </summary>
     COR_PRF_ENABLE_FUNCTION_ARGS = 0X02000000,
 
-    // ENABLE_FUNCTION_RETVAL enables retval tracing through FunctionLeave2.
+    /// <summary>
+    /// ENABLE_FUNCTION_RETVAL enables retval tracing through FunctionLeave2.
+    /// </summary>
     COR_PRF_ENABLE_FUNCTION_RETVAL = 0X04000000,
 
-    // ENABLE_FRAME_INFO enables retrieval of exact ClassIDs for generic functions using
-    // GetFunctionInfo2 with a COR_PRF_FRAME_INFO obtained from FunctionEnter2.
+    /// <summary>
+    /// ENABLE_FRAME_INFO enables retrieval of exact ClassIDs for generic functions using
+    /// GetFunctionInfo2 with a COR_PRF_FRAME_INFO obtained from FunctionEnter2.
+    /// </summary>
     COR_PRF_ENABLE_FRAME_INFO = 0X08000000,
 
-    // ENABLE_STACK_SNAPSHOT enables the used of DoStackSnapshot calls.
+    /// <summary>
+    /// ENABLE_STACK_SNAPSHOT enables the used of DoStackSnapshot calls.
+    /// </summary>
     COR_PRF_ENABLE_STACK_SNAPSHOT = 0X10000000,
 
-    // USE_PROFILE_IMAGES causes the native image search to look for profiler-enhanced
-    // images.  If no profiler-enhanced image is found for a given assembly the
-    // runtime will fallback to JIT for that assembly.
+    /// <summary>
+    /// USE_PROFILE_IMAGES causes the native image search to look for profiler-enhanced
+    /// images.  If no profiler-enhanced image is found for a given assembly the
+    /// runtime will fallback to JIT for that assembly.
+    /// </summary>
     COR_PRF_USE_PROFILE_IMAGES = 0x20000000,
 
-    // COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST will disable security
-    // transparency checks normally done during JIT compilation and class loading for
-    // full trust assemblies. This can make some instrumentation easier to perform.
+    /// <summary>
+    /// COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST will disable security
+    /// transparency checks normally done during JIT compilation and class loading for
+    /// full trust assemblies. This can make some instrumentation easier to perform.
+    /// </summary>
     COR_PRF_DISABLE_TRANSPARENCY_CHECKS_UNDER_FULL_TRUST
                                         = 0x40000000,
 
-    // Prevents all NGEN images (including profiler-enhanced images) from loading.  If
-    // this and COR_PRF_USE_PROFILE_IMAGES are both specified,
-    // COR_PRF_DISABLE_ALL_NGEN_IMAGES wins.
+    /// <summary>
+    /// Prevents all NGEN images (including profiler-enhanced images) from loading.  If
+    /// this and COR_PRF_USE_PROFILE_IMAGES are both specified,
+    /// COR_PRF_DISABLE_ALL_NGEN_IMAGES wins.
+    /// </summary>
     COR_PRF_DISABLE_ALL_NGEN_IMAGES = 0x80000000,
 
-    // The mask for valid mask bits
+    /// <summary>
+    /// The mask for valid mask bits
+    /// </summary>
     COR_PRF_ALL = 0x8FFFFFFF,
 
-    // COR_PRF_REQUIRE_PROFILE_IMAGE represents all flags that require profiler-enhanced
-    // images.
+    /// <summary>
+    /// COR_PRF_REQUIRE_PROFILE_IMAGE represents all flags that require profiler-enhanced
+    /// images.
+    /// </summary>
     COR_PRF_REQUIRE_PROFILE_IMAGE = COR_PRF_USE_PROFILE_IMAGES |
                                           COR_PRF_MONITOR_CODE_TRANSITIONS |
                                           COR_PRF_MONITOR_ENTERLEAVE,
@@ -563,9 +641,11 @@ public enum COR_PRF_MONITOR : uint
                                               COR_PRF_USE_PROFILE_IMAGES |
                                               COR_PRF_DISABLE_ALL_NGEN_IMAGES,
 
-    // MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
-    // Trying to change any of these flags elsewhere will result in a
-    // failed HRESULT.
+    /// <summary>
+    /// MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
+    /// Trying to change any of these flags elsewhere will result in a
+    /// failed HRESULT.
+    /// </summary>
     COR_PRF_MONITOR_IMMUTABLE = COR_PRF_MONITOR_CODE_TRANSITIONS |
                                           COR_PRF_MONITOR_REMOTING |
                                           COR_PRF_MONITOR_REMOTING_COOKIE |
@@ -591,7 +671,9 @@ public enum COR_PRF_HIGH_MONITOR : uint
 {
     COR_PRF_HIGH_MONITOR_NONE = 0x00000000,
 
-    // CORECLR DEPRECATION WARNING: This flag is no longer checked by the runtime
+    /// <summary>
+    /// CORECLR DEPRECATION WARNING: This flag is no longer checked by the runtime
+    /// </summary>
     COR_PRF_HIGH_ADD_ASSEMBLY_REFERENCES = 0x00000001,
 
     COR_PRF_HIGH_IN_MEMORY_SYMBOLS_UPDATED = 0x00000002,
@@ -602,17 +684,23 @@ public enum COR_PRF_HIGH_MONITOR : uint
 
     COR_PRF_HIGH_BASIC_GC = 0x00000010,
 
-    // Enables the MovedReferences/MovedReferences2 callback for compacting GCs only.
+    /// <summary>
+    /// Enables the MovedReferences/MovedReferences2 callback for compacting GCs only.
+    /// </summary>
     COR_PRF_HIGH_MONITOR_GC_MOVED_OBJECTS = 0x00000020,
 
     COR_PRF_HIGH_REQUIRE_PROFILE_IMAGE = 0,
 
-    // Enables the large object allocation monitoring according to the LOH threshold.
+    /// <summary>
+    /// Enables the large object allocation monitoring according to the LOH threshold.
+    /// </summary>
     COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED = 0x00000040,
 
     COR_PRF_HIGH_MONITOR_EVENT_PIPE = 0x00000080,
 
-    // Enables the pinned object allocation monitoring.
+    /// <summary>
+    /// Enables the pinned object allocation monitoring.
+    /// </summary>
     COR_PRF_HIGH_MONITOR_PINNEDOBJECT_ALLOCATED = 0x00000100,
 
     COR_PRF_HIGH_ALLOWABLE_AFTER_ATTACH = COR_PRF_HIGH_IN_MEMORY_SYMBOLS_UPDATED |
@@ -631,9 +719,11 @@ public enum COR_PRF_HIGH_MONITOR : uint
                                               COR_PRF_HIGH_MONITOR_LARGEOBJECT_ALLOCATED |
                                               COR_PRF_HIGH_MONITOR_EVENT_PIPE,
 
-    // MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
-    // Trying to change any of these flags elsewhere will result in a
-    // failed HRESULT.
+    /// <summary>
+    /// MONITOR_IMMUTABLE represents all flags that may only be set during initialization.
+    /// Trying to change any of these flags elsewhere will result in a
+    /// failed HRESULT.
+    /// </summary>
     COR_PRF_HIGH_MONITOR_IMMUTABLE = COR_PRF_HIGH_DISABLE_TIERED_COMPILATION
 }
 
@@ -689,18 +779,35 @@ public enum CorOpenFlags : uint
 [Flags]
 public enum CorILMethodFlags
 {
-    CorILMethod_InitLocals = 0x0010,           // call default constructor on all local vars
-    CorILMethod_MoreSects = 0x0008,           // there is another attribute after this one
+    /// <summary>
+    /// call default constructor on all local vars
+    /// </summary>
+    CorILMethod_InitLocals = 0x0010,           
+    /// <summary>
+    /// there is another attribute after this one
+    /// </summary>
+    CorILMethod_MoreSects = 0x0008,           
 
-    CorILMethod_CompressedIL = 0x0040,           // Not used.
+    /// <summary>
+    /// Not used.
+    /// </summary>
+    CorILMethod_CompressedIL = 0x0040,           
 
-    // Indicates the format for the COR_ILMETHOD header
+    /// <summary>
+    /// Indicates the format for the COR_ILMETHOD header
+    /// </summary>
     CorILMethod_FormatShift = 3,
     CorILMethod_FormatMask = (1 << CorILMethod_FormatShift) - 1,
-    CorILMethod_TinyFormat = 0x0002,         // use this code if the code size is even
+    /// <summary>
+    /// use this code if the code size is even
+    /// </summary>
+    CorILMethod_TinyFormat = 0x0002,         
     CorILMethod_SmallFormat = 0x0000,
     CorILMethod_FatFormat = 0x0003,
-    CorILMethod_TinyFormat1 = 0x0006         // use this code if the code size is odd
+    /// <summary>
+    /// use this code if the code size is odd
+    /// </summary>
+    CorILMethod_TinyFormat1 = 0x0006         
 }
 
 public enum COR_PRF_STATIC_TYPE
@@ -740,8 +847,14 @@ public enum COR_PRF_RUNTIME_TYPE
 /// </summary>
 public enum COR_PRF_GC_REASON
 {
-    COR_PRF_GC_INDUCED = 1,     // Induced by GC.Collect
-    COR_PRF_GC_OTHER = 0        // Anything else
+    /// <summary>
+    /// Induced by GC.Collect
+    /// </summary>
+    COR_PRF_GC_INDUCED = 1,     
+    /// <summary>
+    /// Anything else
+    /// </summary>
+    COR_PRF_GC_OTHER = 0        
 }
 
 /// <summary>
@@ -750,10 +863,22 @@ public enum COR_PRF_GC_REASON
 /// </summary>
 public enum COR_PRF_GC_ROOT_KIND
 {
-    COR_PRF_GC_ROOT_STACK = 1,        // Variables on the stack
-    COR_PRF_GC_ROOT_FINALIZER = 2,    // Entry in the finalizer queue
-    COR_PRF_GC_ROOT_HANDLE = 3,        // GC Handle
-    COR_PRF_GC_ROOT_OTHER = 0        //Misc. roots
+    /// <summary>
+    /// Variables on the stack
+    /// </summary>
+    COR_PRF_GC_ROOT_STACK = 1,        
+    /// <summary>
+    /// Entry in the finalizer queue
+    /// </summary>
+    COR_PRF_GC_ROOT_FINALIZER = 2,    
+    /// <summary>
+    /// GC Handle
+    /// </summary>
+    COR_PRF_GC_ROOT_HANDLE = 3,        
+    /// <summary>
+    /// Misc. roots
+    /// </summary>
+    COR_PRF_GC_ROOT_OTHER = 0        
 }
 
 /// <summary>
@@ -762,11 +887,23 @@ public enum COR_PRF_GC_ROOT_KIND
 /// </summary>
 public enum COR_PRF_GC_ROOT_FLAGS
 {
-    COR_PRF_GC_ROOT_PINNING = 0x1,    // Prevents GC from moving the object
-    COR_PRF_GC_ROOT_WEAKREF = 0x2,    // Does not prevent collection
-    COR_PRF_GC_ROOT_INTERIOR = 0x4,   // Refers to a field of the object rather than the object itself
-    COR_PRF_GC_ROOT_REFCOUNTED = 0x8 // Whether it prevents collection depends on a refcount - if not,
-                                     // COR_PRF_GC_ROOT_WEAKREF will be set also
+    /// <summary>
+    /// Prevents GC from moving the object
+    /// </summary>
+    COR_PRF_GC_ROOT_PINNING = 0x1,    
+    /// <summary>
+    /// Does not prevent collection
+    /// </summary>
+    COR_PRF_GC_ROOT_WEAKREF = 0x2,    
+    /// <summary>
+    /// Refers to a field of the object rather than the object itself
+    /// </summary>
+    COR_PRF_GC_ROOT_INTERIOR = 0x4,   
+    /// <summary>
+    /// Whether it prevents collection depends on a refcount - if not,
+    /// COR_PRF_GC_ROOT_WEAKREF will be set also
+    /// </summary>
+    COR_PRF_GC_ROOT_REFCOUNTED = 0x8 
 }
 
 /// <summary>
@@ -776,11 +913,15 @@ public enum COR_PRF_SNAPSHOT_INFO : uint
 {
     COR_PRF_SNAPSHOT_DEFAULT = 0x0,
 
-    // Return a register context for each frame
+    /// <summary>
+    /// Return a register context for each frame
+    /// </summary>
     COR_PRF_SNAPSHOT_REGISTER_CONTEXT = 0x1,
 
-    // Use a quicker stack walk algorithm based on the EBP frame chain. This is available
-    // on x86 only.
+    /// <summary>
+    /// Use a quicker stack walk algorithm based on the EBP frame chain. This is available
+    /// on x86 only.
+    /// </summary>
     COR_PRF_SNAPSHOT_X86_OPTIMIZED = 0x2
 }
 
@@ -798,10 +939,12 @@ public unsafe struct COR_PRF_EVENTPIPE_PROVIDER_CONFIG
     public char* ProviderName;
     public ulong Keywords;
     public uint LoggingLevel;
-    // filterData expects a semicolon delimited string that defines key value pairs
-    // such as "key1=value1;key2=value2;". Quotes can be used to escape the '=' and ';'
-    // characters. These key value pairs will be passed in the enable callback to event
-    // providers
+    /// <summary>
+    /// filterData expects a semicolon delimited string that defines key value pairs
+    /// such as "key1=value1;key2=value2;". Quotes can be used to escape the '=' and ';'
+    /// characters. These key value pairs will be passed in the enable callback to event
+    /// providers
+    /// </summary>
     public char* FilterData;
 }
 
@@ -827,7 +970,9 @@ public readonly struct EVENTPIPE_EVENT
 public unsafe struct COR_PRF_EVENTPIPE_PARAM_DESC
 {
     public uint Type;
-    // Used if type == ArrayType
+    /// <summary>
+    /// Used if type == ArrayType
+    /// </summary>
     public uint ElementType;
     public char* Name;
 }
@@ -1019,7 +1164,9 @@ public enum CorPinvokeMap : uint
     /// </summary>
     pmNoMangle = 0x0001,
 
-    // Use this mask to retrieve the CharSet information.
+    /// <summary>
+    /// Use this mask to retrieve the CharSet information.
+    /// </summary>
     pmCharSetMask = 0x0006,
     pmCharSetNotSpec = 0x0000,
     pmCharSetAnsi = 0x0002,
@@ -1037,14 +1184,25 @@ public enum CorPinvokeMap : uint
     pmThrowOnUnmappableCharDisabled = 0x2000,
     pmThrowOnUnmappableCharMask = 0x3000,
 
-    pmSupportsLastError = 0x0040,   // Information about target function. Not relevant for fields.
+    /// <summary>
+    /// Information about target function. Not relevant for fields.
+    /// </summary>
+    pmSupportsLastError = 0x0040,   
 
-    // None of the calling convention flags is relevant for fields.
+    /// <summary>
+    /// None of the calling convention flags is relevant for fields.
+    /// </summary>
     pmCallConvMask = 0x0700,
-    pmCallConvWinapi = 0x0100,   // Pinvoke will use native callconv appropriate to target windows platform.
+    /// <summary>
+    /// Pinvoke will use native callconv appropriate to target windows platform.
+    /// </summary>
+    pmCallConvWinapi = 0x0100,   
     pmCallConvCdecl = 0x0200,
     pmCallConvStdcall = 0x0300,
-    pmCallConvThiscall = 0x0400,   // In M9, pinvoke will raise exception.
+    /// <summary>
+    /// In M9, pinvoke will raise exception.
+    /// </summary>
+    pmCallConvThiscall = 0x0400,   
     pmCallConvFastcall = 0x0500,
 
     pmMaxValue = 0xFFFF
@@ -1068,39 +1226,91 @@ public enum CorElementTypes : uint
     ELEMENT_TYPE_R8 = 0x0d,
     ELEMENT_TYPE_STRING = 0x0e,
 
-    // every type above PTR will be simple type
-    ELEMENT_TYPE_PTR = 0x0f,     // PTR <type>
-    ELEMENT_TYPE_BYREF = 0x10,     // BYREF <type>
+    /// <summary>
+    /// every type above PTR will be simple type
+    /// </summary>
+    ELEMENT_TYPE_PTR = 0x0f,     
+    /// <summary>
+    /// BYREF &lt;type&gt;
+    /// </summary>
+    ELEMENT_TYPE_BYREF = 0x10,     
 
-    // Please use ELEMENT_TYPE_VALUETYPE. ELEMENT_TYPE_VALUECLASS is deprecated.
-    ELEMENT_TYPE_VALUETYPE = 0x11,     // VALUETYPE <class Token>
-    ELEMENT_TYPE_CLASS = 0x12,     // CLASS <class Token>
-    ELEMENT_TYPE_VAR = 0x13,     // a class type variable VAR <number>
-    ELEMENT_TYPE_ARRAY = 0x14,     // MDARRAY <type> <rank> <bcount> <bound1> ... <lbcount> <lb1> ...
-    ELEMENT_TYPE_GENERICINST = 0x15,     // GENERICINST <generic type> <argCnt> <arg1> ... <argn>
-    ELEMENT_TYPE_TYPEDBYREF = 0x16,     // TYPEDREF  (it takes no args) a typed reference to some other type
+    /// <summary>
+    /// Please use ELEMENT_TYPE_VALUETYPE. ELEMENT_TYPE_VALUECLASS is deprecated.
+    /// </summary>
+    ELEMENT_TYPE_VALUETYPE = 0x11,     
+    /// <summary>
+    /// CLASS &lt;class Token&gt;
+    /// </summary>
+    ELEMENT_TYPE_CLASS = 0x12,     
+    /// <summary>
+    /// a class type variable VAR &lt;number&gt;
+    /// </summary>
+    ELEMENT_TYPE_VAR = 0x13,
+    /// <summary>
+    /// MDARRAY &lt;type&gt; &lt;rank&gt; &lt;bcount&gt; &lt;bound1&gt; ... &lt;lbcount&gt; &lt;lb1&gt; ...
+    /// </summary>
+    ELEMENT_TYPE_ARRAY = 0x14,
+    /// <summary>
+    /// GENERICINST &lt;generic type&gt; &lt;argCnt&gt; &lt;arg1&gt; ... &lt;argn&gt;
+    /// </summary>
+    ELEMENT_TYPE_GENERICINST = 0x15,     
+    /// <summary>
+    /// TYPEDREF  (it takes no args) a typed reference to some other type
+    /// </summary>
+    ELEMENT_TYPE_TYPEDBYREF = 0x16,     
 
-    ELEMENT_TYPE_I = 0x18,     // native integer size
-    ELEMENT_TYPE_U = 0x19,     // native unsigned integer size
-    ELEMENT_TYPE_FNPTR = 0x1b,     // FNPTR <complete sig for the function including calling convention>
-    ELEMENT_TYPE_OBJECT = 0x1c,     // Shortcut for System.Object
-    ELEMENT_TYPE_SZARRAY = 0x1d,     // Shortcut for single dimension zero lower bound array
-                                     // SZARRAY <type>
-    ELEMENT_TYPE_MVAR = 0x1e,     // a method type variable MVAR <number>
+    /// <summary>
+    /// native integer size
+    /// </summary>
+    ELEMENT_TYPE_I = 0x18,     
+    /// <summary>
+    /// native unsigned integer size
+    /// </summary>
+    ELEMENT_TYPE_U = 0x19,
+    /// <summary>
+    /// FNPTR &lt;complete sig for the function including calling convention&gt;
+    /// </summary>
+    ELEMENT_TYPE_FNPTR = 0x1b,     
+    /// <summary>
+    /// Shortcut for System.Object
+    /// </summary>
+    ELEMENT_TYPE_OBJECT = 0x1c,
+    /// <summary>
+    /// Shortcut for single dimension zero lower bound array
+    /// SZARRAY &lt;type&gt;
+    /// </summary>
+    ELEMENT_TYPE_SZARRAY = 0x1d,
+    /// <summary>
+    /// a method type variable MVAR &lt;number&gt;
+    /// </summary>
+    ELEMENT_TYPE_MVAR = 0x1e,
 
-    // This is only for binding
-    ELEMENT_TYPE_CMOD_REQD = 0x1f,     // required C modifier : E_T_CMOD_REQD <mdTypeRef/mdTypeDef>
-    ELEMENT_TYPE_CMOD_OPT = 0x20,     // optional C modifier : E_T_CMOD_OPT <mdTypeRef/mdTypeDef>
+    /// <summary>
+    /// required C modifier : E_T_CMOD_REQD &lt;mdTypeRef/mdTypeDef&gt;
+    /// </summary>
+    ELEMENT_TYPE_CMOD_REQD = 0x1f,
+    /// <summary>
+    /// optional C modifier : E_T_CMOD_OPT &lt;mdTypeRef/mdTypeDef&gt;
+    /// </summary>
+    ELEMENT_TYPE_CMOD_OPT = 0x20,     
 
-    // This is for signatures generated internally (which will not be persisted in any way).
-    ELEMENT_TYPE_INTERNAL = 0x21,     // INTERNAL <typehandle>
+    /// <summary>
+    /// This is for signatures generated internally (which will not be persisted in any way).
+    /// </summary>
+    ELEMENT_TYPE_INTERNAL = 0x21,     
 
-    // Note that this is the max of base type excluding modifiers
-    ELEMENT_TYPE_MAX = 0x22,     // first invalid element type
+    /// <summary>
+    /// Note that this is the max of base type excluding modifiers
+    /// </summary>
+    ELEMENT_TYPE_MAX = 0x22,     
 
 
     ELEMENT_TYPE_MODIFIER = 0x40,
-    ELEMENT_TYPE_SENTINEL = 0x01 | ELEMENT_TYPE_MODIFIER, // sentinel for varargs
+    /// <summary>
+    /// sentinel for varargs
+    /// </summary>
+    ELEMENT_TYPE_SENTINEL = 0x01 | ELEMENT_TYPE_MODIFIER, 
     ELEMENT_TYPE_PINNED = 0x05 | ELEMENT_TYPE_MODIFIER
 }
 
@@ -1109,14 +1319,31 @@ public enum CorElementTypes : uint
 /// </summary>
 public enum CorParamAttr
 {
-    pdIn = 0x0001,     // Param is [In]
-    pdOut = 0x0002,     // Param is [out]
-    pdOptional = 0x0010,     // Param is optional
+    /// <summary>
+    /// Param is [In]
+    /// </summary>
+    pdIn = 0x0001,     
+    /// <summary>
+    /// Param is [out]
+    /// </summary>
+    pdOut = 0x0002,     
+    /// <summary>
+    /// Param is optional
+    /// </summary>
+    pdOptional = 0x0010,     
 
-    // Reserved flags for Runtime use only.
+    /// <summary>
+    /// Reserved flags for Runtime use only.
+    /// </summary>
     pdReservedMask = 0xf000,
-    pdHasDefault = 0x1000,     // Param has default value.
-    pdHasFieldMarshal = 0x2000,     // Param has FieldMarshal.
+    /// <summary>
+    /// Param has default value.
+    /// </summary>
+    pdHasDefault = 0x1000,     
+    /// <summary>
+    /// Param has FieldMarshal.
+    /// </summary>
+    pdHasFieldMarshal = 0x2000,     
 
     pdUnused = 0xcfe0
 }
@@ -1155,9 +1382,18 @@ public enum CorSaveSize
 [StructLayout(LayoutKind.Sequential)]
 public struct COR_SECATTR
 {
-    public MdMemberRef tkCtor;         // Ref to constructor of security attribute.
-    public IntPtr pCustomAttribute;  // Blob describing ctor args and field/property values.
-    public uint cbCustomAttribute;  // Length of the above blob.
+    /// <summary>
+    /// Ref to constructor of security attribute.
+    /// </summary>
+    public MdMemberRef tkCtor;         
+    /// <summary>
+    /// Blob describing ctor args and field/property values.
+    /// </summary>
+    public IntPtr pCustomAttribute;  
+    /// <summary>
+    /// Length of the above blob.
+    /// </summary>
+    public uint cbCustomAttribute;  
 }
 
 public readonly record struct ObjectHandleId(nint Value);
