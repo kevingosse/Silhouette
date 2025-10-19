@@ -23,12 +23,9 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     {
         get
         {
-            if (_metaDataImport == null)
-            {
-                _metaDataImport = _corProfilerInfo.GetModuleMetaDataImport(_moduleId, CorOpenFlags.ofRead)
-                    .ThrowIfFailed()
-                    .Wrap();
-            }
+            _metaDataImport ??= _corProfilerInfo.GetModuleMetaDataImport(_moduleId, CorOpenFlags.ofRead)
+                .ThrowIfFailed()
+                .Wrap();
 
             return _metaDataImport;
         }
@@ -172,13 +169,13 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         return new MyMemberRef(props.Name, MDToken.ToRID(token), sig, parent);
     }
 
-    private TypeDef ResolveTypeDef(uint tokenValue, GenericParamContext gpContext)
+    private TypeDef ResolveTypeDef(uint tokenValue, GenericParamContext _)
     {
         var typeDefProps = MetaDataImport.Value.GetTypeDefProps(new((int)tokenValue)).ThrowIfFailed();
         return new TypeDefUser(new(typeDefProps.TypeName));
     }
 
-    private TypeRef ResolveTypeRef(uint tokenValue, GenericParamContext gpContext)
+    private TypeRef ResolveTypeRef(uint tokenValue, GenericParamContext _)
     {
         var typeRefProps = MetaDataImport.Value.GetTypeRefProps(new((int)tokenValue)).ThrowIfFailed();
         return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName));
