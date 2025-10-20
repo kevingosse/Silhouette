@@ -8,7 +8,7 @@ namespace Silhouette.IL;
 
 public sealed class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider
 {
-    private ComPtr<IMetaDataImport> _metaDataImport;
+    private ComPtr<IMetaDataImport2> _metaDataImport;
     private ComPtr<IMetaDataEmit> _metaDataEmit;
     private CorLibTypes _corLibTypes;
 
@@ -21,11 +21,11 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         _corProfilerInfo = corProfilerInfo;
     }
 
-    private ComPtr<IMetaDataImport> MetaDataImport
+    private ComPtr<IMetaDataImport2> MetaDataImport
     {
         get
         {
-            _metaDataImport ??= _corProfilerInfo.GetModuleMetaDataImport(_moduleId, CorOpenFlags.ofRead)
+            _metaDataImport ??= _corProfilerInfo.GetModuleMetaDataImport2(_moduleId, CorOpenFlags.ofRead)
                 .ThrowIfFailed()
                 .Wrap();
 
@@ -111,7 +111,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
             //Table.ExportedType => ResolveExportedType(rid),
             //Table.ManifestResource => ResolveManifestResource(rid),
             //Table.GenericParam => ResolveGenericParam(rid),
-            //Table.MethodSpec => ResolveMethodSpec(rid, gpContext),
+            Table.MethodSpec => ResolveMethodSpec(token, gpContext),
             //Table.GenericParamConstraint => ResolveGenericParamConstraint(rid, gpContext),
             _ => null
         };
@@ -122,6 +122,23 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
 
         return result;
+    }
+
+    private MethodSpecUser ResolveMethodSpec(uint token, GenericParamContext gpContext)
+    {
+        var props = MetaDataImport.Value.GetMethodSpecProps(new MdMethodSpec((int)token)).ThrowIfFailed();
+
+        var parentToken = (uint)props.Parent.Value;
+
+        IMethodDefOrRef parent = MDToken.ToTable(parentToken) switch
+        {
+            Table.Method => ResolveMethod(parentToken),
+            Table.MemberRef => ResolveMemberRef(parentToken, gpContext),
+            _ => null
+        };
+
+        var sig = ReadSignature(props.Signature);
+        return new MethodSpecUser(parent, (GenericInstMethodSig)sig) { Rid = MDToken.ToRID(token) };
     }
 
     private unsafe StandAloneSigUser ResolveStandAloneSig(uint token, GenericParamContext _)
