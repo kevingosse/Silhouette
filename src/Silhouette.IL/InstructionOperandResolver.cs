@@ -91,7 +91,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
             //Table.Module => ResolveModule(rid),
             Table.TypeRef => ResolveTypeRef(token, gpContext),
             Table.TypeDef => ResolveTypeDef(token, gpContext),
-            //Table.Field => ResolveField(rid),
+            Table.Field => ResolveField(token),
             Table.Method => ResolveMethod(token),
             //Table.Param => ResolveParam(rid),
             //Table.InterfaceImpl => ResolveInterfaceImpl(rid, gpContext),
@@ -122,6 +122,17 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
 
         return result;
+    }
+
+    private FieldDefUser ResolveField(uint token)
+    {
+        var props = MetaDataImport.Value.GetFieldProps(new((int)token)).ThrowIfFailed();
+        var sig = ReadSignature(props.Signature);
+
+        return new FieldDefUser(props.Name, (FieldSig)sig, (FieldAttributes)props.Attributes)
+        {
+            Rid = MDToken.ToRID(token)
+        };
     }
 
     private MethodSpecUser ResolveMethodSpec(uint token, GenericParamContext gpContext)
