@@ -4,10 +4,10 @@ namespace Silhouette.IL;
 
 public class CorLibTypes : ICorLibTypes, IDisposable
 {
-    private readonly ComPtr<IMetaDataImport> _metadataImport;
-    private readonly ComPtr<IMetaDataImport> _corLibMetadataImport;
+    private readonly ComPtr<IMetaDataImport2> _metadataImport;
+    private readonly ComPtr<IMetaDataImport2> _corLibMetadataImport;
 
-    public static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport> metadataImport, ICorProfilerInfo3 corProfilerInfo)
+    public static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport2> metadataImport, ICorProfilerInfo3 corProfilerInfo)
     {
         var (result, corLib) = FindCorLib(corProfilerInfo);
 
@@ -21,13 +21,13 @@ public class CorLibTypes : ICorLibTypes, IDisposable
         return new CorLibTypes(metadataImport, corLibPtr);
     }
 
-    private CorLibTypes(ComPtr<IMetaDataImport> metadataImport, ComPtr<IMetaDataImport> corLibMetadataImport)
+    private CorLibTypes(ComPtr<IMetaDataImport2> metadataImport, ComPtr<IMetaDataImport2> corLibMetadataImport)
     {
         _metadataImport = metadataImport.Copy();
         _corLibMetadataImport = corLibMetadataImport.Copy();
     }
 
-    private static HResult<IMetaDataImport> FindCorLib(ICorProfilerInfo3 corProfilerInfo)
+    private static HResult<IMetaDataImport2> FindCorLib(ICorProfilerInfo3 corProfilerInfo)
     {
         var (result, moduleEnumerator) = corProfilerInfo.EnumModules();
 
@@ -55,7 +55,7 @@ public class CorLibTypes : ICorLibTypes, IDisposable
             {
                 // TODO: use ofWrite only if needed
                 // TODO: double check if this is the correct module
-                return corProfilerInfo.GetModuleMetaDataImport(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite);
+                return corProfilerInfo.GetModuleMetaDataImport2(module, CorOpenFlags.ofRead | CorOpenFlags.ofWrite);
             }
         }
 
