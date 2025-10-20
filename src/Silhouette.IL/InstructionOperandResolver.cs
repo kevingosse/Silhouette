@@ -10,6 +10,8 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
 {
     private ComPtr<IMetaDataImport> _metaDataImport;
     private ComPtr<IMetaDataEmit> _metaDataEmit;
+    private CorLibTypes _corLibTypes;
+
     private readonly ICorProfilerInfo3 _corProfilerInfo;
     private readonly ModuleId _moduleId;
 
@@ -46,6 +48,15 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
     }
 
+    private CorLibTypes CorLibTypes
+    {
+        get
+        {
+            _corLibTypes ??= CorLibTypes.Create(MetaDataImport, _corProfilerInfo).ThrowIfFailed();
+            return _corLibTypes;
+        }
+    }
+
     public IMDTokenProvider ResolveToken(uint token, GenericParamContext gpContext)
     {
         if (token == 0)
@@ -75,11 +86,11 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         //        throw new NotSupportedException($"Token type {MDToken.ToTable(token)} is not supported.");
         //}
 
-        var result = MDToken.ToTable(token) switch
+        IMDTokenProvider result = MDToken.ToTable(token) switch
         {
             //Table.Module => ResolveModule(rid),
-            //Table.TypeRef => ResolveTypeRef(rid),
-            //Table.TypeDef => ResolveTypeDef(rid),
+            Table.TypeRef => ResolveTypeRef(token, gpContext),
+            Table.TypeDef => ResolveTypeDef(token, gpContext),
             //Table.Field => ResolveField(rid),
             Table.Method => ResolveMethod(token),
             //Table.Param => ResolveParam(rid),
@@ -88,7 +99,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
             //Table.Constant => ResolveConstant(rid),
             //Table.DeclSecurity => ResolveDeclSecurity(rid),
             //Table.ClassLayout => ResolveClassLayout(rid),
-            //Table.StandAloneSig => ResolveStandAloneSig(rid, gpContext),
+            Table.StandAloneSig => ResolveStandAloneSig(token, gpContext),
             //Table.Event => ResolveEvent(rid),
             //Table.Property => ResolveProperty(rid),
             //Table.ModuleRef => ResolveModuleRef(rid),
@@ -107,30 +118,35 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
 
         if (result == null)
         {
-            Console.WriteLine($"Unsupported token: {token:x2}");
+            Console.WriteLine($"Unsupported token: {token:x2} - ({MDToken.ToTable(token)})");
         }
 
         return result;
     }
 
-    private unsafe IMethodDefOrRef ResolveMethod(uint token)
+    private unsafe StandAloneSigUser ResolveStandAloneSig(uint token, GenericParamContext _)
     {
-        var props = MetaDataImport.Value.GetMethodProps(new((int)token)).ThrowIfFailed();
+        var signature = MetaDataImport.Value.GetSigFromToken(new((int)token)).ThrowIfFailed();
 
-        var dataStream = DataStreamFactory.Create((byte*)props.Signature.Ptr);
-        var dataReader = new DataReader(dataStream, 0, (uint)props.Signature.Length);
+        using var corLibTypes = CorLibTypes.Create(MetaDataImport, _corProfilerInfo).ThrowIfFailed();
 
-        var (result, corLibTypes) = CorLibTypes.Create(MetaDataImport, _corProfilerInfo);
-
-        if (!result)
-        {
-            Console.WriteLine($"Failed to create CorLibTypes: {result}");
-            return null;
-        }
-
-        using var _ = corLibTypes;
+        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
+        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
 
         var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
+
+        return sig switch
+        {
+            LocalSig localSig => new StandAloneSigUser(localSig) { Rid = MDToken.ToRID(token) },
+            MethodSig methodSig => new StandAloneSigUser(methodSig) { Rid = MDToken.ToRID(token) },
+            _ => null
+        };
+    }
+
+    private MethodDefUser ResolveMethod(uint token)
+    {
+        var props = MetaDataImport.Value.GetMethodProps(new((int)token)).ThrowIfFailed();
+        var sig = ReadSignature(props.Signature);
 
         var methodDef = new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags)
         {
@@ -140,9 +156,17 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         return methodDef;
     }
 
-    private unsafe MemberRef ResolveMemberRef(uint token, GenericParamContext gpContext)
+    private unsafe CallingConventionSig ReadSignature(NativePointer<byte> signature)
     {
-        var props = _metaDataImport.Value.GetMemberRefProps(new MdMemberRef((int)token)).ThrowIfFailed();
+        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
+        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
+
+        return SignatureReader.ReadSig(this, CorLibTypes, dataReader);
+    }
+
+    private MyMemberRef ResolveMemberRef(uint token, GenericParamContext gpContext)
+    {
+        var props = MetaDataImport.Value.GetMemberRefProps(new MdMemberRef((int)token)).ThrowIfFailed();
 
         IMemberRefParent parent = null;
 
@@ -151,34 +175,20 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
             parent = ResolveTypeRef((uint)props.Token.Value, gpContext);
         }
 
-        var dataStream = DataStreamFactory.Create((byte*)props.Signature.Ptr);
-        var dataReader = new DataReader(dataStream, 0, (uint)props.Signature.Length);
-
-        var (result, corLibTypes) = CorLibTypes.Create(MetaDataImport, _corProfilerInfo);
-
-        if (!result)
-        {
-            Console.WriteLine($"Failed to create CorLibTypes: {result}");
-            return null;
-        }
-
-        using var _ = corLibTypes;
-
-        var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
-
+        var sig = ReadSignature(props.Signature);
         return new MyMemberRef(props.Name, MDToken.ToRID(token), sig, parent);
     }
 
-    private TypeDef ResolveTypeDef(uint tokenValue, GenericParamContext _)
+    private TypeDefUser ResolveTypeDef(uint tokenValue, GenericParamContext _)
     {
         var typeDefProps = MetaDataImport.Value.GetTypeDefProps(new((int)tokenValue)).ThrowIfFailed();
-        return new TypeDefUser(new(typeDefProps.TypeName));
+        return new TypeDefUser(new(typeDefProps.TypeName)) { Rid = MDToken.ToRID(tokenValue) };
     }
 
-    private TypeRef ResolveTypeRef(uint tokenValue, GenericParamContext _)
+    private TypeRefUser ResolveTypeRef(uint tokenValue, GenericParamContext _)
     {
         var typeRefProps = MetaDataImport.Value.GetTypeRefProps(new((int)tokenValue)).ThrowIfFailed();
-        return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName));
+        return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName)) { Rid = MDToken.ToRID(tokenValue) };
     }
 
 #pragma warning disable IDE0003 - Qualifier 'this.' is redundant
