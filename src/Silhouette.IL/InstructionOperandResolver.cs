@@ -103,7 +103,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
             //Table.Event => ResolveEvent(rid),
             //Table.Property => ResolveProperty(rid),
             //Table.ModuleRef => ResolveModuleRef(rid),
-            //Table.TypeSpec => ResolveTypeSpec(rid, gpContext),
+            Table.TypeSpec => ResolveTypeSpec(token, gpContext),
             //Table.ImplMap => ResolveImplMap(rid),
             //Table.Assembly => ResolveAssembly(rid),
             //Table.AssemblyRef => ResolveAssemblyRef(rid),
@@ -122,6 +122,14 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
 
         return result;
+    }
+
+    private TypeSpecUser ResolveTypeSpec(uint token, GenericParamContext _)
+    {
+        var signature = MetaDataImport.Value.GetTypeSpecFromToken(new((int)token)).ThrowIfFailed();
+        var typeSig = ReadTypeSignature(signature);
+
+        return new TypeSpecUser(typeSig) { Rid = MDToken.ToRID(token) };
     }
 
     private FieldDefUser ResolveField(uint token)
@@ -188,6 +196,14 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
 
         return SignatureReader.ReadSig(this, CorLibTypes, dataReader);
+    }
+
+    private unsafe TypeSig ReadTypeSignature(NativePointer<byte> signature)
+    {
+        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
+        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
+
+        return SignatureReader.ReadTypeSig(this, CorLibTypes, dataReader);
     }
 
     private MyMemberRef ResolveMemberRef(uint token, GenericParamContext gpContext)
