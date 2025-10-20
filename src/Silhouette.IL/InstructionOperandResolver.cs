@@ -128,12 +128,10 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     {
         var signature = MetaDataImport.Value.GetSigFromToken(new((int)token)).ThrowIfFailed();
 
-        using var corLibTypes = CorLibTypes.Create(MetaDataImport, _corProfilerInfo).ThrowIfFailed();
-
         var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
         var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
 
-        var sig = SignatureReader.ReadSig(this, corLibTypes, dataReader);
+        var sig = SignatureReader.ReadSig(this, CorLibTypes, dataReader);
 
         return sig switch
         {
@@ -191,7 +189,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName)) { Rid = MDToken.ToRID(tokenValue) };
     }
 
-#pragma warning disable IDE0003 - Qualifier 'this.' is redundant
+#pragma warning disable IDE0003 // Qualifier 'this.' is redundant
     private class MyMemberRef : MemberRef
     {
         public MyMemberRef(string name, uint rid, CallingConventionSig sig, IMemberRefParent parent)
@@ -219,7 +217,9 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
 
     public void Dispose()
     {
-        MetaDataImport.Dispose();
+        _metaDataImport?.Dispose();
+        _metaDataEmit?.Dispose();
+        _corLibTypes?.Dispose();
     }
 
     public ITypeDefOrRef ResolveTypeDefOrRef(uint codedToken, GenericParamContext gpContext)
