@@ -58,7 +58,7 @@ public class ClassFactory : IClassFactory
     {
         var newCount = Interlocked.Decrement(ref _refCount);
 
-        if (newCount == 0)
+        if (newCount == 0 && _handle.IsAllocated)
         {
             _handle.Free();
         }
