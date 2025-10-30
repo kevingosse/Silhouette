@@ -1,20 +1,30 @@
 ﻿using Silhouette.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace Silhouette;
 
 public class ClassFactory : IClassFactory
 {
     private readonly NativeObjects.IClassFactory _classFactory;
-
     private readonly CorProfilerCallbackBase _corProfilerCallback;
 
-    public ClassFactory(CorProfilerCallbackBase corProfilerCallback)
+    private GCHandle _handle;
+    private int _refCount;
+
+    private ClassFactory(CorProfilerCallbackBase corProfilerCallback)
     {
         _classFactory = NativeObjects.IClassFactory.Wrap(this);
         _corProfilerCallback = corProfilerCallback;
+        _handle = GCHandle.Alloc(this);
+        _refCount = 1;
     }
 
     public nint IClassFactory => _classFactory;
+
+    public static IntPtr For(CorProfilerCallbackBase corProfilerCallback)
+    {
+        return new ClassFactory(corProfilerCallback).IClassFactory;
+    }
 
     public HResult CreateInstance(nint outer, in Guid guid, out nint instance)
     {
@@ -41,11 +51,18 @@ public class ClassFactory : IClassFactory
 
     public int AddRef()
     {
-        return 1;
+        return Interlocked.Increment(ref _refCount);
     }
 
     public int Release()
     {
-        return 0;
+        var newCount = Interlocked.Decrement(ref _refCount);
+
+        if (newCount == 0)
+        {
+            _handle.Free();
+        }
+
+        return newCount;
     }
 }
