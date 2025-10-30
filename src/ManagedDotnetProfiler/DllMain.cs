@@ -6,8 +6,6 @@ namespace ManagedDotnetProfiler;
 
 public static class DllMain
 {
-    private static ClassFactory Instance;
-
     [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
     public static unsafe HResult DllGetClassObject(Guid* rclsid, Guid* riid, nint* ppv)
     {
@@ -16,8 +14,7 @@ public static class DllMain
             return HResult.E_NOINTERFACE;
         }
 
-        Instance = new ClassFactory(new CorProfiler());
-        *ppv = Instance.IClassFactory;
+        *ppv = ClassFactory.For(new CorProfiler());
 
         return 0;
     }
