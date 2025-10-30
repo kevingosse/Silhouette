@@ -66,7 +66,7 @@ public readonly struct HResult : IEquatable<HResult>
         { unchecked((int)0x80131380), ("CORPROF_E_CALLBACK6_REQUIRED", "Profiler must implement ICorProfilerCallback6 interface for this call to be supported.") },
         { unchecked((int)0x80131382), ("CORPROF_E_CALLBACK7_REQUIRED", "Profiler must implement ICorProfilerCallback7 interface for this call to be supported.") },
         { unchecked((int)0x80131383), ("CORPROF_E_REJIT_INLINING_DISABLED", "The runtime's tracking of inlined methods for ReJIT is not enabled.") },
-        { unchecked((int)0x80131388), ("CORPROF_E_SUSPENSION_IN_PROGRESS", "The runtime cannot be suspened since a suspension is already in progress.") },
+        { unchecked((int)0x80131388), ("CORPROF_E_SUSPENSION_IN_PROGRESS", "The runtime cannot be suspended since a suspension is already in progress.") },
         { unchecked((int)0x80131389), ("CORPROF_E_NOT_GC_OBJECT", "This object belongs to a non-gc heap.") },
         { unchecked((int)0x8013138a), ("CORPROF_E_MODULE_IS_ENC", "The module is EnC") }
     };
