@@ -103,13 +103,18 @@ public readonly struct HResult : IEquatable<HResult>
         return code.ToString("x8");
     }
 
+    internal static bool IsKnownError(int code)
+    {
+        return KnownErrorCodes.ContainsKey(code);
+    }
+
     public override string ToString() => ToString(Code);
 
     public void ThrowIfFailed()
     {
         if (Code < 0)
         {
-            throw new Win32Exception(this);
+            throw new Win32Exception(Code, IsKnownError(Code) ? ToString(Code) : null);
         }
     }
 
@@ -153,7 +158,7 @@ public readonly struct HResult<T> : IEquatable<HResult<T>>
     {
         if (Error.Code < 0)
         {
-            throw new Win32Exception(Error);
+            throw new Win32Exception(Error, HResult.IsKnownError(Error.Code) ? HResult.ToString(Error.Code) : null);
         }
 
         return Result;
