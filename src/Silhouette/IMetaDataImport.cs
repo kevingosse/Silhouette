@@ -122,9 +122,8 @@ public class IMetaDataImport : Interfaces.IUnknown
         }
 
         Span<char> buffer = stackalloc char[(int)length];
-
         (result, var typeDefProps) = GetTypeDefProps(typeDef, buffer, out _);
-
+        
         return new(result, new(buffer.WithoutNullTerminator(), typeDefProps.TypeDefFlags, typeDefProps.Extends));
     }
 
@@ -133,7 +132,7 @@ public class IMetaDataImport : Interfaces.IUnknown
         fixed (char* szTypeDef = typeName)
         {
             var result = _impl.GetTypeDefProps(typeDef, szTypeDef, (uint)typeName.Length, out typeNameLength, out var typeDefFlags, out var extends);                
-            return new(result, new(typeDefFlags, extends));
+            return new(result, new((CorTypeAttr)typeDefFlags, extends));
         }
     }
 
