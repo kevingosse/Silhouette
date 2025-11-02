@@ -33,8 +33,6 @@ using System.Runtime.InteropServices;
 
 internal class DllMain
 {
-    private static ClassFactory Instance;
-
     [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
     public static unsafe HResult DllGetClassObject(Guid* rclsid, Guid* riid, nint* ppv)
     {
@@ -44,8 +42,7 @@ internal class DllMain
             return HResult.E_NOINTERFACE;
         }
 
-        Instance = new ClassFactory(new CorProfiler());
-        *ppv = Instance.IClassFactory;
+        *ppv = ClassFactory.For(new CorProfiler());
 
         return 0;
     }
@@ -85,4 +82,3 @@ Use the `ICorProfilerInfoXx` fields to access the `ICorProfilerInfo` APIs:
 ```
 
 Most methods return an instance of `HResult<T>`. You can deconstruct it into a `(HResult error, T result)` and manually check the error code. You can also use the `ThrowIfFailed()` method that will return only the result and throw a `Win32Exception` if the error code is not `S_OK`.
-
