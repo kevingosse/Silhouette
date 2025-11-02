@@ -1439,7 +1439,7 @@ public enum CorTypeAttr : uint
 
     tdReservedMask = 0x00040800,
     tdRTSpecialName = 0x00000800,
-    tdHasSecurity = 0x00040000,
+    tdHasSecurity = 0x00040000
 }
 
 public readonly record struct ObjectHandleId(nint Value);
