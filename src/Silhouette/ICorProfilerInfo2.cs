@@ -22,7 +22,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         return _impl.SetEnterLeaveFunctionHooks2(funcEnter, funcLeave, funcTailcall);
     }
 
-    public unsafe HResult<FunctionInfo> GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, ReadOnlySpan<ClassId> typeArgs, out uint nbTypeArgs)
+    public unsafe HResult<FunctionInfo> GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, Span<ClassId> typeArgs, out uint nbTypeArgs)
     {
         fixed (ClassId* pTypeArgs = typeArgs)
         {
@@ -51,7 +51,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         }
     }
 
-    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, ReadOnlySpan<ClassId> typeArgs, out uint numTypeArgs)
+    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, Span<ClassId> typeArgs, out uint numTypeArgs)
     {
         fixed (ClassId* pTypeArgs = typeArgs)
         {
