@@ -51,7 +51,7 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         }
     }
 
-    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, ReadOnlySpan<ClassId> typeArgs, out uint numTypeArgs)
+    public unsafe HResult<ClassIdInfo2> GetClassIDInfo2(ClassId classId, Span<ClassId> typeArgs, out uint numTypeArgs)
     {
         fixed (ClassId* pTypeArgs = typeArgs)
         {
