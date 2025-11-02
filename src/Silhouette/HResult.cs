@@ -114,7 +114,7 @@ public readonly struct HResult : IEquatable<HResult>
     {
         if (Code < 0)
         {
-            throw new Win32Exception(this, IsKnownError(this) ? ToString(this) : null);
+            throw new Win32Exception(Code, IsKnownError(Code) ? ToString(Code) : null);
         }
     }
 
