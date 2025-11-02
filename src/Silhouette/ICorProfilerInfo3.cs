@@ -44,9 +44,15 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2, ICorProfilerInfoFactory<ICor
         return _impl.SetEnterLeaveFunctionHooks3WithInfo(funcEnter3WithInfo, funcLeave3WithInfo, funcTailcall3WithInfo);
     }
 
-    public unsafe HResult GetFunctionEnter3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, out COR_PRF_FRAME_INFO pFrameInfo, int* pcbArgumentInfo, COR_PRF_FUNCTION_ARGUMENT_INFO* pArgumentInfo)
+    public unsafe HResult<COR_PRF_FRAME_INFO> GetFunctionEnter3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, Span<COR_PRF_FUNCTION_ARGUMENT_INFO> argumentInfo, out int nbArgumentInfo)
     {
-        return _impl.GetFunctionEnter3Info(functionId, eltInfo, out pFrameInfo, pcbArgumentInfo, pArgumentInfo);
+        fixed (COR_PRF_FUNCTION_ARGUMENT_INFO* pArgumentInfo = argumentInfo)
+        {
+            int pcbArgumentInfo = argumentInfo.Length;
+            var result = _impl.GetFunctionEnter3Info(functionId, eltInfo, out var frameInfo, &pcbArgumentInfo, pArgumentInfo);
+            nbArgumentInfo = pcbArgumentInfo;
+            return new(result, frameInfo);
+        }
     }
 
     public HResult<FunctionLeave3Info> GetFunctionLeave3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo)
