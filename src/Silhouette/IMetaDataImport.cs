@@ -122,10 +122,9 @@ public class IMetaDataImport : Interfaces.IUnknown
         }
 
         Span<char> buffer = stackalloc char[(int)length];
-
         (result, var typeDefProps) = GetTypeDefProps(typeDef, buffer, out _);
-
-        return new(result, new(buffer.WithoutNullTerminator(), typeDefProps.TypeDefFlags, typeDefProps.Extends));
+        
+        return new(result, new(buffer.WithoutNullTerminator(), (CorTypeAttr)typeDefProps.TypeDefFlags, typeDefProps.Extends));
     }
 
     public unsafe HResult<TypeDefProps> GetTypeDefProps(MdTypeDef typeDef, Span<char> typeName, out uint typeNameLength)
