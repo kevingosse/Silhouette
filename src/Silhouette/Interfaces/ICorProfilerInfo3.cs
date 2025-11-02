@@ -73,7 +73,7 @@ internal unsafe interface ICorProfilerInfo3 : ICorProfilerInfo2
                 FunctionId functionId,
                 COR_PRF_ELT_INFO eltInfo,
                 out COR_PRF_FRAME_INFO pFrameInfo,
-                int* pcbArgumentInfo,
+                uint* pcbArgumentInfo,
                 COR_PRF_FUNCTION_ARGUMENT_INFO* pArgumentInfo);
 
     /*

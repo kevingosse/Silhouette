@@ -44,11 +44,11 @@ public class ICorProfilerInfo3 : ICorProfilerInfo2, ICorProfilerInfoFactory<ICor
         return _impl.SetEnterLeaveFunctionHooks3WithInfo(funcEnter3WithInfo, funcLeave3WithInfo, funcTailcall3WithInfo);
     }
 
-    public unsafe HResult<COR_PRF_FRAME_INFO> GetFunctionEnter3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, Span<COR_PRF_FUNCTION_ARGUMENT_INFO> argumentInfo, out int nbArgumentInfo)
+    public unsafe HResult<COR_PRF_FRAME_INFO> GetFunctionEnter3Info(FunctionId functionId, COR_PRF_ELT_INFO eltInfo, Span<COR_PRF_FUNCTION_ARGUMENT_INFO> argumentInfo, out uint nbArgumentInfo)
     {
         fixed (COR_PRF_FUNCTION_ARGUMENT_INFO* pArgumentInfo = argumentInfo)
         {
-            int pcbArgumentInfo = argumentInfo.Length;
+            uint pcbArgumentInfo = (uint)argumentInfo.Length;
             var result = _impl.GetFunctionEnter3Info(functionId, eltInfo, out var frameInfo, &pcbArgumentInfo, pArgumentInfo);
             nbArgumentInfo = pcbArgumentInfo;
             return new(result, frameInfo);
