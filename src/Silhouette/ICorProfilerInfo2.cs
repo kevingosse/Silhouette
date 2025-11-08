@@ -31,6 +31,24 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         }
     }
 
+    public unsafe HResult<FunctionInfoWithTypeArgs> GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo)
+    {
+        var result = _impl.GetFunctionInfo2(funcId, frameInfo, out var classId, out var moduleId, out var token, 0, out var nbTypeArgs, null);
+
+        if (!result)
+        {
+            return new(result, new(classId, moduleId, token, []));
+        }
+
+        var typeArgs = new ClassId[nbTypeArgs];
+
+        fixed (ClassId* pTypeArgs = typeArgs)
+        {
+            result = _impl.GetFunctionInfo2(funcId, frameInfo, out classId, out moduleId, out token, (uint)typeArgs.Length, out nbTypeArgs, pTypeArgs);
+            return new(result, new(classId, moduleId, token, typeArgs));
+        }
+    }
+
     public unsafe HResult GetFunctionInfo2(FunctionId funcId, COR_PRF_FRAME_INFO frameInfo, out ClassId pClassId, out ModuleId pModuleId, out MdToken pToken, uint cTypeArgs, out uint pcTypeArgs, ClassId* typeArgs)
     {
         return _impl.GetFunctionInfo2(funcId, frameInfo, out pClassId, out pModuleId, out pToken, cTypeArgs, out pcTypeArgs, typeArgs);
@@ -57,6 +75,24 @@ public class ICorProfilerInfo2 : ICorProfilerInfo, ICorProfilerInfoFactory<ICorP
         {
             var result = _impl.GetClassIDInfo2(classId, out var moduleId, out var typeDefToken, out var parentClassId, (uint)typeArgs.Length, out numTypeArgs, pTypeArgs);
             return new(result, new(moduleId, typeDefToken, parentClassId));
+        }
+    }
+
+    public unsafe HResult<ClassIdInfo2WithTypeArgs> GetClassIDInfo2(ClassId classId)
+    {
+        var result = _impl.GetClassIDInfo2(classId, out var moduleId, out var typeDefToken, out var parentClassId, 0, out var numTypeArgs, null);
+
+        if (!result)
+        {
+            return new(result, new(moduleId, typeDefToken, parentClassId, []));
+        }
+
+        var typeArgs = new ClassId[numTypeArgs];
+
+        fixed (ClassId* pTypeArgs = typeArgs)
+        {
+            result = _impl.GetClassIDInfo2(classId, out moduleId, out typeDefToken, out parentClassId, (uint)typeArgs.Length, out numTypeArgs, pTypeArgs);
+            return new(result, new(moduleId, typeDefToken, parentClassId, typeArgs));
         }
     }
 
