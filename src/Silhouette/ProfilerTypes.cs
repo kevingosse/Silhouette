@@ -1446,9 +1446,11 @@ public readonly record struct ObjectHandleId(nint Value);
 
 public readonly record struct ClassIdInfo(ModuleId ModuleId, MdTypeDef TypeDef);
 public readonly record struct ClassIdInfo2(ModuleId ModuleId, MdTypeDef TypeDef, ClassId ParentClassId);
+public readonly record struct ClassIdInfo2WithTypeArgs(ModuleId ModuleId, MdTypeDef TypeDef, ClassId ParentClassId, ClassId[] TypeArgs);
 public readonly record struct TypeDefProps(CorTypeAttr TypeDefFlags, MdToken Extends);
 public readonly record struct TypeDefPropsWithName(string TypeName, CorTypeAttr TypeDefFlags, MdToken Extends);
 public readonly record struct FunctionInfo(ClassId ClassId, ModuleId ModuleId, MdToken Token);
+public readonly record struct FunctionInfoWithTypeArgs(ClassId ClassId, ModuleId ModuleId, MdToken Token, ClassId[] TypeArgs);
 public readonly record struct ModuleInfo(nint BaseLoadAddress, AssemblyId AssemblyId);
 public readonly record struct ModuleInfoWithName(string ModuleName, nint BaseLoadAddress, AssemblyId AssemblyId);
 public readonly record struct ModuleInfo2(nint BaseLoadAddress, AssemblyId AssemblyId, uint ModuleFlags);
