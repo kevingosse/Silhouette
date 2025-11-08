@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette</PackageId>
-    <PackageVersion>3.0.0.0</PackageVersion>
+    <PackageVersion>3.1.0.0</PackageVersion>
     <Title>Silhouette</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,13 +24,7 @@
       A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
     </Description>
     <PackageReleaseNotes>
-        - Changed the `ClassFactory` API. Use `ClassFactory.For` to create instances now.
-        - The instance of `ClassFactory` doesn't need to be referenced anymore. It will say alive on its own until `Release` is called.
-        - Fixed the signature of `GetFunctionInfo2` and `GetClassIDInfo2` to take a `Span` instead of a `ReadOnlySpan`.
-        - The flags returned by `GetTypeDefProps` are now mapped to the `CorTypeAttr` enum.
-        - Changed the signature of `GetFunctionEnter3Info` to be easier to use.
-        - Added description of common profiler error codes in `HResult`.
-        - `ThrowIfFailed` now puts the description of known errors in the exception message.
+        - Added simplified overloads of GetClassIDInfo2 and GetFunctionInfo2
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
