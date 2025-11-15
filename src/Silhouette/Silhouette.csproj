@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette</PackageId>
-    <PackageVersion>3.1.0.0</PackageVersion>
+    <PackageVersion>3.1.1.0</PackageVersion>
     <Title>Silhouette</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,7 +24,7 @@
       A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
     </Description>
     <PackageReleaseNotes>
-        - Added simplified overloads of GetClassIDInfo2 and GetFunctionInfo2
+        - Something went wrong with 3.1.0, the new GetClassIDInfo2 and GetFunctionInfo2 overload were missing
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
