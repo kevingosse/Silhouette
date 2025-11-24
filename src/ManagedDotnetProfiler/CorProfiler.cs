@@ -13,6 +13,7 @@ using Silhouette.IL;
 
 namespace ManagedDotnetProfiler;
 
+[Profiler("0A96F866-D763-4099-8E4E-ED1801BE9FBC")]
 internal unsafe class CorProfiler : CorProfilerCallback10Base
 {
     private readonly ConcurrentDictionary<AssemblyId, bool> _assemblyLoads = new();

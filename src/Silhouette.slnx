@@ -7,6 +7,7 @@
   </Folder>
   <Project Path="ManagedDotnetProfiler/ManagedDotnetProfiler.csproj" />
   <Project Path="Silhouette.IL/Silhouette.IL.csproj" />
+  <Project Path="Silhouette.SourceGenerator/Silhouette.SourceGenerator.csproj" />
   <Project Path="Silhouette/Silhouette.csproj" />
   <Project Path="TestApp/TestApp.csproj" />
 </Solution>
