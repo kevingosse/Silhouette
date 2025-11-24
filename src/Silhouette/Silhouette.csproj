@@ -39,4 +39,18 @@
   <ItemGroup>
     <PackageReference Include="NativeObjects" Version="1.4.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Silhouette.SourceGenerator\Silhouette.SourceGenerator.csproj" 
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Target Name="IncludeSourceGeneratorInPackage" BeforeTargets="_GetPackageFiles">
+    <ItemGroup>
+      <None Include="..\Silhouette.SourceGenerator\bin\$(Configuration)\netstandard2.0\Silhouette.SourceGenerator.dll" 
+            Pack="true" 
+            PackagePath="analyzers/dotnet/cs" 
+            Visible="false" />
+    </ItemGroup>
+  </Target>
 </Project>
