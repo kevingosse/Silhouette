@@ -5,6 +5,7 @@
     <IsRoslynComponent>true</IsRoslynComponent>
     <RootNamespace>Silhouette.SourceGenerator</RootNamespace>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -50,6 +50,14 @@ public class ProfilerAttributeSourceGenerator : IIncrementalGenerator
         });
     }
 
+    private static readonly DiagnosticDescriptor MissingGuidArgumentDescriptor = new(
+        id: "SILH002",
+        title: "MissingGuidArgumentDescriptor",
+        messageFormat: "ProfilerAttribute must have a valid GUID argument.",
+        category: "Silhouette.SourceGenerator",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     private static readonly DiagnosticDescriptor InvalidGuidDescriptor = new(
         id: "SILH001",
         title: "Invalid Profiler GUID",
@@ -58,7 +66,7 @@ public class ProfilerAttributeSourceGenerator : IIncrementalGenerator
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    private static (Guid ProfilerGuid, string ClassName, Diagnostic? Error) Transform(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
+    private static (Guid ProfilerGuid, string? ClassName, Diagnostic? Error) Transform(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
         // context.TargetNode is the ClassDeclarationSyntax
         var classDecl = (ClassDeclarationSyntax)context.TargetNode;
@@ -67,7 +75,12 @@ public class ProfilerAttributeSourceGenerator : IIncrementalGenerator
             .FirstOrDefault(a => context.SemanticModel.GetTypeInfo(a, cancellationToken).Type?.ToDisplayString() == "Silhouette.ProfilerAttribute");
 
         if (attributeSyntax == null || attributeSyntax.ArgumentList == null || attributeSyntax.ArgumentList.Arguments.Count == 0)
-            throw new InvalidOperationException("ProfilerAttribute must have a GUID argument.");
+        {
+            var diagnostic = Diagnostic.Create(
+                MissingGuidArgumentDescriptor,
+                classDecl.Identifier.GetLocation());
+            return (Guid.Empty, null, diagnostic);
+        }
 
         var guidExpr = attributeSyntax.ArgumentList.Arguments[0].Expression;
         string guidString;
@@ -84,7 +97,11 @@ public class ProfilerAttributeSourceGenerator : IIncrementalGenerator
         }
         else
         {
-            throw new InvalidOperationException("ProfilerAttribute argument must be a string literal or constant.");
+            var diagnostic = Diagnostic.Create(
+                InvalidGuidDescriptor,
+                guidExpr.GetLocation(),
+                guidExpr);
+            return (Guid.Empty, null, diagnostic);
         }
 
         if (!Guid.TryParse(guidString, out var guid))
