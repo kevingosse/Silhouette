@@ -9,7 +9,8 @@ Create a new C# NativeAOT project. Reference the Silhouette nuget package and ad
 
 using Silhouette;
 
-internal partial class CorProfiler : CorProfilerCallback11Base
+[Profiler("0A96F866-D763-4099-8E4E-ED1801BE9FBC")] // Use your own profiler GUID here
+internal partial class CorProfilerCallback : CorProfilerCallback11Base
 {
     protected override HResult Initialize(int iCorProfilerInfoVersion)
     {
@@ -25,7 +26,7 @@ internal partial class CorProfiler : CorProfilerCallback11Base
 }
 ```
 
-You also need to expose a `DllGetClassObject` method that will be called by the .NET runtime when initializing the profiler. Use the built-in `ClassFactory` implementation and give it an instance of your `CorProfiler` class.
+The `Profiler` attribute triggers a source-generator that emits the proper `DllGetClassObject` function and validates that the user is using the matching guid for the profiler. Alternatively, you can manually implement a `DllGetClassObject` method that will be called by the .NET runtime when initializing the profiler. Use the built-in `ClassFactory` implementation and give it an instance of your `CorProfiler` class.
 
 ```csharp
 using Silhouette;
@@ -33,18 +34,19 @@ using System.Runtime.InteropServices;
 
 internal class DllMain
 {
+     // This code is automatically generated when using the `[Profiler]` attribute on `CorProfilerCallback`
     [UnmanagedCallersOnly(EntryPoint = "DllGetClassObject")]
     public static unsafe HResult DllGetClassObject(Guid* rclsid, Guid* riid, nint* ppv)
     {
         // Use your own profiler GUID here
         if (*rclsid != new Guid("0A96F866-D763-4099-8E4E-ED1801BE9FBC"))
         {
-            return HResult.E_NOINTERFACE;
+            return HResult.CORPROF_E_PROFILER_CANCEL_ACTIVATION;
         }
 
-        *ppv = ClassFactory.For(new CorProfiler());
+        *ppv = ClassFactory.For(new CorProfilerBase());
 
-        return 0;
+        return HResult.S_OK;
     }
 }
 ```
