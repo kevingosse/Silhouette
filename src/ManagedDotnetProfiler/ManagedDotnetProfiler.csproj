@@ -18,6 +18,7 @@
   </ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Silhouette.SourceGenerator\Silhouette.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	  <ProjectReference Include="..\Silhouette\Silhouette.csproj" />
 	  <ProjectReference Include="..\Silhouette.IL\Silhouette.IL.csproj" />
 	</ItemGroup>
