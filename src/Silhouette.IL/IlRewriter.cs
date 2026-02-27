@@ -11,7 +11,6 @@ public sealed class IlRewriter : IDisposable
     private readonly ICorProfilerFunctionControl _functionControl;
     private ModuleId _moduleId;
     private MdMethodDef _methodDefToken;
-    private InstructionOperandResolver _instructionOperandResolver;
 
     private IlRewriter(ICorProfilerInfo3 corProfilerInfo, ICorProfilerFunctionControl functionControl = null)
     {
@@ -19,7 +18,7 @@ public sealed class IlRewriter : IDisposable
         _functionControl = functionControl;
     }
 
-    public InstructionOperandResolver Metadata => _instructionOperandResolver;
+    public InstructionOperandResolver Metadata { get; private set; }
 
     public CilBody Body { get; private set; }
 
@@ -49,11 +48,11 @@ public sealed class IlRewriter : IDisposable
         var dataStream = DataStreamFactory.Create((byte*)functionBody.MethodHeader);
         var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
 
-        _instructionOperandResolver = new InstructionOperandResolver(moduleId, _corProfilerInfo);
+        Metadata = new InstructionOperandResolver(moduleId, _corProfilerInfo);
 
         var parameters = new List<Parameter>();
 
-        var bodyReader = new MethodBodyReader(_instructionOperandResolver, dataReader, parameters);
+        var bodyReader = new MethodBodyReader(Metadata, dataReader, parameters);
 
         if (!bodyReader.Read())
         {
@@ -65,7 +64,7 @@ public sealed class IlRewriter : IDisposable
 
     public unsafe void Export()
     {
-        var writer = new MethodBodyWriter(_instructionOperandResolver, Body);
+        var writer = new MethodBodyWriter(Metadata, Body);
         writer.Write();
 
         var bodyBytes = writer.Code;
@@ -86,6 +85,6 @@ public sealed class IlRewriter : IDisposable
 
     public void Dispose()
     {
-        _instructionOperandResolver?.Dispose();
+        Metadata?.Dispose();
     }
 }
