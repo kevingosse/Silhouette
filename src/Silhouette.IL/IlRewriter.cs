@@ -19,6 +19,8 @@ public sealed class IlRewriter : IDisposable
         _functionControl = functionControl;
     }
 
+    public InstructionOperandResolver Metadata => _instructionOperandResolver;
+
     public CilBody Body { get; private set; }
 
     public static IlRewriter Create(ICorProfilerInfo3 corProfilerInfo)

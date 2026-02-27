@@ -11,6 +11,11 @@ internal class IlRewriteTest : ITest
 
         StringSubstitutionTest();
         RequestReJitTest();
+        
+        if (SignatureTest() != 42)
+        {
+            Logs.Assert(false, "SignatureTest did not return expected value");
+        }
     }
 
     private static void StringSubstitutionTest()
@@ -31,6 +36,12 @@ internal class IlRewriteTest : ITest
         Logs.Assert(GetValue() == 12);
         Logs.Assert(ProfilerPInvokes.RequestRevert(moduleHandle, methodDef));
         Logs.Assert(GetValue() == 10);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static int SignatureTest()
+    {
+        throw new Exception("Should never get there");
     }
 
 

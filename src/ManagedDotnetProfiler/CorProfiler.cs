@@ -8,6 +8,8 @@ using System.ComponentModel;
 using System.IO;
 using Silhouette;
 using System.Linq;
+using System.Runtime.InteropServices;
+using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using Silhouette.IL;
 
@@ -378,9 +380,45 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         if (Path.GetFileNameWithoutExtension(moduleInfo.ModuleName) == "TestApp")
         {
             RewritePInvokeMaps(moduleId);
+            RewriteSignatureTest(moduleId);
         }
 
         return HResult.S_OK;
+    }
+
+    [UnmanagedCallersOnly]
+    private static int UnmanagedCallback()
+    {
+        Log("Unmanaged callback called from rewritten method");
+        return 42;
+    }
+
+    private void RewriteSignatureTest(ModuleId moduleId)
+    {
+        using var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport2(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
+            .ThrowIfFailed()
+            .Wrap();
+
+        var typeDef = metaDataImport.Value.FindTypeDefByName("TestApp.IlRewriteTest", default).ThrowIfFailed();
+        var methodDef = metaDataImport.Value.FindMethod(typeDef, "SignatureTest", default).ThrowIfFailed();
+
+        using var ilRewriter = IlRewriter.Create(ICorProfilerInfo3);
+        ilRewriter.Import(moduleId, methodDef);
+
+        var ptr = (nint)(delegate* unmanaged<int>)&UnmanagedCallback;
+
+        using var corLibTypes = Silhouette.IL.CorLibTypes.Create(metaDataImport, ICorProfilerInfo3)
+            .ThrowIfFailed();
+
+        var sig = MethodSig.CreateStatic(corLibTypes.Int32);
+
+        ilRewriter.Body.Instructions.Clear();
+        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, ptr));
+        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Conv_I));
+        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Calli, sig));
+        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+        ilRewriter.Export();
     }
 
     private void RewritePInvokeMaps(ModuleId moduleId)
