@@ -6,7 +6,7 @@ using dnlib.IO;
 
 namespace Silhouette.IL;
 
-public sealed class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider
+public sealed class InstructionOperandResolver : IInstructionOperandResolver, IDisposable, ISignatureReaderHelper, ITokenProvider, ISignatureWriterHelper
 {
     private ComPtr<IMetaDataImport2> _metaDataImport;
     private ComPtr<IMetaDataEmit> _metaDataEmit;
@@ -19,6 +19,15 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     {
         _moduleId = moduleId;
         _corProfilerInfo = corProfilerInfo;
+    }
+
+    public CorLibTypes CorLibTypes
+    {
+        get
+        {
+            _corLibTypes ??= CorLibTypes.Create(MetaDataImport, _corProfilerInfo).ThrowIfFailed();
+            return _corLibTypes;
+        }
     }
 
     private ComPtr<IMetaDataImport2> MetaDataImport
@@ -48,14 +57,6 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
     }
 
-    private CorLibTypes CorLibTypes
-    {
-        get
-        {
-            _corLibTypes ??= CorLibTypes.Create(MetaDataImport, _corProfilerInfo).ThrowIfFailed();
-            return _corLibTypes;
-        }
-    }
 
     public IMDTokenProvider ResolveToken(uint token, GenericParamContext gpContext)
     {
@@ -332,22 +333,49 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
                 return new(MetaDataEmit.Value.DefineUserString(str).ThrowIfFailed().Value);
             }
             case MemberRef memberRef:
-                // TODO: Might need to emit or something
                 return memberRef.MDToken;
+
             case MethodDef methodDef:
-                // TODO: Might need to emit or something
                 return methodDef.MDToken;
 
+            case TypeRef typeRef:
+                return typeRef.MDToken;
+
+            case FieldDef fieldDef:
+                return fieldDef.MDToken;
+
+            case MethodSpec methodSpec:
+                return methodSpec.MDToken;
+
+            case MethodSig methodSig:
+                var sigBlob = SignatureWriter.Write(this, methodSig);
+                return new MDToken(MetaDataEmit.Value.GetTokenFromSig(sigBlob).ThrowIfFailed().Value);
+
             default:
-                Console.WriteLine($"ITokenProvider.GetToken({o}) - {o.GetType()}");
-                Console.WriteLine(Environment.StackTrace);
-                throw new NotImplementedException();
+                throw new NotImplementedException($"Method not implemented for argument type {o.GetType()}");
         }
     }
 
     public MDToken GetToken(IList<TypeSig> locals, uint origToken)
     {
-        Console.WriteLine($"ITokenProvider.GetToken({locals}, {origToken})");
-        throw new NotImplementedException();
+        if (locals == null || locals.Count == 0)
+        {
+            return new MDToken(origToken);
+        }
+
+        var sigBlob = SignatureWriter.Write(this, new LocalSig(locals));
+        var token = MetaDataEmit.Value.GetTokenFromSig(sigBlob).ThrowIfFailed();
+        return new MDToken(token.Value);
+    }
+
+    public uint ToEncodedToken(ITypeDefOrRef typeDefOrRef)
+    {
+        if (!CodedToken.TypeDefOrRef.Encode(typeDefOrRef.MDToken, out var encodedToken))
+        {
+            Error($"Can't encode TypeDefOrRef token 0x{typeDefOrRef.MDToken.Raw:X8}");
+            return 0;
+        }
+
+        return encodedToken;
     }
 }
