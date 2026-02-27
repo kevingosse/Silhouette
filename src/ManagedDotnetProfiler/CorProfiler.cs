@@ -407,10 +407,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
         var ptr = (nint)(delegate* unmanaged<int>)&UnmanagedCallback;
 
-        using var corLibTypes = Silhouette.IL.CorLibTypes.Create(metaDataImport, ICorProfilerInfo3)
-            .ThrowIfFailed();
-
-        var sig = MethodSig.CreateStatic(corLibTypes.Int32);
+        var sig = MethodSig.CreateStatic(ilRewriter.Metadata.CorLibTypes.Int32);
 
         ilRewriter.Body.Instructions.Clear();
         ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, ptr));
