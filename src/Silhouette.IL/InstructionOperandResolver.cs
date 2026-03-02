@@ -255,6 +255,31 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     }
 #pragma warning restore IDE0003
 
+    public List<Parameter> ReadParameters(MdMethodDef methodDef)
+    {
+        var props = MetaDataImport.Value.GetMethodProps(methodDef).ThrowIfFailed();
+        var sig = (MethodSig)ReadSignature(props.Signature);
+
+        var parameters = new List<Parameter>();
+
+        int paramIndex = 0;
+
+        if (sig.HasThis)
+        {
+            parameters.Add(new Parameter(paramIndex, Parameter.HIDDEN_THIS_METHOD_SIG_INDEX));
+            paramIndex++;
+        }
+
+        foreach (var paramType in sig.Params)
+        {
+            var methodSigIndex = sig.HasThis ? paramIndex - 1 : paramIndex;
+            parameters.Add(new Parameter(paramIndex, methodSigIndex, paramType));
+            paramIndex++;
+        }
+
+        return parameters;
+    }
+
     public string ReadUserString(uint token)
     {
         return MetaDataImport.Value.GetUserString(new((int)token)).ThrowIfFailed();

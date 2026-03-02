@@ -50,7 +50,7 @@ public sealed class IlRewriter : IDisposable
 
         Metadata = new InstructionOperandResolver(moduleId, _corProfilerInfo);
 
-        var parameters = new List<Parameter>();
+        var parameters = Metadata.ReadParameters(methodDef);
 
         var bodyReader = new MethodBodyReader(Metadata, dataReader, parameters);
 

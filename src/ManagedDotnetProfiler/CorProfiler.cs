@@ -113,6 +113,12 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
             rewriter.Export();
         }
+        else if (functionName.Contains("IlRewriteTest.ParameterRoundTripTest"))
+        {
+            using var rewriter = IlRewriter.Create(ICorProfilerInfo3);
+            rewriter.Import(functionId);
+            rewriter.Export();
+        }
 
         return HResult.S_OK;
     }
