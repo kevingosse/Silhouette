@@ -314,14 +314,10 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     {
         Console.WriteLine($"ISignatureReaderHelper.ConvertRTInternalAddress({address})");
 
-        throw new NotImplementedException();
+        throw new NotImplementedException("ConvertRTInternalAddress");
     }
 
-    public void Error(string message)
-    {
-        Console.WriteLine($"ITokenProvider.Error({message})");
-        throw new NotImplementedException();
-    }
+    public void Error(string message) => throw new InvalidOperationException(message);
 
     public MDToken GetToken(object o)
     {

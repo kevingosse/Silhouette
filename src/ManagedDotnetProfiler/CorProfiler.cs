@@ -96,12 +96,12 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
         if (functionName.Contains("IlRewriteTest.StringSubstitutionTest"))
         {
-            using var rewriter = IlRewriter.Create(ICorProfilerInfo3);
-            rewriter.Import(functionId);
+            var rewriter = IlRewriter.Create(ICorProfilerInfo3);
+            using var method = rewriter.Import(functionId);
 
             Log("JITCompilationStarted - Original method body:");
 
-            foreach (var instruction in rewriter.Body.Instructions)
+            foreach (var instruction in method.Body.Instructions)
             {
                 Log(instruction.ToString());
 
@@ -111,13 +111,13 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 }
             }
 
-            rewriter.Export();
+            rewriter.Export(method);
         }
         else if (functionName.Contains("IlRewriteTest.ParameterRoundTripTest"))
         {
-            using var rewriter = IlRewriter.Create(ICorProfilerInfo3);
-            rewriter.Import(functionId);
-            rewriter.Export();
+            var rewriter = IlRewriter.Create(ICorProfilerInfo3);
+            using var method = rewriter.Import(functionId);
+            rewriter.Export(method);
         }
 
         return HResult.S_OK;
@@ -408,20 +408,20 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         var typeDef = metaDataImport.Value.FindTypeDefByName("TestApp.IlRewriteTest", default).ThrowIfFailed();
         var methodDef = metaDataImport.Value.FindMethod(typeDef, "SignatureTest", default).ThrowIfFailed();
 
-        using var ilRewriter = IlRewriter.Create(ICorProfilerInfo3);
-        ilRewriter.Import(moduleId, methodDef);
+        var ilRewriter = IlRewriter.Create(ICorProfilerInfo3);
+        using var method = ilRewriter.Import(moduleId, methodDef);
 
         var ptr = (nint)(delegate* unmanaged<int>)&UnmanagedCallback;
 
-        var sig = MethodSig.CreateStatic(ilRewriter.Metadata.CorLibTypes.Int32);
+        var sig = MethodSig.CreateStatic(method.Metadata.CorLibTypes.Int32);
 
-        ilRewriter.Body.Instructions.Clear();
-        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, ptr));
-        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Conv_I));
-        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Calli, sig));
-        ilRewriter.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        method.Body.Instructions.Clear();
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, ptr));
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Conv_I));
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Calli, sig));
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
-        ilRewriter.Export();
+        ilRewriter.Export(method);
     }
 
     private void RewritePInvokeMaps(ModuleId moduleId)
@@ -858,26 +858,26 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
     {
         Log($"GetReJITParameters - {moduleId} - {methodId}");
 
-        using var rewriter = IlRewriter.CreateForReJit(ICorProfilerInfo3, functionControl);
+        var rewriter = IlRewriter.CreateForReJit(ICorProfilerInfo3, functionControl);
 
-        rewriter.Import(moduleId, methodId);
+        using var method = rewriter.Import(moduleId, methodId);
 
         bool changedMethod = false;
 
-        for (int i = 0; i < rewriter.Body.Instructions.Count; i++)
+        for (int i = 0; i < method.Body.Instructions.Count; i++)
         {
-            var instruction = rewriter.Body.Instructions[i];
+            var instruction = method.Body.Instructions[i];
 
             if (instruction.IsLdcI4() && instruction.GetLdcI4Value() == 10)
             {
-                rewriter.Body.Instructions[i] = Instruction.CreateLdcI4(12);
+                method.Body.Instructions[i] = Instruction.CreateLdcI4(12);
                 changedMethod = true;
             }
         }
 
         if (changedMethod)
         {
-            rewriter.Export();
+            rewriter.Export(method);
         }
 
         return HResult.S_OK;
