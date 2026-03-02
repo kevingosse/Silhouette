@@ -338,8 +338,14 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
             case MethodDef methodDef:
                 return methodDef.MDToken;
 
+            case TypeDef typeDef:
+                return typeDef.MDToken;
+
             case TypeRef typeRef:
                 return typeRef.MDToken;
+
+            case TypeSpec typeSpec:
+                return typeSpec.MDToken;
 
             case FieldDef fieldDef:
                 return fieldDef.MDToken;
