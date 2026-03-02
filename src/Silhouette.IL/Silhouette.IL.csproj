@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette.IL</PackageId>
-    <PackageVersion>0.2.0.0</PackageVersion>
+    <PackageVersion>0.3.0.0</PackageVersion>
     <Title>Silhouette IL rewriter</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,8 +24,7 @@
       IL Rewriter for Silhouette.
     </Description>
     <PackageReleaseNotes>
-      - Better support for emitting signatures
-      - Expose metadata resolver in IlRewriter through the `Metadata` property
+      - Support more token types when exporting a method
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
