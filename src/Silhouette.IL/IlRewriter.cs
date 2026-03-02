@@ -39,16 +39,25 @@ public sealed class IlRewriter
         var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
 
         var metadata = new InstructionOperandResolver(moduleId, _corProfilerInfo);
-        var parameters = metadata.ReadParameters(methodDef);
-        var bodyReader = new MethodBodyReader(metadata, dataReader, parameters);
 
-        if (!bodyReader.Read())
+        try
         {
-            throw new InvalidOperationException("Failed to read method body.");
-        }
+            var parameters = metadata.ReadParameters(methodDef);
+            var bodyReader = new MethodBodyReader(metadata, dataReader, parameters);
 
-        var body = bodyReader.CreateCilBody();
-        return new Method(moduleId, methodDef, metadata, body);
+            if (!bodyReader.Read())
+            {
+                throw new InvalidOperationException("Failed to read method body.");
+            }
+
+            var body = bodyReader.CreateCilBody();
+            return new Method(moduleId, methodDef, metadata, body);
+        }
+        catch
+        {
+            metadata.Dispose();
+            throw;
+        }
     }
 
     public unsafe void Export(Method method)
