@@ -1,5 +1,4 @@
 ﻿using dnlib.DotNet.Emit;
-using dnlib.DotNet;
 using dnlib.IO;
 using dnlib.DotNet.Writer;
 

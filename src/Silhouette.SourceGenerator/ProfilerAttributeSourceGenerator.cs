@@ -87,7 +87,7 @@ public class ProfilerAttributeSourceGenerator : IIncrementalGenerator
 
         // Try to get constant value using semantic model
         var constantValue = context.SemanticModel.GetConstantValue(guidExpr, cancellationToken);
-        if (constantValue.HasValue && constantValue.Value is string s)
+        if (constantValue is { HasValue: true, Value: string s })
         {
             guidString = s;
         }
