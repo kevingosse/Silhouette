@@ -11,11 +11,12 @@ internal class IlRewriteTest : ITest
 
         StringSubstitutionTest();
         RequestReJitTest();
-        
-        if (SignatureTest() != 42)
-        {
-            Logs.Assert(false, "SignatureTest did not return expected value");
-        }
+
+        var result = SignatureTest();
+        Logs.Assert(result == 42, $"SignatureTest returned {result} instead of 42");
+
+        result = ParameterRoundTripTest(1, 2, 3, 4, 5);
+        Logs.Assert(result == 15, $"ParameterRoundTripTest returned {result} instead of 15");
     }
 
     private static void StringSubstitutionTest()
@@ -44,6 +45,13 @@ internal class IlRewriteTest : ITest
         throw new Exception("Should never get there");
     }
 
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static int ParameterRoundTripTest(int a, int b, int c, int d, int e)
+    {
+        // 5 parameters forces the compiler to use ldarg.s for the 5th parameter (index 4).
+        return a + b + c + d + e;
+    }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static int GetValue() => 10;
