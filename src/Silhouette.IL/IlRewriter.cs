@@ -1,25 +1,19 @@
-﻿using dnlib.DotNet.Emit;
+using dnlib.DotNet.Emit;
 using dnlib.IO;
 using dnlib.DotNet.Writer;
 
 namespace Silhouette.IL;
 
-public sealed class IlRewriter : IDisposable
+public sealed class IlRewriter
 {
     private readonly ICorProfilerInfo3 _corProfilerInfo;
     private readonly ICorProfilerFunctionControl _functionControl;
-    private ModuleId _moduleId;
-    private MdMethodDef _methodDefToken;
 
     private IlRewriter(ICorProfilerInfo3 corProfilerInfo, ICorProfilerFunctionControl functionControl = null)
     {
         _corProfilerInfo = corProfilerInfo;
         _functionControl = functionControl;
     }
-
-    public InstructionOperandResolver Metadata { get; private set; }
-
-    public CilBody Body { get; private set; }
 
     public static IlRewriter Create(ICorProfilerInfo3 corProfilerInfo)
     {
@@ -31,39 +25,35 @@ public sealed class IlRewriter : IDisposable
         return new IlRewriter(corProfilerInfo3, functionControl);
     }
 
-    public void Import(FunctionId functionId)
+    public Method Import(FunctionId functionId)
     {
         var functionInfo = _corProfilerInfo.GetFunctionInfo(functionId).ThrowIfFailed();
-        Import(functionInfo.ModuleId, new(functionInfo.Token));
+        return Import(functionInfo.ModuleId, new(functionInfo.Token));
     }
 
-    public unsafe void Import(ModuleId moduleId, MdMethodDef methodDef)
+    public unsafe Method Import(ModuleId moduleId, MdMethodDef methodDef)
     {
         var functionBody = _corProfilerInfo.GetILFunctionBody(moduleId, methodDef).ThrowIfFailed();
-
-        _moduleId = moduleId;
-        _methodDefToken = methodDef;
 
         var dataStream = DataStreamFactory.Create((byte*)functionBody.MethodHeader);
         var dataReader = new DataReader(dataStream, 0, uint.MaxValue);
 
-        Metadata = new InstructionOperandResolver(moduleId, _corProfilerInfo);
-
-        var parameters = Metadata.ReadParameters(methodDef);
-
-        var bodyReader = new MethodBodyReader(Metadata, dataReader, parameters);
+        var metadata = new InstructionOperandResolver(moduleId, _corProfilerInfo);
+        var parameters = metadata.ReadParameters(methodDef);
+        var bodyReader = new MethodBodyReader(metadata, dataReader, parameters);
 
         if (!bodyReader.Read())
         {
             throw new InvalidOperationException("Failed to read method body.");
         }
 
-        Body = bodyReader.CreateCilBody();
+        var body = bodyReader.CreateCilBody();
+        return new Method(moduleId, methodDef, metadata, body);
     }
 
-    public unsafe void Export()
+    public unsafe void Export(Method method)
     {
-        var writer = new MethodBodyWriter(Metadata, Body);
+        var writer = new MethodBodyWriter(method.Metadata, method.Body);
         writer.Write();
 
         var bodyBytes = writer.Code;
@@ -74,16 +64,11 @@ public sealed class IlRewriter : IDisposable
             return;
         }
 
-        var malloc = _corProfilerInfo.GetILFunctionBodyAllocator(_moduleId).ThrowIfFailed();
+        var malloc = _corProfilerInfo.GetILFunctionBodyAllocator(method.ModuleId).ThrowIfFailed();
 
         var bodyPtr = malloc.Alloc((uint)bodyBytes.Length);
         bodyBytes.AsSpan().CopyTo(new Span<byte>((void*)bodyPtr, bodyBytes.Length));
 
-        _corProfilerInfo.SetILFunctionBody(_moduleId, _methodDefToken, bodyPtr).ThrowIfFailed();
-    }
-
-    public void Dispose()
-    {
-        Metadata?.Dispose();
+        _corProfilerInfo.SetILFunctionBody(method.ModuleId, method.MethodDefToken, bodyPtr).ThrowIfFailed();
     }
 }
