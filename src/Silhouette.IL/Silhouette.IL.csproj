@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette.IL</PackageId>
-    <PackageVersion>0.4.0.0</PackageVersion>
+    <PackageVersion>0.5.0.0</PackageVersion>
     <Title>Silhouette IL rewriter</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,8 +24,7 @@
       IL Rewriter for Silhouette.
     </Description>
     <PackageReleaseNotes>
-      - Fix an issue where the parameters of a method were not correctly loaded by the IlRewriter
-      - (Breaking change) IlRewriter.Import now returns a Method object that can be used to inspect and rewrite the IL
+      - Fix an issue where the EH sections were lost when exporting a method
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
