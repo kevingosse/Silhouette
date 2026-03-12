@@ -65,7 +65,7 @@ public sealed class IlRewriter
         var writer = new MethodBodyWriter(method.Metadata, method.Body);
         writer.Write();
 
-        var bodyBytes = writer.Code;
+        var bodyBytes = writer.GetFullMethodBody();
 
         if (_functionControl != null)
         {

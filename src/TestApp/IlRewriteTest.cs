@@ -16,7 +16,7 @@ internal class IlRewriteTest : ITest
         Logs.Assert(result == 42, $"SignatureTest returned {result} instead of 42");
 
         result = ParameterRoundTripTest(1, 2, 3, 4, 5);
-        Logs.Assert(result == 15, $"ParameterRoundTripTest returned {result} instead of 15");
+        Logs.Assert(result == 16, $"ParameterRoundTripTest returned {result} instead of 16");
     }
 
     private static void StringSubstitutionTest()
@@ -49,8 +49,21 @@ internal class IlRewriteTest : ITest
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static int ParameterRoundTripTest(int a, int b, int c, int d, int e)
     {
-        // 5 parameters forces the compiler to use ldarg.s for the 5th parameter (index 4).
-        return a + b + c + d + e;
+        int result = 0;
+
+        try
+        {
+            // 5 parameters forces the compiler to use ldarg.s for the 5th parameter (index 4).
+            result = a + b + c + d + e;
+            throw new Exception("test");
+        }
+        catch
+        {
+            // Make sure EH sections are not lost during rewriting
+            result += 1;
+        }
+
+        return result;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
