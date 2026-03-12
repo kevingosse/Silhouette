@@ -61,7 +61,7 @@ internal class IlRewriteTest : ITest
         {
             // Make sure EH sections are not lost during rewriting
             result += 1;
-        }        
+        }
 
         return result;
     }
