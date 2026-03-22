@@ -1224,4 +1224,156 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
         return true;
     }
+
+    internal bool TestGetTokenAndMetaDataFromFunction()
+    {
+        var (enumResult, jittedFunctions) = ICorProfilerInfo3.EnumJITedFunctions();
+
+        if (!enumResult)
+        {
+            Error(enumResult, nameof(ICorProfilerInfo3.EnumJITedFunctions));
+            return false;
+        }
+
+        using var _ = jittedFunctions;
+
+        FunctionId targetFunctionId = default;
+
+        foreach (var func in jittedFunctions.AsEnumerable())
+        {
+            targetFunctionId = func.FunctionId;
+            break;
+        }
+
+        if (targetFunctionId == default)
+        {
+            Error("No jitted functions found");
+            return false;
+        }
+
+        // Get the expected token via GetFunctionInfo for cross-validation
+        var (fiResult, functionInfo) = ICorProfilerInfo.GetFunctionInfo(targetFunctionId);
+
+        if (!fiResult)
+        {
+            Error(fiResult, nameof(ICorProfilerInfo.GetFunctionInfo));
+            return false;
+        }
+
+        // Call GetTokenAndMetaDataFromFunction with IMetaDataImport IID.
+        var (result, tokenAndMetaData) = ICorProfilerInfo.GetTokenAndMetaDataFromFunction(
+            targetFunctionId, Silhouette.Interfaces.IMetaDataImport.Guid);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo.GetTokenAndMetaDataFromFunction));
+            return false;
+        }
+
+        // Verify the token matches what GetFunctionInfo returns
+        if (tokenAndMetaData.Token.Value != functionInfo.Token.Value)
+        {
+            Error($"Token mismatch: GetTokenAndMetaDataFromFunction returned 0x{tokenAndMetaData.Token.Value:X} but GetFunctionInfo returned 0x{functionInfo.Token.Value:X}");
+            return false;
+        }
+
+        // Verify the returned IMetaDataImport pointer is usable by calling GetMethodProps.
+        // This proves it's a real IMetaDataImport, not a garbage pointer from a wrong IID.
+        using var metaDataImport = new IMetaDataImport(tokenAndMetaData.Import).Wrap();
+        var (propsResult, methodProps) = metaDataImport.Value.GetMethodProps(new MdMethodDef(tokenAndMetaData.Token));
+
+        if (!propsResult)
+        {
+            Error(propsResult, "IMetaDataImport.GetMethodProps via GetTokenAndMetaDataFromFunction");
+            return false;
+        }
+
+        Log($"GetTokenAndMetaDataFromFunction - {methodProps.Name} (0x{tokenAndMetaData.Token.Value:X})");
+        Log($"GetTokenAndMetaDataFromFunction - Success");
+        return true;
+    }
+
+    internal bool TestGetNativeCodeStartAddresses()
+    {
+        var (enumResult, jittedFunctions) = ICorProfilerInfo3.EnumJITedFunctions();
+
+        if (!enumResult)
+        {
+            Error(enumResult, nameof(ICorProfilerInfo3.EnumJITedFunctions));
+            return false;
+        }
+
+        using var _ = jittedFunctions;
+
+        FunctionId targetFunctionId = default;
+
+        foreach (var func in jittedFunctions.AsEnumerable())
+        {
+            targetFunctionId = func.FunctionId;
+            break;
+        }
+
+        if (targetFunctionId == default)
+        {
+            Error("No jitted functions found");
+            return false;
+        }
+
+        // First call to get the count
+        var result = ICorProfilerInfo9.GetNativeCodeStartAddresses(
+            targetFunctionId, default, [], out var count);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo9.GetNativeCodeStartAddresses));
+            return false;
+        }
+
+        if (count == 0)
+        {
+            Error("GetNativeCodeStartAddresses returned zero count");
+            return false;
+        }
+
+        // Second call to get the actual addresses
+        Span<nint> addresses = stackalloc nint[(int)count];
+
+        result = ICorProfilerInfo9.GetNativeCodeStartAddresses(
+            targetFunctionId, default, addresses, out count);
+
+        if (!result)
+        {
+            Error(result, nameof(ICorProfilerInfo9.GetNativeCodeStartAddresses));
+            return false;
+        }
+
+        // Validate each address by passing it to GetCodeInfo4
+        for (int i = 0; i < (int)count; i++)
+        {
+            if (addresses[i] == 0)
+            {
+                Error($"GetNativeCodeStartAddresses returned null address at index {i}");
+                return false;
+            }
+
+            var codeInfoResult = ICorProfilerInfo9.GetCodeInfo4(addresses[i], [], out var nbCodeInfos);
+
+            if (!codeInfoResult)
+            {
+                Error(codeInfoResult, $"GetCodeInfo4 failed for address 0x{addresses[i]:X} from GetNativeCodeStartAddresses");
+                return false;
+            }
+
+            if (nbCodeInfos == 0)
+            {
+                Error($"GetCodeInfo4 returned zero code regions for address 0x{addresses[i]:X}");
+                return false;
+            }
+
+            Log($"GetNativeCodeStartAddresses - Address[{i}]: 0x{addresses[i]:X} ({nbCodeInfos} code region(s))");
+        }
+
+        Log($"GetNativeCodeStartAddresses - Success");
+        return true;
+    }
 }

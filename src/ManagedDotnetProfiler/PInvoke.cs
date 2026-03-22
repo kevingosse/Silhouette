@@ -76,4 +76,16 @@ internal static unsafe class PInvoke
     {
         return Task.Run(() => CorProfiler.Instance.RequestRevert(module, methodDef)).Result;
     }
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(TestGetTokenAndMetaDataFromFunction))]
+    public static bool TestGetTokenAndMetaDataFromFunction()
+    {
+        return Task.Run(() => CorProfiler.Instance.TestGetTokenAndMetaDataFromFunction()).Result;
+    }
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(TestGetNativeCodeStartAddresses))]
+    public static bool TestGetNativeCodeStartAddresses()
+    {
+        return Task.Run(() => CorProfiler.Instance.TestGetNativeCodeStartAddresses()).Result;
+    }
 }

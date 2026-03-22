@@ -12,9 +12,9 @@ public class ICorProfilerInfo9 : ICorProfilerInfo8, ICorProfilerInfoFactory<ICor
     static ICorProfilerInfo9 ICorProfilerInfoFactory<ICorProfilerInfo9>.Create(nint ptr) => new(ptr);
     static Guid ICorProfilerInfoFactory<ICorProfilerInfo9>.Guid => Interfaces.ICorProfilerInfo9.Guid;
 
-    public unsafe HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, Span<uint> codeStartAddresses, out uint nbCodeStartAddresses)
+    public unsafe HResult GetNativeCodeStartAddresses(FunctionId functionID, ReJITId reJitId, Span<nint> codeStartAddresses, out uint nbCodeStartAddresses)
     {
-        fixed (uint* pCodeStartAddresses = codeStartAddresses)
+        fixed (nint* pCodeStartAddresses = codeStartAddresses)
         {
             return _impl.GetNativeCodeStartAddresses(functionID, reJitId, (uint)codeStartAddresses.Length, out nbCodeStartAddresses, pCodeStartAddresses);
         }
