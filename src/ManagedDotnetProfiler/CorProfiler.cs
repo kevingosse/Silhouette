@@ -88,6 +88,69 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         return ICorProfilerInfo5.SetEventMask2(eventMask, COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_MONITOR_DYNAMIC_FUNCTION_UNLOADS);
     }
 
+    protected override HResult InitializeForAttach(int iCorProfilerInfoVersion, ReadOnlySpan<byte> clientData)
+    {
+        if (iCorProfilerInfoVersion < 13)
+        {
+            Console.WriteLine($"This profiler requires ICorProfilerInfo13 ({iCorProfilerInfoVersion})");
+            return HResult.E_FAIL;
+        }
+
+        Console.WriteLine("[Profiler] *** Profiler initialized for attach ***");
+
+        Instance = this;
+
+        var clientDataString = System.Text.Encoding.UTF8.GetString(clientData);
+        Log($"InitializeForAttach - ClientData: {clientDataString}");
+
+        var result = ICorProfilerInfo5.SetEventMask2(
+            COR_PRF_MONITOR.COR_PRF_ALLOWABLE_AFTER_ATTACH,
+            COR_PRF_HIGH_MONITOR.COR_PRF_HIGH_ALLOWABLE_AFTER_ATTACH);
+
+        if (!result.IsOK)
+        {
+            Error(result, nameof(ICorProfilerInfo5.SetEventMask2));
+            return result;
+        }
+
+        return HResult.S_OK;
+    }
+
+    protected override HResult ProfilerAttachComplete()
+    {
+        Log("ProfilerAttachComplete");
+
+        // Verify that profiler APIs are usable after attach by reading back the event mask
+        var (result, eventMask) = ICorProfilerInfo5.GetEventMask2();
+
+        if (!result.IsOK)
+        {
+            Error(result, nameof(ICorProfilerInfo5.GetEventMask2));
+            return HResult.E_FAIL;
+        }
+
+        Log($"ProfilerAttachComplete - GetEventMask2 succeeded: {eventMask.EventsLow}");
+
+        // Enumerate loaded modules and apply the same setup that ModuleLoadFinished
+        // would do for TestApp (PInvoke maps + IL rewrite preparation).
+        using var enumerator = ICorProfilerInfo3.EnumModules().ThrowIfFailed();
+
+        foreach (var moduleId in enumerator.AsEnumerable())
+        {
+            var moduleInfo = ICorProfilerInfo.GetModuleInfo(moduleId).ThrowIfFailed();
+
+            if (Path.GetFileNameWithoutExtension(moduleInfo.ModuleName) == "TestApp")
+            {
+                Log($"ProfilerAttachComplete - Rewriting PInvoke maps for module {moduleInfo.ModuleName}");
+                RewritePInvokeMaps(moduleId);
+                RewriteSignatureTest(moduleId);
+                break;
+            }
+        }
+
+        return HResult.S_OK;
+    }
+
     protected override HResult JITCompilationStarted(FunctionId functionId, bool fIsSafeToBlock)
     {
         Log($"JITCompilationStarted - {GetFunctionFullName(functionId)}");
