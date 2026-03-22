@@ -1,6 +1,40 @@
 ﻿using System.Runtime.InteropServices;
 using TestApp;
 
+// Attach mode: TestApp self-attaches the profiler at runtime
+if (args.Length >= 2 && args[0] == "--attach")
+{
+    Console.WriteLine($"PID: {Environment.ProcessId}");
+    Console.WriteLine("Mode: attach");
+
+    var profilerPath = args[1];
+    var attachTest = new AttachTest(profilerPath);
+
+    // Run the attach test first to get the profiler loaded
+    var attachTests = new List<ITest> { attachTest };
+
+    // After attach, run compatible tests that only need events available after attach.
+    // Incompatible: ComTests (needs COR_PRF_MONITOR_CCW),
+    //               PInvokeTests (needs COR_PRF_MONITOR_CODE_TRANSITIONS),
+    //               NgenTests (needs COR_PRF_MONITOR_CACHE_SEARCHES)
+    attachTests.Add(new AssemblyLoadContextTests());
+    attachTests.Add(new ClassLoadTests());
+    attachTests.Add(new ConditionalWeakTableTests());
+    attachTests.Add(new DynamicMethodTests());
+    attachTests.Add(new ExceptionTests());
+    attachTests.Add(new FinalizationTests());
+    attachTests.Add(new HandleTests());
+    attachTests.Add(new GarbageCollectionTests());
+    attachTests.Add(new JitCompilationTests());
+    attachTests.Add(new ThreadTests());
+    attachTests.Add(new ModuleTests());
+    attachTests.Add(new GenericArgumentsTests());
+    attachTests.Add(new IlRewriteTest());
+
+    return RunTests(attachTests);
+}
+
+// Startup mode: profiler was attached via environment variables
 bool ngenEnabled = Environment.GetEnvironmentVariable("MONITOR_NGEN") == "1";
 
 Console.WriteLine($"PID: {Environment.ProcessId}");
@@ -54,31 +88,35 @@ else
     tests.Add(new NgenTests());
 }
 
-foreach (var test in tests)
+return RunTests(tests);
+
+static int RunTests(List<ITest> tests)
 {
-    try
+    int failures = 0;
+
+    foreach (var test in tests)
     {
-        test.Run();
-    }
-    catch (Exception e)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write("[FAILURE] ");
+        try
+        {
+            test.Run();
+        }
+        catch (Exception e)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("[FAILURE] ");
+            Console.ResetColor();
+
+            Console.WriteLine($"{test.GetType().Name} failed");
+            Console.WriteLine(e);
+            failures++;
+            continue;
+        }
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write("[SUCCESS] ");
         Console.ResetColor();
-
-        Console.WriteLine($"{test.GetType().Name} failed");
-        Console.WriteLine(e);
-        continue;
+        Console.WriteLine($"{test.GetType().Name}");
     }
 
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.Write("[SUCCESS] ");
-    Console.ResetColor();
-    Console.WriteLine($"{test.GetType().Name}");
+    return failures > 0 ? 1 : 0;
 }
-
-// Dump last logs before exiting
-//foreach (var log in Logs.Fetch())
-//{
-//    Console.WriteLine(log);
-//}

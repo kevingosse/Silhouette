@@ -2,7 +2,7 @@
 
 namespace Silhouette;
 
-public abstract class CorProfilerCallback3Base : CorProfilerCallback2Base, ICorProfilerCallback3
+public abstract unsafe class CorProfilerCallback3Base : CorProfilerCallback2Base, ICorProfilerCallback3
 {
     private readonly NativeObjects.ICorProfilerCallback3 _corProfilerCallback3;
 
@@ -22,6 +22,12 @@ public abstract class CorProfilerCallback3Base : CorProfilerCallback2Base, ICorP
         return base.QueryInterface(guid, out ptr);
     }
 
+    protected virtual HResult InitializeForAttach(int iCorProfilerInfoVersion, ReadOnlySpan<byte> clientData)
+    {
+        return HResult.E_NOTIMPL;
+    }
+
+
     #region ICorProfilerCallback3
 
     HResult ICorProfilerCallback3.ProfilerAttachComplete()
@@ -36,15 +42,13 @@ public abstract class CorProfilerCallback3Base : CorProfilerCallback2Base, ICorP
 
     HResult ICorProfilerCallback3.InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
     {
-        return InitializeForAttach(pCorProfilerInfoUnk, pvClientData, cbClientData);
+        int version = GetICorProfilerInfo(pCorProfilerInfoUnk);
+        ReadOnlySpan<byte> data = pvClientData == 0 ? [] : new((void*)pvClientData, (int)cbClientData);
+
+        return InitializeForAttach(version, data);
     }
 
     #endregion
-
-    protected virtual HResult InitializeForAttach(nint pCorProfilerInfoUnk, nint pvClientData, uint cbClientData)
-    {
-        return HResult.E_NOTIMPL;
-    }
 
     protected virtual HResult ProfilerAttachComplete()
     {

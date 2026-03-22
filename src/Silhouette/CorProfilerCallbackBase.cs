@@ -58,7 +58,7 @@ public abstract class CorProfilerCallbackBase : Unknown, ICorProfilerCallback
     }
 
     // ReSharper disable once DuplicatedStatements
-    private int GetICorProfilerInfo(nint pICorProfilerInfoUnk)
+    private protected int GetICorProfilerInfo(nint pICorProfilerInfoUnk)
     {
         int supportedInterface = 0;
         var impl = new NativeObjects.IUnknownInvoker(pICorProfilerInfoUnk);
