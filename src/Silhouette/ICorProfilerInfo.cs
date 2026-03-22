@@ -120,10 +120,10 @@ public class ICorProfilerInfo : Interfaces.IUnknown, ICorProfilerInfoFactory<ICo
         return _impl.SetFunctionIdMapper(func);
     }
 
-    public unsafe HResult<TokenAndMetaData> GetTokenAndMetaDataFromFunction(FunctionId functionId)
+    public unsafe HResult<TokenAndMetaData> GetTokenAndMetaDataFromFunction(FunctionId functionId, in Guid riid)
     {
-        var result = _impl.GetTokenAndMetaDataFromFunction(functionId, out var riid, out var ppImport, out var pToken);
-        return new(result, new(riid, (nint)ppImport, pToken));
+        var result = _impl.GetTokenAndMetaDataFromFunction(functionId, riid, out var ppImport, out var pToken);
+        return new(result, new((nint)ppImport, pToken));
     }
 
     public unsafe HResult<ModuleInfoWithName> GetModuleInfo(ModuleId moduleId)

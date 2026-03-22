@@ -35,4 +35,10 @@ internal static unsafe class ProfilerPInvokes
 
     [DllImport(DllName)]
     public static extern bool RequestRevert(IntPtr module, int methodDef);
+
+    [DllImport(DllName)]
+    public static extern bool TestGetTokenAndMetaDataFromFunction();
+
+    [DllImport(DllName)]
+    public static extern bool TestGetNativeCodeStartAddresses();
 }

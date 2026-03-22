@@ -1462,7 +1462,7 @@ public readonly record struct StringLayout(uint BufferLengthOffset, uint StringL
 public readonly record struct StringLayout2(uint StringLengthOffset, uint BufferOffset);
 public readonly record struct CodeInfo(nint Start, uint Size);
 public readonly record struct ArrayClassInfo(CorElementType BaseElemType, ClassId BaseClassId, uint Rank);
-public readonly record struct TokenAndMetaData(Guid Riid, nint Import, MdToken Token);
+public readonly record struct TokenAndMetaData(nint Import, MdToken Token);
 public readonly record struct ILFunctionBody(nint MethodHeader, uint MethodSize);
 public readonly record struct FunctionLeave3Info(COR_PRF_FRAME_INFO FrameInfo, COR_PRF_FUNCTION_ARGUMENT_RANGE RetvalRange);
 public readonly record struct RuntimeInformation(ushort ClrInstanceId, COR_PRF_RUNTIME_TYPE RuntimeType, ushort MajorVersion, ushort MinorVersion, ushort BuildNumber, ushort QFEVersion);

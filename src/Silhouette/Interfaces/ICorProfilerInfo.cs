@@ -192,7 +192,7 @@ internal unsafe interface ICorProfilerInfo : IUnknown
      */
     HResult GetTokenAndMetaDataFromFunction(
                 FunctionId FunctionId,
-                out Guid riid,
+                in Guid riid,
                 out void* ppImport,
                 out MdToken pToken);
 

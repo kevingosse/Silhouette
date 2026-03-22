@@ -30,6 +30,7 @@ if (args.Length >= 2 && args[0] == "--attach")
     attachTests.Add(new ModuleTests());
     attachTests.Add(new GenericArgumentsTests());
     attachTests.Add(new IlRewriteTest());
+    attachTests.Add(new FunctionInfoTests());
 
     return RunTests(attachTests);
 }
@@ -70,7 +71,8 @@ var tests = new List<ITest>
     new ThreadTests(),
     new ModuleTests(),
     new GenericArgumentsTests(),
-    new IlRewriteTest()
+    new IlRewriteTest(),
+    new FunctionInfoTests()
 };
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
