@@ -21,11 +21,11 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         _corProfilerInfo = corProfilerInfo;
     }
 
-    public CorLibTypes CorLibTypes
+    public ICorLibTypes CorLibTypes
     {
         get
         {
-            _corLibTypes ??= CorLibTypes.Create(MetaDataImport, _corProfilerInfo, _moduleId).ThrowIfFailed();
+            _corLibTypes ??= IL.CorLibTypes.Create(MetaDataImport, _corProfilerInfo, _moduleId).ThrowIfFailed();
             return _corLibTypes;
         }
     }

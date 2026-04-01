@@ -2,14 +2,14 @@
 
 namespace Silhouette.IL;
 
-public class CorLibTypes : ICorLibTypes, IDisposable
+internal class CorLibTypes : ICorLibTypes, IDisposable
 {
     private readonly ComPtr<IMetaDataImport2> _metadataImport;
     private readonly ComPtr<IMetaDataImport2> _corLibMetadataImport;
     private readonly ModuleId _moduleId;
     private readonly ICorProfilerInfo3 _corProfilerInfo;
 
-    public static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport2> metadataImport, ICorProfilerInfo3 corProfilerInfo, ModuleId moduleId = default)
+    internal static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport2> metadataImport, ICorProfilerInfo3 corProfilerInfo, ModuleId moduleId)
     {
         var (result, corLib) = FindCorLib(corProfilerInfo);
 
