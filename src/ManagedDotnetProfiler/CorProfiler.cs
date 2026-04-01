@@ -503,10 +503,6 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
 
         var corLib = method.Metadata.CorLibTypes;
 
-        using var metaDataEmit = ICorProfilerInfo2.GetModuleMetaDataEmit(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
-            .ThrowIfFailed()
-            .Wrap();
-
         var toStringOp = method.Metadata.GetMemberRef(corLib.Object.TypeDefOrRef, "ToString", MethodSig.CreateInstance(corLib.String));
         var getLengthOp = method.Metadata.GetMemberRef(corLib.String.TypeDefOrRef, "get_Length", MethodSig.CreateInstance(corLib.Int32));
 
