@@ -94,4 +94,5 @@ internal static unsafe class PInvoke
     {
         return Task.Run(() => CorProfiler.Instance.GetAssemblyImportData(buffer, length)).Result;
     }
+
 }

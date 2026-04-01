@@ -1,4 +1,4 @@
-﻿using dnlib.DotNet;
+using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using dnlib.DotNet.MD;
 using dnlib.DotNet.Writer;
@@ -57,203 +57,182 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
     }
 
-
-    public IMDTokenProvider ResolveToken(uint token, GenericParamContext gpContext)
+    public IMDTokenProvider ResolveToken(uint token, GenericParamContext _)
     {
         if (token == 0)
         {
             return null;
         }
 
-        //switch (MDToken.ToTable(token))
-        //{
-        //    case Table.Module:
-        //        return new ModuleDefUser(_metadataImport.Value.GetModule(new((int)token)).ThrowIfFailed());
-        //    case Table.TypeDef:
-        //        return new TypeDefUser(_metadataImport.Value.GetTypeDef(new((int)token)).ThrowIfFailed());
-        //    case Table.MethodDef:
-        //        return new MethodDefUser(_metadataImport.Value.GetMethodDef(new((int)token)).ThrowIfFailed());
-        //    case Table.Field:
-        //        return new FieldDefUser(_metadataImport.Value.GetField(new((int)token)).ThrowIfFailed());
-        //    case Table.Param:
-        //        return new ParamDefUser(_metadataImport.Value.GetParam(new((int)token)).ThrowIfFailed());
-        //    case Table.MemberRef:
-        //        return new MemberRefUser(_metadataImport.Value.GetMemberRef(new((int)token)).ThrowIfFailed());
-        //    case Table.String:
-        //        return _metadataImport.Value.GetString(new((int)token)).ThrowIfFailed();
-        //    case Table.UserString:
-        //        return ReadUserString(token);
-        //    default:
-        //        throw new NotSupportedException($"Token type {MDToken.ToTable(token)} is not supported.");
-        //}
-
         IMDTokenProvider result = MDToken.ToTable(token) switch
         {
-            //Table.Module => ResolveModule(rid),
-            Table.TypeRef => ResolveTypeRef(token, gpContext),
-            Table.TypeDef => ResolveTypeDef(token, gpContext),
-            Table.Field => ResolveField(token),
-            Table.Method => ResolveMethod(token),
-            //Table.Param => ResolveParam(rid),
-            //Table.InterfaceImpl => ResolveInterfaceImpl(rid, gpContext),
-            Table.MemberRef => ResolveMemberRef(token, gpContext),
-            //Table.Constant => ResolveConstant(rid),
-            //Table.DeclSecurity => ResolveDeclSecurity(rid),
-            //Table.ClassLayout => ResolveClassLayout(rid),
-            Table.StandAloneSig => ResolveStandAloneSig(token, gpContext),
-            //Table.Event => ResolveEvent(rid),
-            //Table.Property => ResolveProperty(rid),
-            //Table.ModuleRef => ResolveModuleRef(rid),
-            Table.TypeSpec => ResolveTypeSpec(token, gpContext),
-            //Table.ImplMap => ResolveImplMap(rid),
-            //Table.Assembly => ResolveAssembly(rid),
-            //Table.AssemblyRef => ResolveAssemblyRef(rid),
-            //Table.File => ResolveFile(rid),
-            //Table.ExportedType => ResolveExportedType(rid),
-            //Table.ManifestResource => ResolveManifestResource(rid),
-            //Table.GenericParam => ResolveGenericParam(rid),
-            Table.MethodSpec => ResolveMethodSpec(token, gpContext),
-            //Table.GenericParamConstraint => ResolveGenericParamConstraint(rid, gpContext),
+            Table.TypeRef => ResolveTypeRef(new MdTypeRef(new((int)token))),
+            Table.TypeDef => ResolveTypeDef(new MdTypeDef(new((int)token))),
+            Table.Field => ResolveField(new MdFieldDef((int)token)),
+            Table.Method => ResolveMethod(new MdMethodDef((int)token)),
+            Table.MemberRef => ResolveMemberRef(new MdMemberRef((int)token)),
+            Table.StandAloneSig => ResolveStandAloneSig(new MdSignature(new((int)token))),
+            Table.TypeSpec => ResolveTypeSpec(new MdTypeSpec(new((int)token))),
+            Table.MethodSpec => ResolveMethodSpec(new MdMethodSpec(new((int)token))),
             _ => null
         };
 
         if (result == null)
         {
-            Console.WriteLine($"Unsupported token: {token:x2} - ({MDToken.ToTable(token)})");
+            Error($"Unsupported token: 0x{token:x8} - ({MDToken.ToTable(token)})");
         }
 
         return result;
     }
 
-    private TypeSpecUser ResolveTypeSpec(uint token, GenericParamContext _)
+    public TypeSpec ResolveTypeSpec(MdTypeSpec token)
     {
-        var signature = MetaDataImport.Value.GetTypeSpecFromToken(new((int)token)).ThrowIfFailed();
+        var signature = MetaDataImport.Value.GetTypeSpecFromToken(new(token.Token.Value)).ThrowIfFailed();
         var typeSig = ReadTypeSignature(signature);
 
-        return new TypeSpecUser(typeSig) { Rid = MDToken.ToRID(token) };
+        return new TypeSpecUser(typeSig) { Rid = MDToken.ToRID((uint)token.Token.Value) };
     }
 
-    private FieldDefUser ResolveField(uint token)
+    public TypeSpec GetTypeSpec(TypeSig typeSig)
     {
-        var props = MetaDataImport.Value.GetFieldProps(new((int)token)).ThrowIfFailed();
+        var sigBlob = SignatureWriter.Write(this, typeSig);
+        var mdToken = MetaDataEmit.Value.GetTokenFromTypeSpec(sigBlob).ThrowIfFailed();
+        return ResolveTypeSpec(mdToken);
+    }
+
+    public IField ResolveField(MdFieldDef token)
+    {
+        var props = MetaDataImport.Value.GetFieldProps(new(token.Value)).ThrowIfFailed();
         var sig = ReadSignature(props.Signature);
 
         return new FieldDefUser(props.Name, (FieldSig)sig, (FieldAttributes)props.Attributes)
         {
-            Rid = MDToken.ToRID(token)
+            Rid = MDToken.ToRID((uint)token.Value)
         };
     }
 
-    private MethodSpecUser ResolveMethodSpec(uint token, GenericParamContext gpContext)
+    public IField GetField(TypeDef declaringType, string name)
     {
-        var props = MetaDataImport.Value.GetMethodSpecProps(new MdMethodSpec((int)token)).ThrowIfFailed();
+        var token = MetaDataImport.Value.FindField(new MdTypeDef(new((int)declaringType.MDToken.Raw)), name, default).ThrowIfFailed();
+        return ResolveField(token);
+    }
 
+    public MethodSpec ResolveMethodSpec(MdMethodSpec token)
+    {
+        var props = MetaDataImport.Value.GetMethodSpecProps(token).ThrowIfFailed();
         var parentToken = (uint)props.Parent.Value;
 
-        IMethodDefOrRef parent = MDToken.ToTable(parentToken) switch
+        var parent = MDToken.ToTable(parentToken) switch
         {
-            Table.Method => ResolveMethod(parentToken),
-            Table.MemberRef => ResolveMemberRef(parentToken, gpContext),
+            Table.Method => (IMethodDefOrRef)ResolveMethod(new MdMethodDef((int)parentToken)),
+            Table.MemberRef => ResolveMemberRef(new MdMemberRef((int)parentToken)),
             _ => null
         };
 
         var sig = ReadSignature(props.Signature);
-        return new MethodSpecUser(parent, (GenericInstMethodSig)sig) { Rid = MDToken.ToRID(token) };
+        return new MethodSpecUser(parent, (GenericInstMethodSig)sig) { Rid = MDToken.ToRID((uint)token.Token.Value) };
     }
 
-    private unsafe StandAloneSigUser ResolveStandAloneSig(uint token, GenericParamContext _)
+    public unsafe StandAloneSig ResolveStandAloneSig(MdSignature token)
     {
-        var signature = MetaDataImport.Value.GetSigFromToken(new((int)token)).ThrowIfFailed();
+        var signature = MetaDataImport.Value.GetSigFromToken(new(token.Token.Value)).ThrowIfFailed();
 
         var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
         var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
 
         var sig = SignatureReader.ReadSig(this, CorLibTypes, dataReader);
 
-        return sig switch
+        return new StandAloneSigUser
         {
-            LocalSig localSig => new StandAloneSigUser(localSig) { Rid = MDToken.ToRID(token) },
-            MethodSig methodSig => new StandAloneSigUser(methodSig) { Rid = MDToken.ToRID(token) },
+            Signature = sig,
+            Rid = MDToken.ToRID((uint)token.Token.Value)
+        };
+    }
+
+    public StandAloneSig GetStandAloneSig(CallingConventionSig signature)
+    {
+        var sigBlob = SignatureWriter.Write(this, signature);
+        var mdToken = MetaDataEmit.Value.GetTokenFromSig(sigBlob).ThrowIfFailed();
+        return ResolveStandAloneSig(mdToken);
+    }
+
+    public IMethod ResolveMethod(MdMethodDef token)
+    {
+        var props = MetaDataImport.Value.GetMethodProps(new(token.Value)).ThrowIfFailed();
+        var sig = ReadSignature(props.Signature);
+
+        return new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags)
+        {
+            Rid = MDToken.ToRID((uint)token.Value)
+        };
+    }
+
+    public IMethod GetMethod(TypeDef declaringType, string name)
+    {
+        var token = MetaDataImport.Value.FindMethod(new MdTypeDef(new((int)declaringType.MDToken.Raw)), name, default).ThrowIfFailed();
+        return ResolveMethod(token);
+    }
+
+    public MemberRef ResolveMemberRef(MdMemberRef token)
+    {
+        var props = MetaDataImport.Value.GetMemberRefProps(token).ThrowIfFailed();
+
+        IMemberRefParent parent = MDToken.ToTable(props.Token.Value) switch
+        {
+            Table.TypeRef => ResolveTypeRef(new MdTypeRef(new(props.Token.Value))),
+            Table.TypeDef => ResolveTypeDef(new MdTypeDef(new(props.Token.Value))),
+            Table.TypeSpec => ResolveTypeSpec(new MdTypeSpec(new(props.Token.Value))),
+            Table.ModuleRef => null, // ModuleRef not yet supported
             _ => null
         };
-    }
 
-    private MethodDefUser ResolveMethod(uint token)
-    {
-        var props = MetaDataImport.Value.GetMethodProps(new((int)token)).ThrowIfFailed();
-        var sig = ReadSignature(props.Signature);
-
-        var methodDef = new MethodDefUser(props.Name, (MethodSig)sig, (MethodImplAttributes)props.ImplementationFlags)
+        return new MemberRefUser(null, props.Name)
         {
-            Rid = MDToken.ToRID(token)
+            Signature = ReadSignature(props.Signature),
+            Class = parent,
+            Rid = MDToken.ToRID((uint)token.Value)
         };
-
-        return methodDef;
     }
 
-    private unsafe CallingConventionSig ReadSignature(NativePointer<byte> signature)
+    public MemberRef GetMemberRef(ITypeDefOrRef parent, string name, CallingConventionSig signature)
     {
-        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
-        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
-
-        return SignatureReader.ReadSig(this, CorLibTypes, dataReader);
+        var sigBlob = SignatureWriter.Write(this, signature);
+        var mdToken = MetaDataEmit.Value.DefineMemberRef(new MdToken((int)parent.MDToken.Raw), name, sigBlob).ThrowIfFailed();
+        return ResolveMemberRef(mdToken);
     }
 
-    private unsafe TypeSig ReadTypeSignature(NativePointer<byte> signature)
+    public TypeDef ResolveTypeDef(MdTypeDef token)
     {
-        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
-        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
-
-        return SignatureReader.ReadTypeSig(this, CorLibTypes, dataReader);
+        var typeDefProps = MetaDataImport.Value.GetTypeDefProps(new(token.Token.Value)).ThrowIfFailed();
+        return new TypeDefUser(new(typeDefProps.TypeName)) { Rid = MDToken.ToRID((uint)token.Token.Value) };
     }
 
-    private MyMemberRef ResolveMemberRef(uint token, GenericParamContext gpContext)
+    public TypeDef GetTypeDef(string name, TypeDef enclosingType = null)
     {
-        var props = MetaDataImport.Value.GetMemberRefProps(new MdMemberRef((int)token)).ThrowIfFailed();
+        var enclosingToken = enclosingType != null ? new MdToken((int)enclosingType.MDToken.Raw) : default;
+        var token = MetaDataImport.Value.FindTypeDefByName(name, enclosingToken).ThrowIfFailed();
+        return ResolveTypeDef(token);
+    }
 
-        IMemberRefParent parent = null;
+    public TypeRef ResolveTypeRef(MdTypeRef token)
+    {
+        var typeRefProps = MetaDataImport.Value.GetTypeRefProps(new(token.Token.Value)).ThrowIfFailed();
+        return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName)) { Rid = MDToken.ToRID((uint)token.Token.Value) };
+    }
 
-        if (MDToken.ToTable(props.Token.Value) == Table.TypeRef)
+    public TypeRef GetTypeRef(IResolutionScope resolutionScope, string name)
+    {
+        var scopeToken = new MdToken((int)resolutionScope.MDToken.Raw);
+        var (hr, existing) = MetaDataImport.Value.FindTypeRef(scopeToken, name);
+
+        if (hr)
         {
-            parent = ResolveTypeRef((uint)props.Token.Value, gpContext);
+            return ResolveTypeRef(existing);
         }
 
-        var sig = ReadSignature(props.Signature);
-        return new MyMemberRef(props.Name, MDToken.ToRID(token), sig, parent);
+        var token = MetaDataEmit.Value.DefineTypeRefByName(scopeToken, name).ThrowIfFailed();
+        return ResolveTypeRef(new MdTypeRef(token.Token));
     }
-
-    private TypeDefUser ResolveTypeDef(uint tokenValue, GenericParamContext _)
-    {
-        var typeDefProps = MetaDataImport.Value.GetTypeDefProps(new((int)tokenValue)).ThrowIfFailed();
-        return new TypeDefUser(new(typeDefProps.TypeName)) { Rid = MDToken.ToRID(tokenValue) };
-    }
-
-    private TypeRefUser ResolveTypeRef(uint tokenValue, GenericParamContext _)
-    {
-        var typeRefProps = MetaDataImport.Value.GetTypeRefProps(new((int)tokenValue)).ThrowIfFailed();
-        return new TypeRefUser(new ModuleDefUser(new("TypeRef-ModuleDefUser")), new(typeRefProps.TypeName)) { Rid = MDToken.ToRID(tokenValue) };
-    }
-
-#pragma warning disable IDE0003 // Qualifier 'this.' is redundant
-    private class MyMemberRef : MemberRef
-    {
-        public MyMemberRef(string name, uint rid, CallingConventionSig sig, IMemberRefParent parent)
-        {
-            this.name = name;
-            this.rid = rid;
-            this.module = new ModuleDefUser(new("MyModule"));
-            this.@class = parent;
-            //var sig = MethodSig.CreateStatic(new ClassSig(new TypeDefUser(new("TypeDefArg"))));
-            //SignatureReader.ReadSig()
-            this.signature = sig;
-        }
-
-        public override string ToString()
-        {
-            return "MyMemberRef";
-        }
-    }
-#pragma warning restore IDE0003
 
     public List<Parameter> ReadParameters(MdMethodDef methodDef)
     {
@@ -299,10 +278,10 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         switch (token.Table)
         {
             case Table.TypeRef:
-                return ResolveTypeRef(token.Raw, gpContext);
+                return ResolveTypeRef(new MdTypeRef(new((int)token.Raw)));
 
             case Table.TypeDef:
-                return ResolveTypeDef(token.Raw, gpContext);
+                return ResolveTypeDef(new MdTypeDef(new((int)token.Raw)));
 
             default:
                 Console.WriteLine($"Unsupported token type: {token.Table}");
@@ -313,7 +292,6 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     public TypeSig ConvertRTInternalAddress(IntPtr address)
     {
         Console.WriteLine($"ISignatureReaderHelper.ConvertRTInternalAddress({address})");
-
         throw new NotImplementedException("ConvertRTInternalAddress");
     }
 
@@ -404,5 +382,21 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
         }
 
         return encodedToken;
+    }
+
+    private unsafe CallingConventionSig ReadSignature(NativePointer<byte> signature)
+    {
+        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
+        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
+
+        return SignatureReader.ReadSig(this, CorLibTypes, dataReader);
+    }
+
+    private unsafe TypeSig ReadTypeSignature(NativePointer<byte> signature)
+    {
+        var dataStream = DataStreamFactory.Create((byte*)signature.Ptr);
+        var dataReader = new DataReader(dataStream, 0, (uint)signature.Length);
+
+        return SignatureReader.ReadTypeSig(this, CorLibTypes, dataReader);
     }
 }
