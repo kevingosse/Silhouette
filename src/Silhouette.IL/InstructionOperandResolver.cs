@@ -177,12 +177,14 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     {
         var props = MetaDataImport.Value.GetMemberRefProps(token).ThrowIfFailed();
 
-        IMemberRefParent parent = null;
-
-        if (MDToken.ToTable(props.Token.Value) == Table.TypeRef)
+        IMemberRefParent parent = MDToken.ToTable(props.Token.Value) switch
         {
-            parent = ResolveTypeRef(new MdTypeRef(new(props.Token.Value)));
-        }
+            Table.TypeRef => ResolveTypeRef(new MdTypeRef(new(props.Token.Value))),
+            Table.TypeDef => ResolveTypeDef(new MdTypeDef(new(props.Token.Value))),
+            Table.TypeSpec => ResolveTypeSpec(new MdTypeSpec(new(props.Token.Value))),
+            Table.ModuleRef => null, // ModuleRef not yet supported
+            _ => null
+        };
 
         return new MemberRefUser(null, props.Name)
         {
