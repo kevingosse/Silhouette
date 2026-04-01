@@ -6,8 +6,10 @@ public class CorLibTypes : ICorLibTypes, IDisposable
 {
     private readonly ComPtr<IMetaDataImport2> _metadataImport;
     private readonly ComPtr<IMetaDataImport2> _corLibMetadataImport;
+    private readonly ModuleId _moduleId;
+    private readonly ICorProfilerInfo3 _corProfilerInfo;
 
-    public static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport2> metadataImport, ICorProfilerInfo3 corProfilerInfo)
+    public static HResult<CorLibTypes> Create(ComPtr<IMetaDataImport2> metadataImport, ICorProfilerInfo3 corProfilerInfo, ModuleId moduleId = default)
     {
         var (result, corLib) = FindCorLib(corProfilerInfo);
 
@@ -18,13 +20,15 @@ public class CorLibTypes : ICorLibTypes, IDisposable
 
         using var corLibPtr = corLib.Wrap();
 
-        return new CorLibTypes(metadataImport, corLibPtr);
+        return new CorLibTypes(metadataImport, corLibPtr, moduleId, corProfilerInfo);
     }
 
-    private CorLibTypes(ComPtr<IMetaDataImport2> metadataImport, ComPtr<IMetaDataImport2> corLibMetadataImport)
+    private CorLibTypes(ComPtr<IMetaDataImport2> metadataImport, ComPtr<IMetaDataImport2> corLibMetadataImport, ModuleId moduleId, ICorProfilerInfo3 corProfilerInfo)
     {
         _metadataImport = metadataImport.Copy();
         _corLibMetadataImport = corLibMetadataImport.Copy();
+        _moduleId = moduleId;
+        _corProfilerInfo = corProfilerInfo;
     }
 
     private static HResult<IMetaDataImport2> FindCorLib(ICorProfilerInfo3 corProfilerInfo)
@@ -69,8 +73,30 @@ public class CorLibTypes : ICorLibTypes, IDisposable
 
     public TypeRef GetTypeRef(string @namespace, string name)
     {
-        Console.WriteLine($"GetTypeRef({@namespace}, {name})");
-        throw new NotImplementedException();
+        var fullName = string.IsNullOrEmpty(@namespace) ? name : $"{@namespace}.{name}";
+
+        // Try to find an existing TypeRef first
+        var existing = FindTypeRef(fullName);
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        // Create a new one via IMetaDataEmit
+        var asmRef = AssemblyRef;
+        if (asmRef == null)
+        {
+            return null;
+        }
+
+        using var metaDataEmit = _corProfilerInfo.GetModuleMetaDataEmit(_moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
+            .ThrowIfFailed()
+            .Wrap();
+
+        var typeRef = metaDataEmit.Value.DefineTypeRefByName(
+            new MdToken((int)asmRef.MDToken.Raw), fullName).ThrowIfFailed();
+
+        return new TypeRefUser(null, @namespace, name) { Rid = MDToken.ToRID((uint)typeRef.Value) };
     }
 
     public CorLibTypeSig Void => new(new TypeDefUser("void"), ElementType.Void);
@@ -91,13 +117,63 @@ public class CorLibTypes : ICorLibTypes, IDisposable
     public CorLibTypeSig IntPtr => ResolveTypeSig("System.IntPtr", ElementType.I);
     public CorLibTypeSig UIntPtr => ResolveTypeSig("System.UIntPtr", ElementType.U);
     public CorLibTypeSig Object => ResolveTypeSig("System.Object", ElementType.Object);
-    public AssemblyRef AssemblyRef
+    public AssemblyRef AssemblyRef => _assemblyRef ??= FindCorLibAssemblyRef();
+
+    private AssemblyRef _assemblyRef;
+
+    // TODO: Replace enumeration with IMetaDataAssemblyImport.FindAssemblyRef or similar direct lookup
+    private AssemblyRef FindCorLibAssemblyRef()
     {
-        get
+        HCORENUM hEnum = default;
+        Span<MdTypeRef> typeRefs = stackalloc MdTypeRef[50];
+
+        try
         {
-            Console.WriteLine("AssemblyRef requested, returning null.");
+            while (_metadataImport.Value.EnumTypeRefs(ref hEnum, typeRefs, out var count) && count > 0)
+            {
+                for (int i = 0; i < (int)count; i++)
+                {
+                    var (hr, props) = _metadataImport.Value.GetTypeRefProps(typeRefs[i]);
+
+                    if (hr && props.TypeName == "System.Object")
+                    {
+                        return new AssemblyRefUser("corlib") { Rid = MDToken.ToRID((uint)props.ResolutionScope.Value) };
+                    }
+                }
+            }
+        }
+        finally
+        {
+            _metadataImport.Value.CloseEnum(hEnum);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds the TypeRef token for a corlib type in the target module.
+    /// Returns null if the type is not referenced by the target module.
+    /// </summary>
+    private TypeRef FindTypeRef(string fullName)
+    {
+        var asmRef = AssemblyRef;
+
+        if (asmRef == null)
+        {
             return null;
         }
+
+        var (hr, typeRef) = _metadataImport.Value.FindTypeRef(new MdToken((int)asmRef.MDToken.Raw), fullName);
+
+        if (!hr)
+        {
+            return null;
+        }
+
+        var dot = fullName.LastIndexOf('.');
+        var ns = dot >= 0 ? fullName[..dot] : "";
+        var typeName = dot >= 0 ? fullName[(dot + 1)..] : fullName;
+        return new TypeRefUser(null, ns, typeName) { Rid = MDToken.ToRID((uint)typeRef.Value) };
     }
 
     private CorLibTypeSig ResolveTypeSig(string name, ElementType elementType)
@@ -108,6 +184,13 @@ public class CorLibTypes : ICorLibTypes, IDisposable
             Console.WriteLine($"Failed to find type definition for {name}: {result}");
             return default;
         }
+
+        var typeRef = FindTypeRef(name);
+        if (typeRef != null)
+        {
+            return new(typeRef, elementType);
+        }
+
         return new(new TypeDefUser(name), elementType);
     }
 

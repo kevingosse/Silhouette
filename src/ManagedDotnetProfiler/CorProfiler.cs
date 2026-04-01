@@ -11,6 +11,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using dnlib.DotNet.MD;
+using dnlib.DotNet.Writer;
 using Silhouette.IL;
 
 namespace ManagedDotnetProfiler;
@@ -144,6 +146,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
                 Log($"ProfilerAttachComplete - Rewriting PInvoke maps for module {moduleInfo.ModuleName}");
                 RewritePInvokeMaps(moduleId);
                 RewriteSignatureTest(moduleId);
+                RewriteCorLibTypesProbe(moduleId);
                 break;
             }
         }
@@ -450,6 +453,7 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         {
             RewritePInvokeMaps(moduleId);
             RewriteSignatureTest(moduleId);
+            RewriteCorLibTypesProbe(moduleId);
         }
 
         return HResult.S_OK;
@@ -482,6 +486,52 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I8, ptr));
         method.Body.Instructions.Add(Instruction.Create(OpCodes.Conv_I));
         method.Body.Instructions.Add(Instruction.Create(OpCodes.Calli, sig));
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+        ilRewriter.Export(method);
+    }
+
+    private void RewriteCorLibTypesProbe(ModuleId moduleId)
+    {
+        using var metaDataImport = ICorProfilerInfo2.GetModuleMetaDataImport2(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
+            .ThrowIfFailed()
+            .Wrap();
+
+        var typeDef = metaDataImport.Value.FindTypeDefByName("TestApp.CorLibTypesTest", default).ThrowIfFailed();
+        var methodDef = metaDataImport.Value.FindMethod(typeDef, "CorLibTypesProbe", default).ThrowIfFailed();
+
+        var ilRewriter = IlRewriter.Create(ICorProfilerInfo3);
+        using var method = ilRewriter.Import(moduleId, methodDef);
+
+        var corLib = method.Metadata.CorLibTypes;
+
+        // Build MemberRefs using CorLibTypes TypeDefOrRef tokens as parents.
+        // If AssemblyRef/ResolveTypeSig are broken, TypeDefOrRef is a TypeDef(0) instead of
+        // a proper TypeRef, which produces MemberRefs pointing at <Module> → MissingMethodException.
+        using var metaDataEmit = ICorProfilerInfo2.GetModuleMetaDataEmit(moduleId, CorOpenFlags.ofRead | CorOpenFlags.ofWrite)
+            .ThrowIfFailed()
+            .Wrap();
+
+        var objectToken = new MdToken((int)corLib.Object.TypeDefOrRef.MDToken.Raw);
+        var stringToken = new MdToken((int)corLib.String.TypeDefOrRef.MDToken.Raw);
+
+        // Object.ToString(): instance string ()
+        var toStringSig = MethodSig.CreateInstance(corLib.String);
+        var toStringRef = metaDataEmit.Value.DefineMemberRef(
+            objectToken, "ToString", SignatureWriter.Write(method.Metadata, toStringSig)).ThrowIfFailed();
+        var toStringOp = new MemberRefUser(null, "ToString", toStringSig) { Rid = MDToken.ToRID((uint)toStringRef.Value) };
+
+        // String.get_Length(): instance int32 ()
+        var getLengthSig = MethodSig.CreateInstance(corLib.Int32);
+        var getLengthRef = metaDataEmit.Value.DefineMemberRef(
+            stringToken, "get_Length", SignatureWriter.Write(method.Metadata, getLengthSig)).ThrowIfFailed();
+        var getLengthOp = new MemberRefUser(null, "get_Length", getLengthSig) { Rid = MDToken.ToRID((uint)getLengthRef.Value) };
+
+        // Rewrite method to: return "test".ToString().Length;  (== 4)
+        method.Body.Instructions.Clear();
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Ldstr, "test"));
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, (IMethod)toStringOp));
+        method.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, (IMethod)getLengthOp));
         method.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 
         ilRewriter.Export(method);

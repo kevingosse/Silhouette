@@ -25,7 +25,7 @@ public sealed class InstructionOperandResolver : IInstructionOperandResolver, ID
     {
         get
         {
-            _corLibTypes ??= CorLibTypes.Create(MetaDataImport, _corProfilerInfo).ThrowIfFailed();
+            _corLibTypes ??= CorLibTypes.Create(MetaDataImport, _corProfilerInfo, _moduleId).ThrowIfFailed();
             return _corLibTypes;
         }
     }
