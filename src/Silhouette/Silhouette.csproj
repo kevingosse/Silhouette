@@ -13,7 +13,7 @@
 
   <PropertyGroup>
     <PackageId>Silhouette</PackageId>
-    <PackageVersion>4.0.0.0</PackageVersion>
+    <PackageVersion>4.1.0.0</PackageVersion>
     <Title>Silhouette</Title>
     <Authors>Kevin Gosse</Authors>
     <PackageProjectUrl>https://github.com/kevingosse/Silhouette</PackageProjectUrl>
@@ -24,8 +24,7 @@
       A library to build .NET profilers in .NET. No need for C++ anymore, just C#.
     </Description>
     <PackageReleaseNotes>
-        - Add support for attach profiler and change the signature of InitializeForAttach (breaking change)
-        - Fix the signature of GetTokenAndMetaDataFromFunction and GetNativeCodeStartAddresses (breaking change)
+        - Add `IMetaDataAssemblyImport` and `ICorProfilerInfo.GetModuleMetaDataAssemblyImport`
     </PackageReleaseNotes>
     <Copyright>Copyright 2024-$([System.DateTime]::UtcNow.ToString(yyyy))</Copyright>
     <PackageTags>profiler profiling diagnostics native interop</PackageTags>
