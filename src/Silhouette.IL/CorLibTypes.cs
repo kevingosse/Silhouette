@@ -121,33 +121,60 @@ internal class CorLibTypes : ICorLibTypes, IDisposable
 
     private AssemblyRef _assemblyRef;
 
-    // TODO: Replace enumeration with IMetaDataAssemblyImport.FindAssemblyRef or similar direct lookup
     private AssemblyRef FindCorLibAssemblyRef()
     {
+        using var assemblyImport = _corProfilerInfo.GetModuleMetaDataAssemblyImport(_moduleId, CorOpenFlags.ofRead)
+            .ThrowIfFailed()
+            .Wrap();
+
         HCORENUM hEnum = default;
-        Span<MdTypeRef> typeRefs = stackalloc MdTypeRef[50];
+        Span<MdAssemblyRef> assemblyRefs = stackalloc MdAssemblyRef[50];
 
         try
         {
-            while (_metadataImport.Value.EnumTypeRefs(ref hEnum, typeRefs, out var count) && count > 0)
+            while (assemblyImport.Value.EnumAssemblyRefs(ref hEnum, assemblyRefs, out var count) && count > 0)
             {
                 for (int i = 0; i < (int)count; i++)
                 {
-                    var (hr, props) = _metadataImport.Value.GetTypeRefProps(typeRefs[i]);
+                    var (hr, props) = assemblyImport.Value.GetAssemblyRefProps(assemblyRefs[i]);
 
-                    if (hr && props.TypeName == "System.Object")
+                    if (!hr)
                     {
-                        return new AssemblyRefUser("corlib") { Rid = MDToken.ToRID((uint)props.ResolutionScope.Value) };
+                        continue;
+                    }
+
+                    if (!IsCorLibName(props.Name))
+                    {
+                        continue;
+                    }
+
+                    // Verify this is the assembly ref the module actually uses for corlib types,
+                    // since modules may reference both System.Runtime and System.Private.CoreLib
+                    // but only use one as the resolution scope for their TypeRefs.
+                    var token = new MdToken(assemblyRefs[i].Value);
+                    var (found, _) = _metadataImport.Value.FindTypeRef(token, "System.Object");
+
+                    if (found)
+                    {
+                        return new AssemblyRefUser(props.Name) { Rid = MDToken.ToRID((uint)assemblyRefs[i].Value) };
                     }
                 }
             }
         }
         finally
         {
-            _metadataImport.Value.CloseEnum(hEnum);
+            assemblyImport.Value.CloseEnum(hEnum);
         }
 
         return null;
+    }
+
+    private static bool IsCorLibName(string name)
+    {
+        return "mscorlib".Equals(name, StringComparison.OrdinalIgnoreCase)
+               || "System.Private.CoreLib".Equals(name, StringComparison.OrdinalIgnoreCase)
+               || "System.Runtime".Equals(name, StringComparison.OrdinalIgnoreCase)
+               || "netstandard".Equals(name, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

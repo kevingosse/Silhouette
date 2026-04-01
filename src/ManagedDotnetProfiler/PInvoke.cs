@@ -88,4 +88,10 @@ internal static unsafe class PInvoke
     {
         return Task.Run(() => CorProfiler.Instance.TestGetNativeCodeStartAddresses()).Result;
     }
+
+    [UnmanagedCallersOnly(EntryPoint = nameof(GetAssemblyImportData))]
+    public static int GetAssemblyImportData(char* buffer, int length)
+    {
+        return Task.Run(() => CorProfiler.Instance.GetAssemblyImportData(buffer, length)).Result;
+    }
 }

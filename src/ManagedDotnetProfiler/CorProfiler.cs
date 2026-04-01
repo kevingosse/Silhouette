@@ -1426,4 +1426,139 @@ internal unsafe class CorProfiler : CorProfilerCallback10Base
         Log($"GetNativeCodeStartAddresses - Success");
         return true;
     }
+
+    internal unsafe int GetAssemblyImportData(char* buffer, int bufferLength)
+    {
+        // Find the TestApp module
+        var (enumResult, modules) = ICorProfilerInfo3.EnumModules();
+
+        if (!enumResult)
+        {
+            Error(enumResult, nameof(ICorProfilerInfo3.EnumModules));
+            return -1;
+        }
+
+        using var _ = modules;
+
+        ModuleId testAppModule = default;
+
+        foreach (var module in modules.AsEnumerable())
+        {
+            var (hr, moduleInfo) = ICorProfilerInfo.GetModuleInfo(module);
+
+            if (hr && Path.GetFileNameWithoutExtension(moduleInfo.ModuleName) == "TestApp")
+            {
+                testAppModule = module;
+                break;
+            }
+        }
+
+        if (testAppModule == default)
+        {
+            Error("TestApp module not found");
+            return -1;
+        }
+
+        using var assemblyImport = ICorProfilerInfo.GetModuleMetaDataAssemblyImport(testAppModule, CorOpenFlags.ofRead)
+            .ThrowIfFailed()
+            .Wrap();
+
+        // --- GetAssemblyFromScope ---
+        var (asmResult, asmToken) = assemblyImport.Value.GetAssemblyFromScope();
+
+        if (!asmResult)
+        {
+            Error(asmResult, "GetAssemblyFromScope");
+            return -1;
+        }
+
+        Log($"AssemblyImport - GetAssemblyFromScope token=0x{asmToken.Value:X8}");
+
+        // --- GetAssemblyProps ---
+        var (propsResult, asmProps) = assemblyImport.Value.GetAssemblyProps(asmToken);
+
+        if (!propsResult)
+        {
+            Error(propsResult, "GetAssemblyProps");
+            return -1;
+        }
+
+        Log($"AssemblyImport - GetAssemblyProps name={asmProps.Name} version={asmProps.Version.Major}.{asmProps.Version.Minor}.{asmProps.Version.Build}.{asmProps.Version.Revision} flags={asmProps.AssemblyFlags}");
+
+        // --- EnumAssemblyRefs + GetAssemblyRefProps ---
+        HCORENUM hEnum = default;
+        Span<MdAssemblyRef> assemblyRefs = stackalloc MdAssemblyRef[50];
+        var refEntries = new List<string>();
+
+        try
+        {
+            while (assemblyImport.Value.EnumAssemblyRefs(ref hEnum, assemblyRefs, out var count) && count > 0)
+            {
+                for (int i = 0; i < (int)count; i++)
+                {
+                    var (refResult, refProps) = assemblyImport.Value.GetAssemblyRefProps(assemblyRefs[i]);
+
+                    if (!refResult)
+                    {
+                        Error(refResult, $"GetAssemblyRefProps(0x{assemblyRefs[i].Value:X8})");
+                        return -1;
+                    }
+
+                    // Format: Name|Major.Minor.Build.Revision
+                    refEntries.Add($"{refProps.Name}|{refProps.Version.Major}.{refProps.Version.Minor}.{refProps.Version.Build}.{refProps.Version.Revision}");
+                }
+            }
+        }
+        finally
+        {
+            assemblyImport.Value.CloseEnum(hEnum);
+        }
+
+        refEntries.Sort(StringComparer.Ordinal);
+
+        foreach (var entry in refEntries)
+        {
+            Log($"AssemblyImport - AssemblyRef {entry}");
+        }
+
+        // --- EnumManifestResources ---
+        hEnum = default;
+        Span<MdManifestResource> resources = stackalloc MdManifestResource[50];
+        int resourceCount = 0;
+
+        try
+        {
+            while (assemblyImport.Value.EnumManifestResources(ref hEnum, resources, out var count) && count > 0)
+            {
+                resourceCount += (int)count;
+            }
+        }
+        finally
+        {
+            assemblyImport.Value.CloseEnum(hEnum);
+        }
+
+        Log($"AssemblyImport - ManifestResources count={resourceCount}");
+
+        // --- Write assembly ref entries to buffer for cross-checking ---
+        // Format: sorted "Name|Major.Minor.Build.Revision" null-terminated strings
+        int size = 0;
+
+        foreach (var entry in refEntries)
+        {
+            if (size + entry.Length + 1 > bufferLength)
+            {
+                Error("AssemblyImport buffer too small");
+                return -1;
+            }
+
+            entry.AsSpan().CopyTo(new Span<char>(buffer + size, entry.Length));
+            buffer[size + entry.Length] = '\0';
+
+            size += entry.Length + 1;
+        }
+
+        Log($"AssemblyImport - Success");
+        return size;
+    }
 }

@@ -211,6 +211,41 @@ public readonly record struct MdMethodSpec(MdToken Token)
 }
 
 [StructLayout(LayoutKind.Sequential)]
+public readonly record struct MdAssemblyRef(MdToken Token)
+{
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public readonly record struct MdAssembly(MdToken Token)
+{
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public readonly record struct MdFile(MdToken Token)
+{
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public readonly record struct MdExportedType(MdToken Token)
+{
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public readonly record struct MdManifestResource(MdToken Token)
+{
+    public int Value => Token.Value;
+    public override string ToString() => Value.ToString("x2");
+}
+
+[StructLayout(LayoutKind.Sequential)]
 public readonly struct MdGenericParamConstraint(MdToken Token)
 {
     public int Value => Token.Value;
@@ -1502,4 +1537,80 @@ public readonly record struct PEKind(CorPEKind Kind, uint Machine);
 public readonly record struct NativePointer<T>(nint Ptr, int Length)
 {
     public unsafe Span<T> AsSpan => new((void*)Ptr, Length);
+}
+
+public readonly record struct AssemblyVersion(ushort Major, ushort Minor, ushort Build, ushort Revision);
+
+public readonly record struct AssemblyProps(NativePointer<byte> PublicKey, uint HashAlgId, CorAssemblyFlags AssemblyFlags);
+public readonly record struct AssemblyPropsWithName(string Name, AssemblyVersion Version, string Locale, NativePointer<byte> PublicKey, uint HashAlgId, CorAssemblyFlags AssemblyFlags);
+
+public readonly record struct AssemblyRefProps(NativePointer<byte> PublicKeyOrToken, NativePointer<byte> HashValue, CorAssemblyFlags AssemblyRefFlags);
+public readonly record struct AssemblyRefPropsWithName(string Name, AssemblyVersion Version, string Locale, NativePointer<byte> PublicKeyOrToken, NativePointer<byte> HashValue, CorAssemblyFlags AssemblyRefFlags);
+
+public readonly record struct FileProps(NativePointer<byte> HashValue, CorFileFlags FileFlags);
+public readonly record struct FilePropsWithName(string Name, NativePointer<byte> HashValue, CorFileFlags FileFlags);
+
+public readonly record struct ExportedTypeProps(MdToken Implementation, MdTypeDef TypeDef, CorTypeAttr ExportedTypeFlags);
+public readonly record struct ExportedTypePropsWithName(string Name, MdToken Implementation, MdTypeDef TypeDef, CorTypeAttr ExportedTypeFlags);
+
+public readonly record struct ManifestResourceProps(MdToken Implementation, uint Offset, CorManifestResourceFlags ResourceFlags);
+public readonly record struct ManifestResourcePropsWithName(string Name, MdToken Implementation, uint Offset, CorManifestResourceFlags ResourceFlags);
+
+[StructLayout(LayoutKind.Sequential)]
+public unsafe struct ASSEMBLYMETADATA
+{
+    public ushort usMajorVersion;
+    public ushort usMinorVersion;
+    public ushort usBuildNumber;
+    public ushort usRevisionNumber;
+    public char* szLocale;
+    public uint cbLocale;
+    public uint* rProcessor;
+    public uint ulProcessor;
+    public nint rOS;                    // OSINFO* - deprecated, always null
+    public uint ulOS;
+}
+
+[Flags]
+public enum CorAssemblyFlags : uint
+{
+    afPublicKey                  = 0x0001,  // The assembly ref holds the full (unhashed) public key.
+
+    afPA_None                    = 0x0000,  // Processor Architecture unspecified
+    afPA_MSIL                    = 0x0010,  // Processor Architecture: neutral (PE32)
+    afPA_x86                     = 0x0020,  // Processor Architecture: x86 (PE32)
+    afPA_IA64                    = 0x0030,  // Processor Architecture: Itanium (PE32+)
+    afPA_AMD64                   = 0x0040,  // Processor Architecture: AMD X64 (PE32+)
+    afPA_ARM                     = 0x0050,  // Processor Architecture: ARM (PE32)
+    afPA_ARM64                   = 0x0060,  // Processor Architecture: ARM64 (PE32+)
+    afPA_NoPlatform              = 0x0070,  // Applies to any platform but cannot run on any (e.g. reference assembly), should not have "specified" set
+    afPA_Specified               = 0x0080,  // Propagate PA flags to AssemblyRef record
+    afPA_Mask                    = 0x0070,  // Bits describing the processor architecture
+    afPA_FullMask                = 0x00F0,  // Bits describing the PA incl. Specified
+    afPA_Shift                   = 0x0004,  // NOT A FLAG, shift count in PA flags <--> index conversion
+
+    afEnableJITcompileTracking   = 0x8000,  // From "DebuggableAttribute".
+    afDisableJITcompileOptimizer = 0x4000,  // From "DebuggableAttribute".
+    afDebuggableAttributeMask    = 0xc000,
+
+    afRetargetable               = 0x0100,  // The assembly can be retargeted (at runtime) to an assembly from a different publisher.
+
+    afContentType_Default        = 0x0000,
+    afContentType_WindowsRuntime = 0x0200,
+    afContentType_Mask           = 0x0E00,  // Bits describing ContentType
+}
+
+[Flags]
+public enum CorFileFlags : uint
+{
+    ffContainsMetaData   = 0x0000,  // This is not a resource file
+    ffContainsNoMetaData = 0x0001,  // This is a resource file or other non-metadata-containing file
+}
+
+[Flags]
+public enum CorManifestResourceFlags : uint
+{
+    mrVisibilityMask = 0x0007,
+    mrPublic         = 0x0001,  // The Resource is exported from the Assembly.
+    mrPrivate        = 0x0002,  // The Resource is private to the Assembly.
 }
