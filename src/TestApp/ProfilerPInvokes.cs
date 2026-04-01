@@ -41,4 +41,7 @@ internal static unsafe class ProfilerPInvokes
 
     [DllImport(DllName)]
     public static extern bool TestGetNativeCodeStartAddresses();
+
+    [DllImport(DllName)]
+    public static extern int GetAssemblyImportData(char* buffer, int length);
 }

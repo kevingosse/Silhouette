@@ -186,6 +186,12 @@ public class ICorProfilerInfo : Interfaces.IUnknown, ICorProfilerInfoFactory<ICo
         return new(result, new(ptr));
     }
 
+    public HResult<IMetaDataAssemblyImport> GetModuleMetaDataAssemblyImport(ModuleId moduleId, CorOpenFlags dwOpenFlags)
+    {
+        var result = _impl.GetModuleMetaData(moduleId, dwOpenFlags, Interfaces.IMetaDataAssemblyImport.Guid, out var ptr);
+        return new(result, new(ptr));
+    }
+
     public unsafe HResult<ILFunctionBody> GetILFunctionBody(ModuleId moduleId, MdMethodDef methodId)
     {
         var result = _impl.GetILFunctionBody(moduleId, methodId, out var pMethodHeader, out var methodSize);
