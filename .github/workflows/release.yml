@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Read version from csproj
+      id: version
+      run: |
+        raw=$(dotnet msbuild src/Silhouette/Silhouette.csproj -nologo -getProperty:PackageVersion)
+        # Strip trailing .0 segments to get semver (4.2.0.0 -> 4.2.0)
+        version=$(echo "$raw" | sed 's/\.0$//')
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+        echo "tag=v$version" >> "$GITHUB_OUTPUT"
+        echo "Detected version: $version"
+
+    - name: Check version is newer than latest release
+      id: check
+      run: |
+        latest_tag=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+        echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+        echo "Latest Silhouette tag: $latest_tag"
+        echo "New tag: ${{ steps.version.outputs.tag }}"
+
+        if [ -z "$latest_tag" ]; then
+          echo "No existing releases found, proceeding."
+          exit 0
+        fi
+
+        if [ "${{ steps.version.outputs.tag }}" = "$latest_tag" ]; then
+          echo "::error::Version ${{ steps.version.outputs.tag }} already released."
+          exit 1
+        fi
+
+        # Compare versions using sort -V
+        higher=$(printf '%s\n%s' "$latest_tag" "${{ steps.version.outputs.tag }}" | sort -V | tail -n1)
+        if [ "$higher" != "${{ steps.version.outputs.tag }}" ]; then
+          echo "::error::Version ${{ steps.version.outputs.tag }} is not greater than $latest_tag."
+          exit 1
+        fi
+
+        echo "Version check passed."
+
+    - name: Build
+      run: dotnet build src/Silhouette/Silhouette.csproj -c Release
+
+    - name: Create GitHub Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "${{ steps.version.outputs.tag }}" \
+          --title "${{ steps.version.outputs.tag }}" \
+          --generate-notes \
+          --notes-start-tag "${{ steps.check.outputs.latest_tag }}" \
+          nugets/Silhouette.${{ steps.version.outputs.version }}.nupkg
+
+    - name: NuGet Login (OIDC)
+      uses: NuGet/login@v1
+      id: nuget-login
+      with:
+        user: KooKiz
+
+    - name: Publish to NuGet
+      run: |
+        dotnet nuget push nugets/Silhouette.${{ steps.version.outputs.version }}.nupkg \
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json
