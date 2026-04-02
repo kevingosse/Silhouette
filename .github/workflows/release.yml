@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
 
     steps:
     - uses: actions/checkout@v4
@@ -69,8 +70,12 @@ jobs:
           --notes-start-tag "${{ steps.check.outputs.latest_tag }}" \
           nugets/Silhouette.${{ steps.version.outputs.version }}.nupkg
 
+    - name: NuGet Login (OIDC)
+      uses: NuGet/login@v1
+      id: nuget-login
+
     - name: Publish to NuGet
       run: |
         dotnet nuget push nugets/Silhouette.${{ steps.version.outputs.version }}.nupkg \
-          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json
