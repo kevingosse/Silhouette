@@ -110,11 +110,19 @@ public readonly struct HResult : IEquatable<HResult>
 
     public override string ToString() => ToString(Code);
 
-    public void ThrowIfFailed()
+    public void ThrowIfFailed(string errorMessage = null)
     {
         if (Code < 0)
         {
-            throw new Win32Exception(Code, IsKnownError(Code) ? ToString(Code) : null);
+            var codeDescription = IsKnownError(Code) ? ToString(Code) : null;
+            var message = (errorMessage, codeDescription) switch
+            {
+                (not null, not null) => $"{errorMessage} ({codeDescription})",
+                (not null, null) => errorMessage,
+                _ => codeDescription
+            };
+
+            throw new Win32Exception(Code, message);
         }
     }
 
@@ -154,11 +162,19 @@ public readonly struct HResult<T> : IEquatable<HResult<T>>
 
     public static bool operator !=(HResult<T> left, HResult<T> right) => !left.Equals(right);
 
-    public T ThrowIfFailed()
+    public T ThrowIfFailed(string errorMessage = null)
     {
         if (Error.Code < 0)
         {
-            throw new Win32Exception(Error, HResult.IsKnownError(Error.Code) ? HResult.ToString(Error.Code) : null);
+            var codeDescription = HResult.IsKnownError(Error.Code) ? HResult.ToString(Error.Code) : null;
+            var message = (errorMessage, codeDescription) switch
+            {
+                (not null, not null) => $"{errorMessage} ({codeDescription})",
+                (not null, null) => errorMessage,
+                _ => codeDescription
+            };
+
+            throw new Win32Exception(Error, message);
         }
 
         return Result;
