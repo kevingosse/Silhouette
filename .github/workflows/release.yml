@@ -22,7 +22,7 @@ jobs:
     - name: Read version from csproj
       id: version
       run: |
-        raw=$(grep '<PackageVersion>' src/Silhouette/Silhouette.csproj | sed 's/.*<PackageVersion>\(.*\)<\/PackageVersion>.*/\1/')
+        raw=$(dotnet msbuild src/Silhouette/Silhouette.csproj -nologo -getProperty:PackageVersion)
         # Strip trailing .0 segments to get semver (4.2.0.0 -> 4.2.0)
         version=$(echo "$raw" | sed 's/\.0$//')
         echo "version=$version" >> "$GITHUB_OUTPUT"
