@@ -73,6 +73,8 @@ jobs:
     - name: NuGet Login (OIDC)
       uses: NuGet/login@v1
       id: nuget-login
+      with:
+        user: KooKiz
 
     - name: Publish to NuGet
       run: |
